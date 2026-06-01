@@ -1904,6 +1904,10 @@ body.danzaio-body {
   grid-column: span 2;
 }
 
+.danzaio-roster-grid--catalog .danzaio-roster-card:first-child {
+  grid-column: auto;
+}
+
 .danzaio-roster-card {
   overflow: hidden;
   border: 1px solid rgba(196, 185, 152, 0.2);
