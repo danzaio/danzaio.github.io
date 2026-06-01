@@ -4,7 +4,7 @@ import {
 	platformCards,
 	venSuite,
 	yasuoSuite,
-} from "./danzaio-data.js?v=1779229574674";
+} from "./danzaio-data.js?v=9ad3bf1";
 
 const app = document.querySelector("#app");
 const pageKind = location.pathname.includes("/yasuo/")
