@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">RiftReborn mark</title>
+  <path fill="#06111b" d="M2 2h60v60H2z"/>
+  <path fill="none" stroke="#c89b3c" stroke-width="3" d="M32 5 57 18v28L32 59 7 46V18z"/>
+  <path fill="none" stroke="#f0e6d2" stroke-width="3" d="M20 18h18c8 0 12 4 12 11 0 6-4 10-11 11l11 8H39L27 39v9h-7zm7 7v8h11c3 0 5-1 5-4s-2-4-5-4z"/>
+  <path fill="#0ac8b9" d="m32 7 4 4-4 4-4-4z"/>
+</svg>
