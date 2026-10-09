@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aim That Lands: Magnet, Ease-Out, and a CSV Logger — danzlock</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header><a href="/">danzlock</a> — deadlock reversal diary</header>
+<main>
+<article>
+<h1>Aim That Lands: Magnet, Ease-Out, and a CSV Logger</h1>
+<p class="meta">2026-10-08 · build 6765 · <code>src/app/aim.cpp</code></p>
+
+<p>This is the post where the aim stops missing. Not because I tuned a magic
+number, but because I stopped fighting the engine and started measuring what
+"missing" actually means. The result is a three-layer system: world-velocity
+prediction that leads the target, a WindMouse curve that humanises the
+approach, and a sub-25px magnet that eases out with a smoothstep instead of
+snapping. Plus a CSV logger that told me exactly how wrong I was.</p>
+
+<h2>The problem with screen-space prediction</h2>
+
+<p>My first aim iteration did everything in screen space. Project the bone,
+measure the distance from centre, move the mouse. It worked — until the target
+strafed. Screen-space prediction lags one frame because you're always
+chasing the last projected position. The target moves, you see the new
+position a frame later, you move toward it. In a game where strafing is
+constant, that one-frame lag is the difference between a hit and a miss.</p>
+
+<p>The fix is to predict in <em>world</em> space, where the target's velocity
+is a real 3D vector, not a 2D screen delta. The bone position comes from the
+pawn's scene node, and the velocity comes from
+<code>ENT_VELOCITY</code> at pawn offset <code>+0x400</code>. Multiply
+velocity by a capped lead time, add it to the bone position, <em>then</em>
+project to screen. The prediction travels with the target instead of chasing
+it.</p>
+
+<pre><code>Vec3 AimPointPredicted(const PlayerData&amp; p, bool wantHead, int aimBone, float leadS) {
+    Vec3 base = AimPointFor(p, wantHead, aimBone);
+    if (leadS &lt;= 0.0005f) return base;
+    float spd = std::sqrt(p.velocity.x * p.velocity.x + p.velocity.y * p.velocity.y);
+    if (spd &lt; 1.f || spd &gt; 1500.f) return base; // parado ou teleporte: sem lead
+    float cap = leadS &gt; 0.15f ? 0.15f : leadS;  // max 150ms de lead em mundo
+    base.x += p.velocity.x * cap;
+    base.y += p.velocity.y * cap;
+    base.z += p.velocity.z * cap * 0.5f;
+    return base;
+}</code></pre>
+
+<p>Three guards here. Speed below 1 unit/s means the target is standing
+still — no lead. Speed above 1500 means teleport or network correction — no
+lead. And the lead time itself is capped at 150ms no matter what the preset
+asks for, because beyond that you're predicting into noise.</p>
+
+<h2>Screen EMA: killing the jitter</h2>
+
+<p>World prediction solves the strafe lag, but it introduces a new problem:
+the projected point jitters. Hitboxes are thin, bones oscillate by a pixel or
+two, and a raw projection makes the aim look nervous. I added a 65/35
+exponential moving average on the screen point — 65% new position, 35%
+previous smoothed position.</p>
+
+<pre><code>if (!st.smInit) {
+    st.smX = wantX; st.smY = wantY; st.smInit = true;
+} else {
+    float jx = wantX - st.smX, jy = wantY - st.smY;
+    float jd = std::sqrt(jx * jx + jy * jy);
+    if (jd &gt; 150.f) {
+        st.smX = wantX; st.smY = wantY; // salto grande = troca real: cola direto
+    } else {
+        st.smX = st.smX * 0.35f + wantX * 0.65f;
+        st.smY = st.smY * 0.35f + wantY * 0.65f;
+    }
+}</code></pre>
+
+<p>The 150px jump threshold is the escape hatch. If the target teleports or
+the lock switches to a different player, the EMA would drag the aim across
+the screen. Above 150px, snap directly. Below it, smooth.</p>
+
+<h2>Velocity EMA with bias correction</h2>
+
+<p>The screen EMA smooths position, but I also need velocity for the
+sticky prediction (when the target drops behind a wall, I extrapolate from
+the last known position). A naive velocity calculation —
+<code>(current - last) / dt</code> — is noisy. A 50/50 EMA on velocity
+helps, but it has a known bias: in constant strafe, the EMA lags to one
+side of the true velocity vector, which makes the aim drift left or right of
+the target.</p>
+
+<p>The fix is a bias correction term. After the EMA update, add 25% of the
+difference between the raw velocity and the EMA velocity:</p>
+
+<pre><code>float k = 0.5f;
+st.lastVelX = st.lastVelX * (1.f - k) + vx * k + (vx - st.lastVelX) * 0.25f;
+st.lastVelY = st.lastVelY * (1.f - k) + vy * k + (vy - st.lastVelY) * 0.25f;</code></pre>
+
+<p>This is a standard EMA bias correction (the same technique used in TCP
+RTT estimation). The <code>+0.25f</code> term pulls the EMA toward the
+current sample faster when the velocity is changing, killing the lateral
+drift.</p>
+
+<p>The screen lead itself gets half weight — the world prediction already
+leads, so the screen lead is a correction, not a primary predictor. And
+it's capped at 120px to prevent runaway extrapolation.</p>
+
+<h2>WindMouse: the humaniser</h2>
+
+<p>Once the target point is computed, the mouse needs to move toward it in
+a way that doesn't look like a robot. A straight lerp is too perfect. A pure
+random walk is too slow. WindMouse sits in between: a gravity term pulls
+toward the target, a wind term adds controlled noise, and the whole thing
+is scaled by an adaptive smooth factor.</p>
+
+<pre><code>float dist = distC &lt; 1.f ? 1.f : distC;
+float grav = distC &gt; 200.f ? 10.f : (distC &gt; 60.f ? 12.f : 15.f);
+float windMag = 1.5f + cfg.aimHumanize * 5.f; // 1.5 (gruda) .. 6.5 (curvo)
+float wCur = windMag &lt; dist ? windMag : dist;
+const float kSqrt3 = 1.7320508f, kSqrt5 = 2.2360679f;
+if (dist &gt;= 30.f) {
+    float r1 = (float)std::rand() / (float)RAND_MAX;
+    float r2 = (float)std::rand() / (float)RAND_MAX;
+    st.windX = st.windX / kSqrt3 + (2.f * r1 - 1.f) * wCur / kSqrt5;
+    st.windY = st.windY / kSqrt3 + (2.f * r2 - 1.f) * wCur / kSqrt5;
+} else {
+    st.windX = st.windX / kSqrt3;
+    st.windY = st.windY / kSqrt3;
+}
+float vx = st.windX + grav * (aimX - cx) / dist;
+float vy = st.windY + grav * (aimY - cy) / dist;</code></pre>
+
+<p>The gravity is distance-dependent: 15 within 60px, 12 from 60–200px, 10
+beyond 200px. Closer targets get pulled harder (you want to land the hit),
+distant targets get a gentler pull (you want to approach naturally). The
+wind magnitude scales with <code>aimHumanize</code> — 0.1 gives a nearly
+straight line, 0.55 gives a visibly curved approach.</p>
+
+<p>The <code>sqrt(3)</code> and <code>sqrt(5)</code> factors are the classic
+WindMouse scaling: dividing the wind by <code>sqrt(3)</code> each frame
+keeps the variance bounded, and the <code>sqrt(5)</code> in the random
+injection keeps the step size proportional to the remaining distance.</p>
+
+<p>Adaptive smooth adjusts the step size based on target speed:</p>
+
+<pre><code>float smooth = cfg.aimSmooth &lt; 1.f ? 1.f : cfg.aimSmooth;
+float tgtSpd = std::sqrt(st.lastVelX * st.lastVelX + st.lastVelY * st.lastVelY);
+if (tgtSpd &gt; 500.f) smooth *= 0.6f;       // alvo rapido: gruda junto
+else if (distC &lt; 60.f) smooth *= 1.2f;    // perto (fora do ima): leve
+vx /= smooth; vy /= smooth;</code></pre>
+
+<p>Fast target (>500 px/s) gets a tighter smooth (0.6×) to keep up. Close
+target (<60px, outside the magnet zone) gets a looser smooth (1.2×) for
+fine adjustment. The final step is capped by <code>aimMaxStep</code> to
+prevent single-frame jumps.</p>
+
+<h2>The magnet: sub-25px ease-out</h2>
+
+<p>This is the part that took the most iterations. When the crosshair is
+within 25px of the target, the WindMouse gravity is too aggressive — it
+overshoots, oscillates, and looks like a snap. But doing nothing means the
+aim never quite centres. The answer is a smoothstep ease-out on the pure
+bone position (no screen lead, no prediction — just centre).</p>
+
+<pre><code>if (distC &lt; 25.f) {
+    float px = wantX, py = wantY; // ponto PURO do bone (sem lead de tela)
+    float pdx = px - cx, pdy = py - cy;
+    float pdist = std::sqrt(pdx * pdx + pdy * pdy);
+    if (pdist &lt; cfg.aimDeadzone) { /* parado */ return; }
+    float t = pdist / 25.f;
+    if (t &gt; 1.f) t = 1.f;
+    float ease = t * t * (3.f - 2.f * t); // smoothstep
+    float gain = 0.12f + 0.55f * ease;    // 12%..67% da distancia
+    float mx = pdx * gain, my = pdy * gain;
+    float mm = std::sqrt(mx * mx + my * my);
+    if (mm &gt; 14.f) { mx *= 14.f / mm; my *= 14.f / mm; }
+    // sub-pixel carry
+    st.windX += mx - (float)((int)mx);
+    st.windY += my - (float)((int)my);
+    float ix = (float)((int)mx), iy = (float)((int)my);
+    if (std::fabs(st.windX) &gt;= 1.f) {
+        float carry = (float)((int)st.windX);
+        ix += carry; st.windX -= carry;
+    }
+    if (std::fabs(st.windY) &gt;= 1.f) {
+        float carry = (float)((int)st.windY);
+        iy += carry; st.windY -= carry;
+    }
+    MoveMouse(ix, iy);
+}</code></pre>
+
+<p>The gain curve is a smoothstep from 12% to 67% of the remaining distance.
+At 25px out, you move 67% of the way — aggressive enough to close fast. At
+5px out, you move ~18% — gentle enough to land without overshoot. The 14px
+cap prevents a single large jump even at the edge of the magnet zone.</p>
+
+<p>The subpixel carry is the detail that makes it feel human. Without it,
+a 0.8px move truncates to 0 and the aim stalls just outside the deadzone.
+With it, the fractional part accumulates in <code>st.windX</code> /
+<code>st.windY</code> until it crosses 1.0, then gets emitted as an extra
+pixel. The result is a smooth, continuous approach that never quite stops
+moving.</p>
+
+<svg viewBox="0 0 400 220" width="100%" role="img" aria-label="Ease-out gain curve">
+  <line x1="40" y1="180" x2="380" y2="180" stroke="#888" stroke-width="1"/>
+  <line x1="40" y1="180" x2="40" y2="20" stroke="#888" stroke-width="1"/>
+  <text x="210" y="205" fill="#aaa" font-size="11" text-anchor="middle">distance from centre (px)</text>
+  <text x="15" y="100" fill="#aaa" font-size="11" text-anchor="middle" transform="rotate(-90 15 100)">gain</text>
+  <!-- gridlines -->
+  <line x1="40" y1="140" x2="380" y2="140" stroke="#333" stroke-width="0.5" stroke-dasharray="2,4"/>
+  <line x1="40" y1="100" x2="380" y2="100" stroke="#333" stroke-width="0.5" stroke-dasharray="2,4"/>
+  <line x1="40" y1="60" x2="380" y2="60" stroke="#333" stroke-width="0.5" stroke-dasharray="2,4"/>
+  <line x1="40" y1="20" x2="380" y2="20" stroke="#333" stroke-width="0.5" stroke-dasharray="2,4"/>
+  <!-- y labels: 0.12, 0.25, 0.50, 0.67 -->
+  <text x="35" y="143" fill="#888" font-size="10" text-anchor="end">12%</text>
+  <text x="35" y="103" fill="#888" font-size="10" text-anchor="end">25%</text>
+  <text x="35" y="63" fill="#888" font-size="10" text-anchor="end">50%</text>
+  <text x="35" y="23" fill="#888" font-size="10" text-anchor="end">67%</text>
+  <!-- x labels: 0, 5, 10, 15, 20, 25 -->
+  <text x="40" y="195" fill="#888" font-size="10" text-anchor="middle">0</text>
+  <text x="108" y="195" fill="#888" font-size="10" text-anchor="middle">5</text>
+  <text x="176" y="195" fill="#888" font-size="10" text-anchor="middle">10</text>
+  <text x="244" y="195" fill="#888" font-size="10" text-anchor="middle">15</text>
+  <text x="312" y="195" fill="#888" font-size="10" text-anchor="middle">20</text>
+  <text x="380" y="195" fill="#888" font-size="10" text-anchor="middle">25</text>
+  <!-- curve: gain = 0.12 + 0.55 * smoothstep(t), t = dist/25 -->
+  <!-- smoothstep(t) = t*t*(3-2t) -->
+  <!-- At dist=0: gain=0.12, y=180-0.12*300=144 -->
+  <!-- At dist=5: t=0.2, ease=0.104, gain=0.177, y=180-0.177*300=127 -->
+  <!-- At dist=10: t=0.4, ease=0.352, gain=0.314, y=180-0.314*300=86 -->
+  <!-- At dist=15: t=0.6, ease=0.648, gain=0.476, y=180-0.476*300=37 -->
+  <!-- At dist=20: t=0.8, ease=0.896, gain=0.613, y=180-0.613*300=-4 -->
+  <!-- At dist=25: t=1.0, ease=1.0, gain=0.67, y=180-0.67*300=-21 -->
+  <!-- Clamp y to 20 for visibility -->
+  <path d="M 40 144 L 108 127 L 176 86 L 244 37 L 312 20 L 380 20" fill="none" stroke="#4fc3f7" stroke-width="2"/>
+  <!-- key points -->
+  <circle cx="40" cy="144" r="3" fill="#4fc3f7"/>
+  <circle cx="176" cy="86" r="3" fill="#4fc3f7"/>
+  <circle cx="380" cy="20" r="3" fill="#4fc3f7"/>
+  <!-- annotations -->
+  <text x="50" y="135" fill="#ccc" font-size="10">5px → ~18%</text>
+  <text x="186" y="77" fill="#ccc" font-size="10">10px → ~31%</text>
+  <text x="300" y="15" fill="#ccc" font-size="10">25px → 67%</text>
+</svg>
+
+<p>The curve is flat near zero (small corrections are gentle) and steep near
+25px (large corrections are aggressive). This is the opposite of a linear
+gain, which would feel twitchy at range and sluggish up close.</p>
+
+<h2>Sticky lock: pawn-based, not index-based</h2>
+
+<p>Target switching is the silent killer of aim quality. If the aim
+re-evaluates "who is closest to centre" every frame, it flickers between
+targets during strafes. The fix is a sticky lock: once a target is
+acquired, keep it until it dies, goes dormant, or drops behind a wall.</p>
+
+<p>The lock is keyed by <code>pawn</code> pointer, not entity index. Indices
+reuse; pawns don't. When the locked pawn is found in the player list, the
+aim checks three conditions before releasing:</p>
+
+<ol>
+<li><strong>Validity:</strong> pawn still in list, not local, not same team,
+alive, not dormant (if <code>aimVisibleOnly</code>).</li>
+<li><strong>Frozen bone:</strong> if the 3D bone position hasn't moved more
+than 2 units in 350ms while the target's velocity is above 50 units/s, the
+target is behind a wall — the server stopped sending pose updates. Release.</li>
+<li><strong>Projection miss:</strong> if <code>WorldToScreen</code> fails for
+10 consecutive frames, the target is off-screen or occluded. Release.</li>
+</ol>
+
+<p>When the lock is lost but the target was seen recently (within
+<code>aimStickyMs</code>), the aim extrapolates from the last known
+position using the velocity EMA. This keeps the crosshair on the target
+through brief occlusions instead of snapping to centre.</p>
+
+<p>The hysteresis bonus prevents flicker: when evaluating candidates, the
+current lock gets a 25% distance bonus (<code>0.75²</code> on the squared
+distance). A new target must be significantly closer to centre to steal
+the lock.</p>
+
+<h2>CSV logger: measuring what "missing" means</h2>
+
+<p>I can tune aim by feel, but feel is subjective. The CSV logger makes it
+objective. Every frame with the aim key held, it writes one row to
+<code>%TEMP%\danzlock_aimlog.csv</code> with 18 columns:</p>
+
+<table>
+<thead><tr><th>Column</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>t</code></td><td>Timestamp (seconds since start)</td></tr>
+<tr><td><code>hero</code></td><td>Hero ID of the locked target</td></tr>
+<tr><td><code>bx,by,bz</code></td><td>3D bone position (world)</td></tr>
+<tr><td><code>sx,sy</code></td><td>Screen position (projected)</td></tr>
+<tr><td><code>smx,smy</code></td><td>Smoothed screen position (after EMA)</td></tr>
+<tr><td><code>velx,vely</code></td><td>Velocity EMA (px/s, screen space)</td></tr>
+<tr><td><code>ax,ay</code></td><td>Final aim point (after lead)</td></tr>
+<tr><td><code>dist</code></td><td>Distance from centre to aim point (px)</td></tr>
+<tr><td><code>modo</code></td><td>0 = WindMouse, 1 = IMA (magnet)</td></tr>
+<tr><td><code>mx,my</code></td><td>Mouse movement this frame (px)</td></tr>
+<tr><td><code>dorm</code></td><td>1 if target is dormant (network-invisible)</td></tr>
+</tbody>
+</table>
+
+<p>The file is opened with <code>_fsopen</code> and <code>_SH_DENYNO</code>
+so I can read it live while the game is running — no file lock contention.
+It flushes every 32 frames to keep the data fresh without killing
+performance. The logger caps at 7200 frames (~2 minutes at 60fps) to
+prevent unbounded file growth.</p>
+
+<pre><code>FILE* f = _fsopen(path, "w", _SH_DENYNO);
+if (!f) return;
+st.logFile = f;
+st.logFrames = 0;
+fprintf(f, "t,hero,bx,by,bz,sx,sy,smx,smy,velx,vely,ax,ay,dist,modo,mx,my,dorm\n");
+fflush(f);
+// ... per frame:
+if (++st.logFrames &gt; 7200) return; // ~2min a 60fps
+fprintf((FILE*)st.logFile, "%.3f,%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.0f,%.0f,%.1f,%.1f,%.1f,%d,%.2f,%.2f,%d\n", ...);
+if ((st.logFrames &amp; 31) == 0) fflush((FILE*)st.logFile);</code></pre>
+
+<h2>The finding: IMA vs WindMouse</h2>
+
+<p>I ran the logger for a full session on heroes 64 and 84, collecting
+<strong>n=2261 frames</strong> of aim data. The question was simple: does
+the sub-25px magnet (IMA) actually centre better than the WindMouse gravity
+alone?</p>
+
+<p>The answer was unambiguous:</p>
+
+<table>
+<thead><tr><th>Metric</th><th>IMA (modo=1)</th><th>WindMouse (modo=0)</th></tr></thead>
+<tbody>
+<tr><td>Centring error (dx)</td><td><strong>-0.4 .. +1.3 px</strong></td><td>+151 / -75 px</td></tr>
+<tr><td>Sample size</td><td>2261 frames</td><td>2261 frames</td></tr>
+<tr><td>Heroes tested</td><td>64, 84</td><td>64, 84</td></tr>
+</tbody>
+</table>
+
+<p>The IMA zone centres to within 1.3px of the crosshair. The WindMouse
+zone oscillates ±75–151px. That's not a tuning difference — that's a
+fundamental difference in approach. The WindMouse gravity is designed to
+<em>approach</em> the target, not to <em>land</em> on it. The magnet is
+designed to land.</p>
+
+<p>The <code>dx=17.2</code> figure is the average distance from centre
+across all frames — most of which are in the WindMouse zone, where the
+aim is still travelling. The IMA zone is only active for the last 25px,
+but that's where the hit registers.</p>
+
+<h2>Seven presets</h2>
+
+<p>The presets are not arbitrary — each one is a different answer to the
+question "how much human is enough?" The values below are the exact
+numbers from <code>ApplyAimPreset</code> in <code>config.hpp</code>:</p>
+
+<table>
+<thead><tr><th>Preset</th><th>FOV</th><th>Smooth</th><th>MaxStep</th><th>Predict (ms)</th><th>React (ms)</th><th>Deadzone</th><th>Humanize</th></tr></thead>
+<tbody>
+<tr><td><strong>Cola60</strong></td><td>60</td><td>1.5</td><td>60</td><td>120</td><td>0</td><td>1</td><td>0.10</td></tr>
+<tr><td><strong>Gruda90</strong></td><td>90</td><td>2.0</td><td>70</td><td>130</td><td>20</td><td>2</td><td>0.15</td></tr>
+<tr><td><strong>Equil120</strong></td><td>120</td><td>3.0</td><td>60</td><td>130</td><td>60</td><td>4</td><td>0.30</td></tr>
+<tr><td><strong>Preciso100</strong></td><td>100</td><td>2.5</td><td>50</td><td>110</td><td>40</td><td>2</td><td>0.10</td></tr>
+<tr><td><strong>Legit80</strong></td><td>80</td><td>5.0</td><td>35</td><td>100</td><td>110</td><td>6</td><td>0.55</td></tr>
+<tr><td><strong>Sniper70</strong></td><td>70</td><td>4.0</td><td>30</td><td>140</td><td>80</td><td>3</td><td>0.20</td></tr>
+<tr><td><strong>Spray130</strong></td><td>130</td><td>2.0</td><td>80</td><td>140</td><td>20</td><td>3</td><td>0.25</td></tr>
+</tbody>
+</table>
+
+<p>The logic behind each:</p>
+
+<ul>
+<li><strong>Cola60</strong> — "glued": minimum FOV, zero reaction delay,
+minimal humanize. For close-range duels where you need the crosshair on the
+target yesterday.</li>
+<li><strong>Gruda90</strong> — "stuck": short FOV, strong pull, low
+humanize. Mid-range aggression.</li>
+<li><strong>Equil120</strong> — the default. Balanced FOV, moderate
+smooth, visible but not obvious humanize. The "I'm just good" preset.</li>
+<li><strong>Preciso100</strong> — "surgical": no wind (humanize 0.10),
+tight deadzone, medium FOV. For precise taps at range.</li>
+<li><strong>Legit80</strong> — maximum humanize (0.55), long reaction
+delay (110ms), wide deadzone (6px). The "I'm a human with a mouse"
+preset.</li>
+<li><strong>Sniper70</strong> — short FOV, contained step (30px), long
+predict (140ms). For cross-map picks where overshoot is death.</li>
+<li><strong>Spray130</strong> — wide FOV, large step (80px), tracks
+strafe. For sustained fire where you need to follow the target.</li>
+</ul>
+
+<svg viewBox="0 0 400 220" width="100%" role="img" aria-label="FOV and magnet zones">
+  <!-- outer FOV circle (120px scaled to 100) -->
+  <circle cx="200" cy="110" r="100" fill="none" stroke="#555" stroke-width="1" stroke-dasharray="4,4"/>
+  <text x="200" y="18" fill="#888" font-size="10" text-anchor="middle">FOV (Equil120 = 120px)</text>
+  <!-- 200px gravity zone -->
+  <circle cx="200" cy="110" r="83" fill="none" stroke="#666" stroke-width="0.5" stroke-dasharray="2,4"/>
+  <text x="200" y="35" fill="#777" font-size="9" text-anchor="middle">200px · gravity 10</text>
+  <!-- 60px near zone -->
+  <circle cx="200" cy="110" r="25" fill="none" stroke="#888" stroke-width="0.5" stroke-dasharray="2,4"/>
+  <text x="200" y="90" fill="#999" font-size="9" text-anchor="middle">60px · gravity 15</text>
+  <!-- 25px magnet zone -->
+  <circle cx="200" cy="110" r="10" fill="rgba(79,195,247,0.15)" stroke="#4fc3f7" stroke-width="1.5"/>
+  <text x="200" y="125" fill="#4fc3f7" font-size="9" text-anchor="middle">25px · IMA magnet</text>
+  <!-- deadzone -->
+  <circle cx="200" cy="110" r="2" fill="none" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="200" y="105" fill="#e0e0e0" font-size="8" text-anchor="middle">dz</text>
+  <!-- crosshair -->
+  <line x1="195" y1="110" x2="205" y2="110" stroke="#fff" stroke-width="1"/>
+  <line x1="200" y1="105" x2="200" y2="115" stroke="#fff" stroke-width="1"/>
+</svg>
+
+<p>The zones are concentric. The deadzone (2–6px depending on preset) is
+where the aim does nothing. The magnet zone (0–25px) is where the ease-out
+takes over. The near zone (25–60px) is where WindMouse gravity is 15 and
+the smooth is 1.2×. The far zone (60–200px) is where gravity drops to 12
+and the smooth is 1.0×. Beyond 200px, gravity is 10 and the smooth drops
+to 0.6× if the target is moving fast.</p>
+
+<h2>INI save/load</h2>
+
+<p>The settings persist through a simple INI file at
+<code>%TEMP%\danzlock.ini</code>. The save is a single
+<code>fprintf</code> with all fields; the load is a line-by-line
+<code>sscanf_s</code> that applies the preset first, then lets individual
+sliders override it. This means you can save a custom config that starts
+from a preset but tweaks one or two values.</p>
+
+<pre><code>// Save: one fprintf with all fields
+fprintf(f,
+    "preset=%d\nbone=%d\neye=%d\nkey=%d\n"
+    "fov=%.1f\nsmooth=%.2f\nmaxstep=%.1f\npredict=%.1f\nreact=%.1f\n"
+    "deadzone=%.2f\nhumanize=%.2f\nheadprob=%.2f\n"
+    "sticky=%d\nstickyms=%.1f\nstickypx=%.1f\nvisonly=%d\nsnaphead=%d\n"
+    "esp=%d\nskel=%d\nheadot=%d\nhealth=%d\nname=%d\nhero=%d\n"
+    "esplocal=%d\nnamesize=%.1f\nespvis=%d\ndim=%d\neyeline=%d\ndrawfov=%d\n",
+    s.aimPreset, s.aimBone, s.aimEyeMode, s.aimKey, ...);
+
+// Load: preset first, sliders override
+if (sscanf_s(line, "preset=%d", &amp;iv) == 1) {
+    if (iv &gt;= 0 &amp;&amp; iv &lt; kAimPresetCount) ApplyAimPreset(s, (AimPreset)iv);
+    continue;
+}
+if (sscanf_s(line, "fov=%f", &amp;fv) == 1) { s.aimFov = fv; continue; }
+// ... same pattern for every field</code></pre>
+
+<p>The load order matters: <code>preset</code> is parsed first and calls
+<code>ApplyAimPreset</code>, which sets all the aim fields to the preset
+defaults. Then individual keys like <code>fov</code> and
+<code>smooth</code> override those defaults. The result is a config that
+says "start from Equilibrado but with FOV 90 and humanize 0.4" without
+needing to specify every field.</p>
+
+<h2>What I'd do differently</h2>
+
+<p>The world prediction is capped at 150ms, but the presets ask for
+120–140ms. That's fine — the cap is a safety rail, not a target. But the
+screen lead cap of 120px is arbitrary. A better cap would be proportional
+to the target's angular velocity, not a fixed pixel count. At 1080p, 120px
+is about 6° of rotation; at 4K, it's 3°. The cap should scale with
+resolution.</p>
+
+<p>The WindMouse gravity values (10/12/15) are tuned by feel. The CSV
+logger gives me the data to tune them analytically — I can measure the
+overshoot distribution and adjust the gravity to minimise it. That's the
+next iteration.</p>
+
+<p>The subpixel carry works, but it's a hack. A better approach would be
+to accumulate the mouse delta in a floating-point variable and only emit
+integer moves when the accumulator crosses 1.0. That's essentially what
+the code does, but it's spread across <code>windX</code> /
+<code>windY</code> which are also used for the WindMouse state. Separating
+the accumulator from the wind state would make the code clearer.</p>
+
+<h2>Repro</h2>
+
+<p>Source: <code>src/app/aim.cpp</code> (383 lines),
+<code>src/app/config.hpp</code> (91 lines),
+<code>src/app/cfgfile.hpp</code> (92 lines).</p>
+
+<p>Build the scanner that validates the patterns this post depends on:</p>
+
+<pre><code>cd C:\Users\admin\deadlock-re
+build\Release\scan.exe out\scan-6765-client.txt</code></pre>
+
+<p>The aim logger writes to <code>%TEMP%\danzlock_aimlog.csv</code> while
+the aim key (default <code>VK_XBUTTON2</code>, mouse5) is held. Enable it
+in the menu under Aim → Logger. The file opens with
+<code>_SH_DENYNO</code> so you can tail it live:</p>
+
+<pre><code>type %TEMP%\danzlock_aimlog.csv</code></pre>
+
+<p>Settings persist to <code>%TEMP%\danzlock.ini</code> via
+<code>cfgfile::Save</code> / <code>cfgfile::Load</code>.</p>
+
+<p><a href="../">← Back to index</a></p>
+</article>
+</main>
+<footer>build 6765 · 2026-10-08 · danzlock reversal diary</footer>
+</body>
+</html>

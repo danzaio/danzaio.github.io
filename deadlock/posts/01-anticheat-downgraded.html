@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inside Deadlock's Downgraded Anti-Cheat — danzlock</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header><a href="/">danzlock</a> — deadlock reversal diary</header>
+<article>
+
+<h1>Inside Deadlock's Downgraded Anti-Cheat</h1>
+
+<p>I expected something modern. Instead I found the same implementation Counter-Strike 2 uses — just switched off in most places. That's the first thing to understand: Deadlock's client-side anti-cheat isn't a new system, it's Valve's existing one with features disabled.</p>
+
+<p>The client.dll does the work. There is no kernel driver. So before we write a single line of tooling, I want to map exactly what is running and what we must never touch.</p>
+
+<h2>Same AC as CS2 — but downgraded</h2>
+
+<p>The community consensus from the UnknownCheats thread, posted by Hec4te on 2026-03-28 and updated through August, is direct: <q>the same as CS2 but downgraded</q>. The mechanism lives inside the client binary. No kernel component ships with the game.</p>
+
+<p>That means everything we need to worry about is in user-mode memory. It also means we know roughly what to expect — this stack was already dissected for Counter-Strike years ago.</p>
+
+<svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="What the anti-cheat watches versus what we touch">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#e06c75"/>
+    </marker>
+    <marker id="arrg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#98c379"/>
+    </marker>
+  </defs>
+  <text x="20" y="30" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" font-weight="bold" fill="#e06c75">WHAT THE AC WATCHES</text>
+  <text x="400" y="30" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" font-weight="bold" fill="#98c379">WHAT WE TOUCH</text>
+
+  <rect x="20" y="48" width="270" height="50" fill="#2d2d2d" stroke="#e06c75" stroke-width="1.5"/>
+  <text x="34" y="70" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#abb2bf">DllStatus protobuf → module list</text>
+  <text x="34" y="86" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7f848e">client.dll → Steam servers</text>
+
+  <rect x="20" y="106" width="270" height="50" fill="#2d2d2d" stroke="#e06c75" stroke-width="1.5"/>
+  <text x="34" y="128" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#abb2bf">Thread scan — DllMain</text>
+  <text x="34" y="144" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7f848e">start addr / RWX / kernel32</text>
+
+  <rect x="20" y="164" width="270" height="50" fill="#2d2d2d" stroke="#e06c75" stroke-width="1.5"/>
+  <text x="34" y="186" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#abb2bf">Vtable modification checks</text>
+  <text x="34" y="202" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7f848e">interface vtables in client.dll</text>
+
+  <rect x="400" y="48" width="300" height="50" fill="#2d2d2d" stroke="#98c379" stroke-width="1.5"/>
+  <text x="414" y="70" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#abb2bf">KPRL driver — read-only memory</text>
+  <text x="414" y="86" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7f848e">no injection · no handle · no vtable</text>
+
+  <rect x="400" y="106" width="300" height="50" fill="#2d2d2d" stroke="#98c379" stroke-width="1.5"/>
+  <text x="414" y="128" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#abb2bf">Entity list / view matrix / bones</text>
+  <text x="414" y="144" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7f848e">read-only — same as Rubi/MSW</text>
+
+  <rect x="400" y="164" width="300" height="50" fill="#2d2d2d" stroke="#98c379" stroke-width="1.5"/>
+  <text x="414" y="186" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#abb2bf">Server-side stats — frog headshot %</text>
+  <text x="414" y="202" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7f848e">behavioural — residual risk only</text>
+</svg>
+
+<h2>What is active</h2>
+
+<table>
+<tr><th>Mechanism</th><th>Detail</th></tr>
+<tr><td>Vtable checks</td><td>Detects modification of interface vtables. Any detour, any hook, any redirect on a known vtable trips it.</td></tr>
+<tr><td>DllStatus protobuf</td><td><code>AVCUserMessage_DllStatus</code> — sends the full list of loaded DLLs to Steam servers. Injection of any module becomes visible.</td></tr>
+<tr><td>Inventory response</td><td><code>AVCUserMessage_Inventory_Response</code> — a channel that also carries the late thread-scan report.</td></tr>
+<tr><td>Thread scan (DllMain)</td><td>Runs on <code>DLL_THREAD_ATTACH</code>. For each thread, checks if the start address is RWX, does not belong to any image, or sits inside kernel32 / kernelbase. If it matches, the game reports: <ul>
+<li>Module handle via <code>GetModuleHandleExW</code></li>
+<li>Start address</li>
+<li>Memory protections</li>
+<li>Thread ID (TID)</li>
+<li>Return address</li>
+<li>Allocation base</li>
+<li>4 KB dump of the page</li>
+<li>First bytes of <code>NtOpenFile</code> / <code>LoadLibraryExW</code></li>
+</ul></td></tr>
+</table>
+
+<p>The thread scan is the sharpest tool here. As the research notes put it: it <q>triggers both for manual map and loadlib</q>. A DLL that normalises itself — maps its sections, restores permissions — still leaves a start address that does not belong to any mapped image. That is what catches stealthy loaders.</p>
+
+<p>On the bypass question, the source is blunt: <q>if you bypass what's sent from those protobufs [DllStatus + Inventory] you are essentially fully undetected (outside of CUserCmd tampering)</q>. We will not be bypassing anything. We will simply not be there.</p>
+
+<h2>What is off</h2>
+
+<ul>
+<li><strong>VAC modules (Steam-streamed): OFF since November/December 2025.</strong> The same status applies to CS2. The thread author's read: <q>I believe they will not come back at this point.</q></li>
+<li><strong>DLL file-integrity checking</strong> — present in CS2, disabled in Deadlock. The game no longer verifies that on-disk DLLs match expected hashes. This is attributed to the modding community and the game's early-development state.</li>
+<li>No VAC Live component has been observed.</li>
+</ul>
+
+<p>The combination is telling. The server-side behavioural system — the so-called frog — is what Valve is betting on. The client-side memory-forensics stack is a partial skeleton: module list and thread scan stay on, but VAC's file-integrity layer and the streamed modules are gone.</p>
+
+<h2>Bans: server-side, not memory</h2>
+
+<p>The only public ban vector anyone has documented is statistical. The author of the anti-cheat thread states it plainly: <q>The only thing I ever got banned for was having a high headshot percentage</q>.</p>
+
+<p>That is the frog system. It watches play statistics on the server and acts on outliers. No memory evidence, no injection trace. This matches the broader theory that Valve's current strategy leans on server-side analysis and AI-driven pattern detection rather than kernel-level enforcement.</p>
+
+<p>For our project the residual risk is not the tool — it is how the tool is used. A radar that automates play into absurd patterns is the vector. A read-only overlay that shows information is not.</p>
+
+<h2>Implication: strict read-only</h2>
+
+<p>Every active check maps to an operation we must never perform:</p>
+
+<ol>
+<li><strong>Do not inject.</strong> No DLL, no manual map, no shellcode, no remote thread. That eliminates every monitored point in one stroke — module list, thread scan, vtable integrity.</li>
+<li><strong>Do not open handles with write access.</strong> Read-only via the KPRL driver. No handle at all if we can avoid it.</li>
+<li><strong>Do not modify vtables.</strong> We read them. We never write to them.</li>
+<li><strong>Accept the behavioural risk.</strong> The frog system does not care how we read memory — only what the resulting gameplay looks like. Our scope is reading and visualisation. That is the cleanest path, and it matches the model we already run for RubinOT / MSW.</li>
+</ol>
+
+<p>If a kernel anti-cheat or a new wave ever ships, the thread speculates <q>they are working on a new AC</q>, we revisit. Today there is no signal of any new active module. The post will be updated if that changes.</p>
+
+<h2>Repro</h2>
+
+<p>Everything above is drawn from two sources in this repo:</p>
+
+<ul>
+<li><code>docs/01-anticheat.md</code> — the anti-cheat state summary with the full ACTIVE / OFF tables and implications.</li>
+<li><code>research/2026-10-06-initial-research.md</code> — section 1, <em>Estado do anti-cheat</em>, which consolidates the UC thread observations and cites the protobuf names, the DllMain scan detail, and the VAC-off timeline.</li>
+</ul>
+
+<p>The primary source is the UnknownCheats thread by Hec4te: <code>unknowncheats.me/forum/deadlock/745313-anti-cheat-systems-deadlock.html</code> (2026-03-28, updated 2026-08-06).</p>
+
+<p>Next: <a href="02-entitysystem-disk.html">Resolving GameEntitySystem Without Opening the Game</a> — how the 6765 client builds its entity list and where the view matrix lives.</p>
+
+</article>
+<footer>danzlock reversal diary · build 2026-10-08 · <a href="../">index</a></footer>
+</body>
+</html>

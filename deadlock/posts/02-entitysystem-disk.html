@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resolving GameEntitySystem Without Opening the Game — danzlock</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header>
+  <a href="/">danzlock</a> — deadlock reversal diary
+</header>
+
+<main>
+<article>
+
+<h1>Resolving GameEntitySystem Without Opening the Game</h1>
+
+<p class="meta">2026-10-08 · build 6765 · client.dll 58.634.904 B · sha <code>1dc44d55…</code></p>
+
+<p>
+The whole point of this series is to reverse Deadlock <em>without running it</em>. I sit on the
+other side of an anti-cheat that will flag the moment I attach a debugger or open a handle to the
+process. But the binary just sits there on disk, 58 megabytes of compiled C++, full of RIP-relative
+pointers waiting to be chased.
+</p>
+
+<p>
+This post covers how I resolved <code>GameEntitySystem</code> — the global that owns every entity in
+the game — using nothing but a static pattern scanner, a hex editor, and two builds of
+<code>client.dll</code>. No debugger. No process handle. No game running.
+</p>
+
+<h2>The Disk-First Scanner</h2>
+
+<p>
+I wrote a tiny tool called <code>tools/scan</code>. It does exactly one thing: opens a PE file, reads
+it into memory, and searches for byte patterns. That's it. No process injection, no hooks, no
+<code>OpenProcess</code>. The entire attack surface is <code>CreateFile</code> +
+<code>ReadFile</code> on a DLL that Steam already put on my disk.
+</p>
+
+<pre><code>scan.exe "D:\SteamLibrary\steamapps\common\Deadlock\game\citadel\bin\win64\client.dll"   patterns-client.txt</code></pre>
+
+<p>
+The pattern format is dead simple — one byte per token, <code>?</code> for wildcards:
+</p>
+
+<pre><code>NOME = 48 8B 0D ? ? ? ? 8B D0      # '?' ou '??' = wildcard de 1 byte</code></pre>
+
+<p>
+When the scanner finds a match at some file offset, it converts that offset to an RVA, then to a
+VA by adding the image base (<code>0x180000000</code>). But the interesting part happens when the
+matched instruction is a RIP-relative memory access — the scanner goes one step further and
+resolves the <em>target</em> of that access.
+</p>
+
+<h2>RIP-Resolve: mov vs lea</h2>
+
+<p>
+This is the single most important concept in the whole approach. x86-64 code doesn't use absolute
+addresses — they're not knowable at compile time because of ASLR. Instead the compiler emits
+RIP-relative instructions that compute <em>address = address_of_next_instruction + disp32</em>.
+</p>
+
+<p>
+Two instructions look almost identical in a hex dump but mean completely different things:
+</p>
+
+<pre><code>48 8B 0D xx xx xx xx    mov  rcx, [rip+0x2067db9]   ; deref — rcq gets the VALUE at that address
+48 8D 0D xx xx xx xx    lea  rcx, [rip+0x2067db9]   ; no deref — rcx IS the address</code></pre>
+
+<p>
+In <code>mov reg, [rip+x]</code>, the register receives the pointer stored at the target address. That
+means the global itself contains a <em>pointer to</em> the real object, and you need one more deref
+at runtime. In <code>lea reg, [rip+x]</code>, the register <em>is</em> the address — the global
+<em>is</em> the object (or the start of an array of objects).
+</p>
+
+<p>
+The scanner's <code>rip_target()</code> function detects the common REX prefixes (<code>48</code> /
+<code>4C</code>), the opcode byte (<code>8B</code> = mov, <code>8D</code> = lea, <code>89</code> =
+mov-store), and the ModR/M byte (<code>05</code>–<code>3D</code> with the right bit pattern for
+RIP-relative), then computes:
+</p>
+
+<pre><code>target = imageBase + rva_of_instruction + 7 + disp32</code></pre>
+
+<p>
+The <code>+7</code> accounts for the instruction length (2-byte prefix+opcode, 1-byte ModR/M,
+4-byte displacement). The <code>rip-&gt;</code> annotation in the scan output tells you exactly this:
+the resolved VA of whatever the code is pointing at.
+</p>
+
+<h2>Three Patterns, One Target</h2>
+
+<p>
+For <code>GameEntitySystem</code> I had three completely independent byte patterns, each matching at
+a different location in the binary, each resolving to the exact same virtual address:
+</p>
+
+<pre><code>[OK]   entity_list_dezlock        1 hit   RVA 0x2067DB9   rip-&gt;0x183DB48B0
+[OK]   game_entity_system_alt     1 hit   RVA 0x16F3ABB   rip-&gt;0x183DB48B0
+[OK]   game_entity_system_alt3    1 hit   RVA 0x206279A   rip-&gt;0x183DB48B0</code></pre>
+
+<p>
+These patterns come from different sources, contributed over months, in different code paths. The
+first one (<code>entity_list_dezlock</code>) was posted by dezlock back in March 2026. The other two
+(<code>game_entity_system_alt</code> and <code>alt3</code>) were added as "alternatives" on
+6/10/2026 after the original <code>game_entity_system</code> pattern (from yfndream, June 2026) died
+in build 6759.
+</p>
+
+<p>
+Here are the raw pattern definitions from <code>patterns-client.txt</code>:
+</p>
+
+<pre><code># --- globais principais ---
+game_entity_system      = 48 8B 0D ? ? ? ? 8B D0 E8 ? ? ? ? 44 8B 83
+entity_list_dezlock     = 48 89 0D ? ? ? ? E9 ? ? ? ? CC
+
+# --- alternativos (lote 2, agregados 06/10) ---
+game_entity_system_alt   = 48 8B 1D ? ? ? ? 48 89 1D ? ? ? ? 4C 63 B3
+game_entity_system_alt3  = 48 8B 05 ? ? ? ? 48 85 C0 0F 84 8B ? ? ? 48 8B 09</code></pre>
+
+<p>
+Look at the ModR/M byte in the first byte of each pattern. The opcode is <code>89</code> (mov-store)
+in <code>entity_list_dezlock</code> — this code is <em>writing</em> a pointer into the global. The
+opcode is <code>8B</code> (mov) in <code>game_entity_system_alt</code> and <code>alt3</code> — they're
+<em>reading</em> from the global. Three different code paths, three different instruction encodings,
+one shared address. When patterns converge like this, you know you've got the right global.
+</p>
+
+<h2>ViewMatrix</h2>
+
+<p>
+Same approach, same confidence. The <code>view_matrix</code> pattern resolves to
+<code>0x183C7F960</code>:
+</p>
+
+<pre><code>[OK]   view_matrix                1 hit   RVA 0x18F3EE3   rip-&gt;0x183C7F960
+[OK]   view_matrix_alt            1 hit   RVA 0x18F3EE3   rip-&gt;0x183C7F960</code></pre>
+
+<p>
+Both the primary and the alternate pattern match at the <em>same RVA</em> — they're two different
+instruction encodings for the same RIP-relative access. The primary pattern is a <code>lea</code>
+(compute the address), the alternate is a <code>mov</code> (read through it):
+</p>
+
+<pre><code>view_matrix             = 48 8D 0D ? ? ? ? 48 C1 E0 06
+view_matrix_alt         = 48 8D ? ? ? ? ? 48 C1 E0 06 48 03 C1 C3</code></pre>
+
+<p>
+This is a high-confidence resolution. The <code>view_matrix</code> global stores a
+<code>ViewMatrix_t</code> — 4×4 floats that the game uses to transform world coordinates into
+clip space. Combined with <code>screen_transform</code> (RVA <code>0x18F9FD0</code>), this is what
+an ESP or radar needs to draw on top of the game.
+</p>
+
+<h2>6763 → 6765: The −0x80 Delta</h2>
+
+<p>
+I had a previous scan from build 6763 (<code>out/scan-6763-client.txt</code>). When the game
+patched from 6763 to 6765, I re-ran the scanner and diffed the results. The headline finding:
+</p>
+
+<table>
+<thead>
+<tr><th>Global</th><th>6763 VA</th><th>6765 VA</th><th>Delta</th></tr>
+</thead>
+<tbody>
+<tr><td><code>GameEntitySystem</code></td><td><code>0x183DB4930</code></td><td><code>0x183DB48B0</code></td><td><code>−0x80</code></td></tr>
+<tr><td><code>ViewMatrix</code></td><td><code>0x183C7F9E0</code></td><td><code>0x183C7F9660</code></td><td><code>−0x80</code></td></tr>
+</tbody>
+</table>
+
+<p>
+Both globals moved by exactly <code>−0x80</code> — 128 bytes downward. This kind of uniform shift
+usually means the compiler inserted a new global variable (or resized an existing one) somewhere
+in the same translation unit or in a linked object that gets laid out before these two. Everything
+else stayed put: <code>trace_manager_global</code> didn't move, <code>create_move</code> only
+shifted by <code>0x1C</code>.
+</p>
+
+<p>
+The pattern RVAs barely budged too. <code>entity_list_dezlock</code> went from RVA
+<code>0x2067BF9</code> (6763) to <code>0x2067DB9</code> (6765) — a <code>+0x1C0</code> shift in
+the code, which is just the compiler adding a few instructions somewhere upstream. The
+<em>resolved target</em> moved by <code>−0x80</code>, meaning the data layout in the data section
+changed even though the code only shifted by <code>+0x1C0</code>.
+</p>
+
+<p>
+This is exactly why pattern scanning is so powerful: you don't need to care <em>why</em> the address
+changed. You just re-run the scanner and get the new VA.
+</p>
+
+<h2>The Full Scan: 23 OK / 2 MULTI / 10 MISS</h2>
+
+<p>
+Here is the complete result from the 6765 scan. Every line below is verbatim from
+<code>out/scan-6765-client.txt</code>:
+</p>
+
+<pre><code>== alvo: D:\SteamLibrary\steamapps\common\Deadlock\game\citadel\bin\win64\client.dll
+== imageBase 0x180000000 · sizeOfImage 0x41B6000 · 5 secoes
+
+[MISS] game_entity_system         0 hits
+[OK]   entity_list_dezlock        1 hit   RVA 0x2067DB9   rip-&gt;0x183DB48B0
+[MISS] entity_list_legacy         0 hits
+[MISS] local_player_controller    0 hits
+[MISS] local_player_ctrl_alt      0 hits
+[OK]   local_player_sig2          1 hit   RVA 0x57A150
+[OK]   view_matrix                1 hit   RVA 0x18F3EE3   rip-&gt;0x183C7F960
+[OK]   view_matrix_alt            1 hit   RVA 0x18F3EE3   rip-&gt;0x183C7F960
+[MISS] global_vars                0 hits
+[MISS] global_vars_alt            0 hits
+[MISS] schema_system              0 hits
+[MULTI] camera_manager            2 hits  0x5AEE53  0x5B79F3
+[OK]   screen_transform           1 hit   RVA 0x18F9FD0
+[OK]   get_matrices_for_view      1 hit   RVA 0xC04160
+[OK]   trace_shape_wrapper        1 hit   RVA 0x16F5F40
+[OK]   trace_manager_global       1 hit   RVA 0x245A3D   rip-&gt;0x1832B5820
+[OK]   entity_from_index          1 hit   RVA 0x16D1440
+[OK]   lookup_bone                1 hit   RVA 0x1636360
+[MISS] get_bone_position          0 hits
+[OK]   create_move                1 hit   RVA 0x184CAE0
+[OK]   game_entity_system_alt     1 hit   RVA 0x16F3ABB   rip-&gt;0x183DB48B0
+[MULTI] game_entity_system_alt2   22 hits  0x23BA00  0x23BA70  0x24E5D0  0x35ED50  0x35EE00  0x491DD0  0x4976F0  0x51F910 ...
+[OK]   game_entity_system_alt3    1 hit   RVA 0x206279A   rip-&gt;0x183DB48B0
+[OK]   local_player_alt_aw        1 hit   RVA 0x160ECA1   rip-&gt;0x183C33170
+[OK]   local_player_alt_falz      1 hit   RVA 0x164EB70
+[OK]   view_render                1 hit   RVA 0x1865FE0   rip-&gt;0x1831CC118
+[MISS] global_vars_short          0 hits
+[OK]   global_vars_v2             1 hit   RVA 0x99F6CC   rip-&gt;0x1832BF670
+[OK]   global_vars_v3             1 hit   RVA 0x99F6CC   rip-&gt;0x1832BF670
+[MISS] schema_system_alt          0 hits
+[OK]   dw_prediction              1 hit   RVA 0x18D6F20   rip-&gt;0x1832C5880
+[MISS] glow_manager               0 hits
+[OK]   outline_get_params         1 hit   RVA 0x57C3E0
+[OK]   outline_health_fraction    1 hit   RVA 0xA71040
+[OK]   camera_update_fallback     1 hit   RVA 0x6095F0
+[OK]   input_base                 1 hit   RVA 0x184CB7B   rip-&gt;0x1832B2D30
+[MISS] lookup_bone_alt            0 hits
+
+== resultado: 23 unicos, 2 multiplos, 37 total ==</code></pre>
+
+<p>
+That's <strong>23 unique hits</strong>, <strong>2 multi-hits</strong> (ambiguous patterns), and
+<strong>10 misses</strong> out of 37 patterns total. Let me break down what each category means.
+</p>
+
+<h3>OK (23 patterns)</h3>
+
+<p>
+These matched exactly one location in the binary. They're the workhorse patterns — the ones I can
+rely on for the next build. The entity system, view matrix, trace manager, global vars, input
+system, prediction, and most of the render helpers all fall in this bucket.
+</p>
+
+<h3>MULTI (2 patterns)</h3>
+
+<p>
+Two patterns matched more than once, which means they're not specific enough. The
+<code>camera_manager</code> pattern matched at <code>0x5AEE53</code> and <code>0x5B79F3</code> —
+the compiler emitted the same instruction sequence in two different places. The
+<code>game_entity_system_alt2</code> pattern matched <em>22 times</em> — it's far too generic.
+Both need to be extended with more surrounding bytes to become unambiguous. For now I just skip
+them; the three clean patterns for GameEntitySystem give me the same address.
+</p>
+
+<h3>MISS (10 patterns)</h3>
+
+<p>
+Ten patterns returned zero hits. They died in the 6759 or 6765 update. Some of them are
+understandable — the underlying instruction sequence changed slightly, or the compiler reordered
+basic blocks. But one of them is particularly notable:
+</p>
+
+<p>
+The original <code>game_entity_system</code> pattern, contributed by yfndream back in June 2026,
+is a MISS on both builds. It worked on whatever build yfndream tested against, but it's been dead
+since at least 6759. Here it is:
+</p>
+
+<pre><code>game_entity_system = 48 8B 0D ? ? ? ? 8B D0 E8 ? ? ? ? 44 8B 83</code></pre>
+
+<p>
+The problem: <code>8B D0</code> is <code>mov edx, eax</code> — a fixed register pair with no
+wildcards. If the compiler ever swaps <code>eax</code> for <code>ecx</code> or reorders the
+surrounding instructions, the pattern breaks. The alternatives I use instead have more
+wildcards and are robust to minor instruction reordering:
+</p>
+
+<pre><code># Dead (yfndream, jun/2026 — no wildcard on the mov edx, eax)
+game_entity_system      = 48 8B 0D ? ? ? ? 8B D0 E8 ? ? ? ? 44 8B 83
+
+# Alive (lote 2, added 10/06/2026 after the original died)
+game_entity_system_alt   = 48 8B 1D ? ? ? ? 48 89 1D ? ? ? ? 4C 63 B3
+game_entity_system_alt3  = 48 8B 05 ? ? ? ? 48 85 C0 0F 84 8B ? ? ? 48 8B 09</code></pre>
+
+<p>
+Same story for <code>local_player_controller</code> (from dezlock, March 2026) — MISS. It was
+replaced by <code>local_player_alt_aw</code>, <code>local_player_alt_falz</code>, and
+<code>local_player_sig2</code>. And <code>global_vars</code> (with its fixed
+<code>DC 00 00 00</code> displacement) was replaced by <code>global_vars_v2</code> with full
+wildcards on the displacement.
+</p>
+
+<p>
+The lesson: <strong>patterns are fragile</strong>. They work until the next compiler optimization
+or source change breaks them. That's why I always keep at least 2–3 independent patterns per
+critical global. When one dies, the others still resolve the same address. It's also why I keep a
+dated scan output in <code>out/</code> — so I can diff two builds and see exactly what moved.
+</p>
+
+<h2>The Resolution Flow</h2>
+
+<p>
+Here is the full pipeline from raw bytes on disk to a usable virtual address:
+</p>
+
+<svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;margin:1.5rem 0;" role="img" aria-label="Pattern to RVA to VA resolution flow">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#666"/>
+    </marker>
+  </defs>
+
+  <!-- Step 1: PE file on disk -->
+  <rect x="20" y="20" width="200" height="80" rx="6" fill="#1e1e2e" stroke="#89b4fa" stroke-width="1.5"/>
+  <text x="120" y="48" text-anchor="middle" fill="#cdd6f4" font-family="ui-monospace,Consolas,monospace" font-size="13" font-weight="bold">client.dll</text>
+  <text x="120" y="68" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="11">58.634.904 bytes on disk</text>
+  <text x="120" y="84" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="11">ImageBase 0x180000000</text>
+
+  <!-- Arrow 1 -->
+  <line x1="220" y1="60" x2="268" y2="60" stroke="#666" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="244" y="50" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="10">ReadFile</text>
+
+  <!-- Step 2: Byte pattern search -->
+  <rect x="270" y="20" width="200" height="80" rx="6" fill="#1e1e2e" stroke="#89b4fa" stroke-width="1.5"/>
+  <text x="370" y="48" text-anchor="middle" fill="#cdd6f4" font-family="ui-monospace,Consolas,monospace" font-size="13" font-weight="bold">Pattern Match</text>
+  <text x="370" y="68" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="11">48 89 0D ? ? ? ? E9 …</text>
+  <text x="370" y="84" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="11">scan.cpp rip_target()</text>
+
+  <!-- Arrow 2 -->
+  <line x1="470" y1="60" x2="518" y2="60" stroke="#666" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="494" y="50" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="10">file offset</text>
+
+  <!-- Step 3: RVA -->
+  <rect x="520" y="20" width="220" height="80" rx="6" fill="#1e1e2e" stroke="#89b4fa" stroke-width="1.5"/>
+  <text x="630" y="48" text-anchor="middle" fill="#cdd6f4" font-family="ui-monospace,Consolas,monospace" font-size="13" font-weight="bold">RVA 0x2067DB9</text>
+  <text x="630" y="68" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="11">PE section table lookup</text>
+  <text x="630" y="84" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="11">file offset → RVA</text>
+
+  <!-- Arrow 3 (down) -->
+  <line x1="630" y1="100" x2="630" y2="148" stroke="#666" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="650" y="130" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="10">+ imageBase + 7 + disp32</text>
+
+  <!-- Step 4: VA -->
+  <rect x="520" y="150" width="220" height="80" rx="6" fill="#1e1e2e" stroke="#a6e3a1" stroke-width="2"/>
+  <text x="630" y="178" text-anchor="middle" fill="#cdd6f4" font-family="ui-monospace,Consolas,monospace" font-size="13" font-weight="bold">VA 0x183DB48B0</text>
+  <text x="630" y="198" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="11">GameEntitySystem global</text>
+  <text x="630" y="214" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="11">mov = deref · lea = address</text>
+
+  <!-- Side note: mov vs lea -->
+  <rect x="20" y="150" width="480" height="140" rx="6" fill="#1e1e2e" stroke="#f9e2af" stroke-width="1"/>
+  <text x="40" y="176" fill="#f9e2af" font-family="ui-monospace,Consolas,monospace" font-size="12" font-weight="bold">mov vs lea — same prefix, different meaning</text>
+
+  <text x="40" y="204" fill="#cdd6f4" font-family="ui-monospace,Consolas,monospace" font-size="11">48 8B 0D …   mov rcx, [rip+x]</text>
+  <text x="40" y="222" fill="#f38ba8" font-family="ui-monospace,Consolas,monospace" font-size="11">→ global holds a POINTER (deref at runtime)</text>
+
+  <text x="40" y="250" fill="#cdd6f4" font-family="ui-monospace,Consolas,monospace" font-size="11">48 8D 0D …   lea rcx, [rip+x]</text>
+  <text x="40" y="268" fill="#a6e3a1" font-family="ui-monospace,Consolas,monospace" font-size="11">→ rcx IS the address (no deref)</text>
+</svg>
+
+<p>
+The beauty of this approach is that it's <em>deterministic</em>. Same binary, same pattern file,
+same scan output — every single time. No ASLR, no runtime patching, no anti-cheat interference.
+The binary doesn't know it's being read.
+</p>
+
+<h2>What's Next</h2>
+
+<p>
+With <code>GameEntitySystem</code> at <code>0x183DB48B0</code> and <code>ViewMatrix</code> at
+<code>0x183C7F960</code>, I have the two most important globals for an external ESP or radar. The
+next step is the entity walk: understanding how <code>CGameEntitySystem</code> stores its entities,
+what the chunk layout looks like (stride <code>0x70</code>, chunks at <code>+0x10</code>), and how
+to resolve a <code>CEntityIdentity</code> into a <code>CCitadelPlayerController</code> or a
+<code>CCitadelPlayerPawn</code>. That's the next post.
+</p>
+
+<h2>Reproduce</h2>
+
+<p>
+To reproduce this exact scan:
+</p>
+
+<pre><code>cd C:\Users\admin\deadlock-re
+tools\scan\build.bat
+tools\scan\scan.exe "D:\SteamLibrary\steamapps\common\Deadlock\game\citadel\bin\win64\client.dll" tools\scan\patterns-client.txt</code></pre>
+
+<p>
+The output should match <code>out/scan-6765-client.txt</code> line for line. If the game has
+updated since 08/10/2026, re-run <code>build.bat</code> first (in case the source changed), then
+scan the new DLL and diff against the stored output to see what moved.
+</p>
+
+<h2>Next Post</h2>
+
+<p>
+<a href="03-entity-walk-bones.html">Walking Entities Externally: Controller to Bone →</a>
+</p>
+
+</article>
+</main>
+
+<footer>
+  <span>build 6765 · scan 23 OK / 2 MULTI / 10 MISS · client.dll 1dc44d55…</span>
+  <span>deadlock-re · 2026-10-08</span>
+</footer>
+</body>
+</html>

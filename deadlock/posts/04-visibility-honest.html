@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Visibility, Honestly: FOW Is Minimap — danzlock</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header><a href="/">danzlock</a> — deadlock reversal diary</header>
+<article>
+
+<h1>Visibility, Honestly: FOW Is Minimap</h1>
+
+<p>I expected to find a wallhack flag. Instead I found a radar flag, and the difference matters more than I thought. This post is about what visibility actually means in Deadlock, what I measured, and why the answer is less powerful than the community assumed.</p>
+
+<h2>TraceShape: the right answer I can't use</h2>
+
+<p>The obvious path is <code>TraceShape</code> — the game's own raycast. dysonPeek mapped it back in October: RVA <code>0x16F5F40</code>, a clean single-hit wrapper. The signature is in <code>tools/scan/patterns-client.txt</code>:</p>
+
+<pre><code>trace_shape_wrapper = 48 89 54 24 10 48 89 4C 24 08 55 53 56 57 41 54 41 56 41 57 48 8D AC 24 ? ? ? ? B8 ? ? 00 00</code></pre>
+
+<p>The 6765 scan confirms it — 1 hit at RVA <code>0x16F5F40</code>. The pattern is alive. The layout is known: <code>GameTrace_t</code> with <code>fraction+0xAC</code> (visible &gt; 0.97), <code>bAllSolid+0xB6</code>, masks SHOT/VISIBILITY <code>0x1C3003</code>. Everything needed to call it is documented.</p>
+
+<p>But calling <code>TraceShape</code> means executing game code inside the target process. That is injection — a thread, a call, a return address. The anti-cheat's thread scan (DllMain / DLL_THREAD_ATTACH) watches exactly for start addresses outside mapped images. The vtable checks watch for modified interface pointers. Calling a game function from outside touches both.</p>
+
+<p>We are read-only. Not "read-only except when convenient." Strictly read-only. So <code>TraceShape</code> is off the table.</p>
+
+<svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TraceShape rejected — why calling game functions is off-limits">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#e06c75"/>
+    </marker>
+  </defs>
+  <text x="20" y="28" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" font-weight="bold" fill="#e06c75">TRACESHAPE — CORRECT ANSWER, WRONG METHOD</text>
+  <rect x="20" y="44" width="320" height="60" fill="#2d2d2d" stroke="#e06c75" stroke-width="1.5"/>
+  <text x="34" y="64" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#abb2bf">Call game fn → thread with foreign start addr</text>
+  <text x="34" y="80" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7f848e">DllMain scan: "triggers both for manual map"</text>
+  <text x="34" y="96" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7f848e">→ injection → detected</text>
+  <rect x="380" y="44" width="320" height="60" fill="#2d2d2d" stroke="#98c379" stroke-width="1.5"/>
+  <text x="394" y="64" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#abb2bf">KPRL read-only → no thread, no call</text>
+  <text x="394" y="80" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7f848e">physical memory reads only</text>
+  <text x="394" y="96" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7f848e">→ invisible to current AC</text>
+  <line x1="180" y1="104" x2="180" y2="140" stroke="#e06c75" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="540" y1="104" x2="540" y2="140" stroke="#98c379" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="20" y="160" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#e06c75">❌ violates read-only</text>
+  <text x="380" y="160" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#98c379">✅ what we do instead</text>
+  <text x="20" y="185" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7f848e">TraceShape is the right answer to "can I see this?" — but the method breaks our only safety guarantee.</text>
+</svg>
+
+<h2>FOW: what I expected vs what is there</h2>
+
+<p>The entity chain doc says <code>C_CitadelTeam+0x6C8</code> holds <code>m_vecFOWEntities</code> — an embedded <code>UtlVector</code> of <code>STeamFOWEntity</code> at <code>+0x41</code>. The name sounds like wallhack data: "FOW entities" = entities you can see through fog-of-war. I expected a per-target visibility flag.</p>
+
+<p>I ran the census. The command walks all 8 entity chunks, reads identity headers, and tallies names:</p>
+
+<pre><code>danzlock.exe --fow</code></pre>
+
+<p>The output is blunt:</p>
+
+<pre><code>== censo: 518 entidades, 68 nomes ==
+  ... (68 distinct names, zero of them "citadel_team_*") ...
+== fim fow ==</code></pre>
+
+<p>518 entities. 68 distinct class names. Not a single <code>citadel_team</code> in the entity list. The FOW vector lives inside a team object that isn't even instantiated as a live entity in the way I expected. The census proves it: <code>citadel_team</code> is not a per-frame entity you can walk.</p>
+
+<h2>What FOW actually means</h2>
+
+<p>Page 64 of the UC thread clarifies it: FOW is the minimap radar, not a wallhack layer. It tells you <em>"this unit is visible on the map"</em>, not <em>"a bullet would reach this unit"</em>. The distinction is everything. A unit can be on your minimap (FOW says visible) but behind a wall (bullet blocked). FOM and occlusion are separate systems.</p>
+
+<p>The game code confirms it. From <code>game.cpp</code>:</p>
+
+<pre><code>// ---- passo 4: FOW DESATIVADO (08/10): m_vecFOWEntities = minimapa, NAO parede.
+// Censo ao vivo: citadel_team_* nem existe na entity list (518 ents, 68 nomes,
+// zero team). FOW so diz "visivel no mapa", nunca "bala passa". Vischeck real
+// = TraceShape (viola read-only) ou VPK raycast (projeto futuro).
+// Visibilidade agora = dormant (rede) + filtros de mira (dist/FOV/sticky).
+// visibleFow fica true p/ todos (neutro).</code></pre>
+
+<p><code>visibleFow</code> stays <code>true</code> for everyone. Neutral. Useless as a wallhack. The FOW path is dead.</p>
+
+<h2>The occlusion experiment: what actually changes</h2>
+
+<p>If FOW is not the answer, what does change when a target goes behind a wall? I built a snapshot tool — <code>--occl</code> — that captures the raw bytes of a pawn and its scene node, then diffs two moments.</p>
+
+<p>The usage is deliberate:</p>
+
+<ol>
+<li>Stand behind a wall with an enemy in your crosshair → <code>danzlock.exe --occl a</code></li>
+<li>Step out so the enemy is visible → <code>danzlock.exe --occl b</code></li>
+<li>Compare → <code>danzlock.exe --occl diff</code></li>
+</ol>
+
+<p>The diff logic reads <code>0x600</code> bytes of pawn and <code>0x130</code> bytes of scene node for each snapshot, then prints every byte that changed:</p>
+
+<pre><code>printf("-- PAWN bytes que MUDARAM --\n");
+for (int off = 0; off < 0x600; ++off)
+    if (A.pawn[off] != B.pawn[off])
+        printf("  pawn+0x%03X: A=%02X B=%02X\n", off, A.pawn[off], B.pawn[0]);
+printf("-- SCENENODE bytes que MUDARAM --\n");
+for (int off = 0; off < 0x130; ++off)
+    if (A.node[off] != B.node[off])
+        printf("  node+0x%03X: A=%02X B=%02X\n", off, A.node[off], B.node[0]);</code></pre>
+
+<p>The result is the most honest data point in this post. Between "behind wall" and "visible", the <em>only</em> bytes that change in the pawn are animation timers:</p>
+
+<pre><code>pawn+0x2E8  — animation time
+pawn+0x3BC  — animation cycle
+pawn+0x3C0  — animation playback
+pawn+0x3DC  — animation state</code></pre>
+
+<p>That is it. Four floats, all animation-related. No visibility flag. No occlusion boolean. No "can I shoot this" bit. The game does not store a per-target occlusion flag in the pawn that we can read.</p>
+
+<svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Occlusion diff — only animation timers change">
+  <text x="20" y="28" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" font-weight="bold" fill="#61afef">OCCLUSION DIFF: BEHIND WALL vs VISIBLE</text>
+  <text x="20" y="52" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#abb2bf">pawn 0x600 bytes · node 0x130 bytes · only these change:</text>
+  <rect x="20" y="66" width="320" height="40" fill="#2d2d2d" stroke="#61afef" stroke-width="1.5"/>
+  <text x="34" y="82" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#abb2bf">pawn+0x2E8  animation time</text>
+  <text x="34" y="98" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7f848e">changes every frame</text>
+  <rect x="20" y="114" width="320" height="40" fill="#2d2d2d" stroke="#61afef" stroke-width="1.5"/>
+  <text x="34" y="130" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#abb2bf">pawn+0x3BC  animation cycle</text>
+  <text x="34" y="146" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7f848e">loops</text>
+  <rect x="380" y="66" width="320" height="40" fill="#2d2d2d" stroke="#61afef" stroke-width="1.5"/>
+  <text x="394" y="82" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#abb2bf">pawn+0x3C0  animation playback</text>
+  <text x="394" y="98" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7f848e">continuous</text>
+  <rect x="380" y="114" width="320" height="40" fill="#2d2d2d" stroke="#61afef" stroke-width="1.5"/>
+  <text x="394" y="130" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#abb2bf">pawn+0x3DC  animation state</text>
+  <text x="394" y="146" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7f848e">interpolated</text>
+  <text x="20" y="180" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#e06c75">NO visibility flag · NO occlusion boolean · NO "can shoot" bit</text>
+  <text x="20" y="200" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7f848e">The game does not store a readable per-target occlusion state in the pawn.</text>
+</svg>
+
+<h2>What we actually use: dormant + behavioural filters</h2>
+
+<p>If there is no occlusion flag, how does the aim avoid shooting walls? Three layers, all read-only:</p>
+
+<h3>Layer 1 — network dormant</h3>
+
+<p>Every scene node has <code>m_bDormant</code> at <code>+0x103</code>. When the server stops sending updates about an entity, it goes dormant. A dormant entity is, by definition, not visible to you on the network. From <code>game.cpp</code>:</p>
+
+<pre><code>constexpr uint64_t SSN_DORMANT = 0x103;  // bool (m_bDormant, build 6763)
+
+// in read_pawn_core:
+uint8_t d = 0;
+if (m_k.Read(m_pid, sceneNode + SSN_DORMANT, &d, 1)) p.dormant = (d != 0);</code></pre>
+
+<p>Dormant is a network-level "you don't know about this entity" flag. It is not occlusion — a unit can be visible on screen and dormant if the server hasn't told you about it yet. But it is a reliable negative: if dormant, you cannot see it.</p>
+
+<h3>Layer 2 — freeze-drop (350 ms)</h3>
+
+<p>When you are behind a wall, the server stops sending pose updates for the target. The bone position freezes. If the target is moving fast (&gt; 50 units/s) but the bone has not moved for 350 ms, it is behind geometry. Drop the lock.</p>
+
+<pre><code>// aim.cpp — freeze-drop
+} else if (vspd > 50.f && (now - st.lockFrozenSince) &gt; 0.35f) {
+    // corre mas o bone nao mexe ha 350ms = parede: SOLTA
+    st.target = -1;
+    st.targetPawn = 0;
+    // ...
+    break;
+}</code></pre>
+
+<h3>Layer 3 — w2s-miss (10 frames)</h3>
+
+<p>If <code>WorldToScreen</code> fails to project the bone for 10 consecutive frames, the target is behind the camera or inside geometry. Drop the lock.</p>
+
+<pre><code>// aim.cpp — w2s-miss
+} else {
+    // nao projeta 10 frames seguidos = parede/camera: SOLTA
+    if (++st.lockMissW2s &gt; 10) {
+        st.target = -1;
+        st.targetPawn = 0;
+        // ...
+        break;
+    }
+}</code></pre>
+
+<p>Together these three layers give a practical "don't shoot walls" filter without ever calling <code>TraceShape</code> and without reading a non-existent occlusion flag.</p>
+
+<h2>EyePosition: the honest origin</h2>
+
+<p>One more thing I got wrong before I measured it. I assumed the eye position for aim raycasts could come from <code>m_vecViewOffset</code> at <code>+0xA88</code>. It cannot. That field is quantized for network transmission — the client sends a compressed version to the server. Reading it from memory gives you the network-quantized value, not the render-accurate eye.</p>
+
+<p>From <code>game.cpp</code>:</p>
+
+<pre><code>Vec3 Game::EyePosition(const PlayerData&amp; p) {
+    // Olho read-only: head bone em mundo; sem bones, origem + altura padrao.
+    // (m_vecViewOffset e quantizado na rede — nao le confiavel de fora.)
+    int hi = HeadBoneIndex(p.heroId);
+    if (p.hasBones &amp;&amp; hi &gt;= 0 &amp;&amp; hi &lt; p.boneCount) return p.bones[hi];
+    return Vec3{ p.origin.x, p.origin.y, p.origin.z + 64.f };
+}</code></pre>
+
+<p>The eye is the head bone in world space. If bones are not available, fall back to origin + 64 units. The head bone is more accurate than any network-quantized view offset — it is the actual render position of the skull.</p>
+
+<h2>Summary: what visibility is and isn't</h2>
+
+<table>
+<tr><th>What</th><th>Reality</th></tr>
+<tr><td>FOW (<code>m_vecFOWEntities</code>)</td><td>Minimap radar, not wallhack. <code>citadel_team</code> not in entity list (518 ents, 68 names, zero team). <code>visibleFow</code> stays <code>true</code> — neutral.</td></tr>
+<tr><td>Occlusion flag</td><td>Does not exist in pawn. Diff shows only animation timers change (<code>+0x2E8/+0x3BC/+0x3C0/+0x3DC</code>).</td></tr>
+<tr><td><code>TraceShape</code></td><td>Correct answer, wrong method. Calling game fn = injection = detected.</td></tr>
+<tr><td>Dormant (<code>+0x103</code>)</td><td>Network-level "not visible" flag. Reliable negative.</td></tr>
+<tr><td>Freeze-drop (350 ms)</td><td>Bone frozen while target moves = behind wall.</td></tr>
+<tr><td>w2s-miss (10 f)</td><td>Cannot project = behind camera/geometry.</td></tr>
+<tr><td>EyePosition</td><td>Head bone in world. <code>m_vecViewOffset</code> is network-quantized — unreliable.</td></tr>
+</table>
+
+<p>The honest answer is that there is no wallhack flag to read. There is a radar flag (FOW), a network flag (dormant), and two behavioural heuristics (freeze-drop, w2s-miss). That is what we have. It is less than I hoped and more than nothing.</p>
+
+<h2>Repro</h2>
+
+<p>All evidence above is from the live reader against build 6765. To reproduce:</p>
+
+<pre><code># Entity census (proves citadel_team is not walkable):
+danzlock.exe --fow
+
+# Occlusion diff (proves no visibility flag in pawn):
+danzlock.exe --occl a    # stand behind wall, enemy in crosshair
+danzlock.exe --occl b    # step out, enemy visible
+danzlock.exe --occl diff # compare — only anim times change
+
+# Source:
+#   src/app/game.cpp:37      — SSN_DORMANT = 0x103
+#   src/app/game.cpp:235     — dormant read
+#   src/app/game.cpp:420-536 — DebugFow / DebugOccl
+#   src/app/game.cpp:134-139 — EyePosition = head bone
+#   src/app/aim.cpp:152-160   — freeze-drop 350ms
+#   src/app/aim.cpp:169-177   — w2s-miss 10 frames
+#   out/scan-6765-client.txt — trace_shape_wrapper RVA 0x16F5F40</code></pre>
+
+<p>Next: <a href="05-aim-lands.html">Aim That Lands: Magnet, Ease-Out, and a CSV Logger</a> — how the aim curve works when there is no wallhack to lean on.</p>
+
+</article>
+<footer>danzlock reversal diary · build 2026-10-08 · <a href="../">index</a></footer>
+</body>
+</html>

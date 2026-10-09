@@ -1,0 +1,302 @@
+/* danzlock — deadlock reversal diary */
+/* Minimal pro theme. No JS, no external deps. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: #1a1a1a;
+  background: #fafafa;
+}
+
+/* ── Layout ─────────────────────────────────────────────── */
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+
+.site-header {
+  border-bottom: 1px solid #e0e0e0;
+  padding: 1.25rem 0;
+  margin-bottom: 2rem;
+}
+
+.site-header .brand {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-decoration: none;
+}
+
+.site-header .brand span {
+  color: #666;
+  font-weight: 400;
+}
+
+/* ── Typography ─────────────────────────────────────────── */
+
+h1, h2, h3, h4 {
+  line-height: 1.25;
+  margin: 1.8rem 0 0.6rem;
+  font-weight: 700;
+}
+
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.3rem; }
+h3 { font-size: 1.1rem; }
+
+p {
+  margin: 0.75rem 0;
+}
+
+a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+strong { font-weight: 600; }
+
+/* ── Code ───────────────────────────────────────────────── */
+
+pre {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 1rem 1.25rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 1rem 0;
+}
+
+code {
+  font-family: "SF Mono", "Cascadia Code", "Fira Code", Consolas,
+    "Liberation Mono", Menlo, monospace;
+  font-size: 0.88em;
+  background: #f0f0f0;
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+}
+
+/* ── Tables ─────────────────────────────────────────────── */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+th, td {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+th {
+  font-weight: 600;
+  background: #f5f5f5;
+}
+
+tr:hover td {
+  background: #fafafa;
+}
+
+/* ── SVG ────────────────────────────────────────────────── */
+
+svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1rem 0;
+}
+
+/* ── Post list ──────────────────────────────────────────── */
+
+.post-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.post-list li {
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.75rem;
+  border-bottom: 1px solid #eee;
+}
+
+.post-list li:last-child {
+  border-bottom: none;
+}
+
+.post-list .post-date {
+  font-size: 0.8rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.post-list .post-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0.25rem 0 0.4rem;
+}
+
+.post-list .post-title a {
+  color: #1a1a1a;
+}
+
+.post-list .post-title a:hover {
+  color: #0066cc;
+}
+
+.post-list .post-summary {
+  color: #555;
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+/* ── Boxes (About / Repro) ──────────────────────────────── */
+
+.box {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  background: #fff;
+}
+
+.box h2,
+.box h3 {
+  margin-top: 0;
+}
+
+.box p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Footer ─────────────────────────────────────────────── */
+
+.site-footer {
+  border-top: 1px solid #e0e0e0;
+  margin-top: 3rem;
+  padding: 1.25rem 0 2rem;
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.build-tag {
+  font-family: "SF Mono", "Cascadia Code", Consolas, monospace;
+  font-size: 0.75rem;
+  color: #aaa;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  html { font-size: 15px; }
+  .container { padding: 0 1rem; }
+  pre { padding: 0.75rem 1rem; font-size: 0.8rem; }
+}
+
+/* Language toggle removed: EN-only page. */
+
+/* ── Table of contents ──────────────────────────────────── */
+
+.toc {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 0.5rem 1.25rem 0.75rem;
+  margin: 0 0 2rem;
+  background: #fff;
+}
+
+.toc h2 {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+  margin: 0.5rem 0 0.4rem;
+}
+
+.toc ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  columns: 2;
+  column-gap: 2rem;
+}
+
+.toc li {
+  margin: 0.2rem 0;
+  font-size: 0.9rem;
+  break-inside: avoid;
+}
+
+/* ── Sections ───────────────────────────────────────────── */
+
+section {
+  scroll-margin-top: 1rem;
+}
+
+section > h1 {
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 0.4rem;
+}
+
+/* Meta line under the H1 */
+.meta {
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: -0.2rem;
+}
+
+/* ── Responsive SVG ─────────────────────────────────────── */
+
+svg {
+  width: 100%;
+  height: auto;
+}
+
+/* Quotes / inline citations */
+q {
+  font-style: italic;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .brand-row { align-items: flex-start; }
+  .toc ul { columns: 1; }
+}
+
+/* Password gate removed: public page. */

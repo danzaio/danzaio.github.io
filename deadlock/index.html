@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>danzlock — deadlock reversal diary</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body id="top">
+
+<div class="container">
+
+<header class="site-header">
+  <div class="brand-row">
+    <a class="brand" href="#top">danzlock <span>— deadlock reversal diary</span></a>
+    </div>
+</header>
+
+<nav class="toc">
+  <h1>1. Anti-cheat Downgraded</h1>
+<p class="meta">2026-10-08 · build 6765 · source: UC thread 745313 (Hec4te, 2026-03-28 → 2026-08-06)</p>
+
+<p>I expected something modern. Instead I found the same implementation Counter-Strike 2 uses — just switched off in most places. That's the first thing to understand: Deadlock's client-side anti-cheat isn't a new system, it's Valve's existing one with features disabled.</p>
+
+<p>The <code>client.dll</code> does the work. There is no kernel driver. So before we write a single line of tooling, I want to map exactly what is running and what we must never touch.</p>
+
+<h2>Same AC as CS2 — but downgraded</h2>
+
+<p>The community consensus from the UnknownCheats thread, posted by Hec4te on 2026-03-28 and updated through August, is direct: <q>the same as CS2 but downgraded</q>. The mechanism lives inside the client binary. No kernel component ships with the game.</p>
+
+<p>That means everything we need to worry about is in user-mode memory. It also means we know roughly what to expect — this stack was already dissected for Counter-Strike years ago.</p>
+
+<svg viewBox="0 0 720 240" role="img" aria-label="What the anti-cheat watches versus what we touch">
+  <text x="20" y="30" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="bold" fill="#e06c75">WHAT THE AC WATCHES</text>
+  <text x="400" y="30" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="bold" fill="#98c379">WHAT WE TOUCH</text>
+  <rect x="20" y="48" width="270" height="50" fill="#2d2d2d" stroke="#e06c75" stroke-width="1.5"/>
+  <text x="34" y="70" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" fill="#abb2bf">DllStatus protobuf → module list</text>
+  <text x="34" y="86" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#7f848e">client.dll → Steam servers</text>
+  <rect x="20" y="106" width="270" height="50" fill="#2d2d2d" stroke="#e06c75" stroke-width="1.5"/>
+  <text x="34" y="128" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" fill="#abb2bf">Thread scan — DllMain</text>
+  <text x="34" y="144" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#7f848e">start addr / RWX / kernel32</text>
+  <rect x="20" y="164" width="270" height="50" fill="#2d2d2d" stroke="#e06c75" stroke-width="1.5"/>
+  <text x="34" y="186" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" fill="#abb2bf">Vtable modification checks</text>
+  <text x="34" y="202" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#7f848e">interface vtables in client.dll</text>
+  <rect x="400" y="48" width="300" height="50" fill="#2d2d2d" stroke="#98c379" stroke-width="1.5"/>
+  <text x="414" y="70" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" fill="#abb2bf">KPRL driver — read-only memory</text>
+  <text x="414" y="86" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#7f848e">no injection · no handle · no vtable</text>
+  <rect x="400" y="106" width="300" height="50" fill="#2d2d2d" stroke="#98c379" stroke-width="1.5"/>
+  <text x="414" y="128" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" fill="#abb2bf">Entity list / view matrix / bones</text>
+  <text x="414" y="144" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#7f848e">read-only — same as Rubi/MSW</text>
+  <rect x="400" y="164" width="300" height="50" fill="#2d2d2d" stroke="#98c379" stroke-width="1.5"/>
+  <text x="414" y="186" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" fill="#abb2bf">Server-side stats — frog headshot%</text>
+  <text x="414" y="202" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#7f848e">behavioural — residual risk only</text>
+</svg>
+
+<h2>What is active</h2>
+
+<table>
+<thead><tr><th>Mechanism</th><th>Detail</th></tr></thead>
+<tbody>
+<tr><td>Vtable checks</td><td>Detects modification of interface vtables. Any detour, hook, or redirect on a known vtable trips it.</td></tr>
+<tr><td>DllStatus protobuf</td><td><code>AVCUserMessage_DllStatus</code> — sends the full list of loaded DLLs to Steam servers. Injection of any module becomes visible.</td></tr>
+<tr><td>Inventory response</td><td><code>AVCUserMessage_Inventory_Response</code> — a channel that also carries the late thread-scan report.</td></tr>
+<tr><td>Thread scan (DllMain)</td><td>Runs on <code>DLL_THREAD_ATTACH</code>. For each thread: checks if the start address is RWX, does not belong to any image, or sits inside kernel32/kernelbase. If it matches, the game reports: HMODULE, start address, memory protections, TID, return address, allocation base, 4 KB dump of the page, first bytes of <code>NtOpenFile</code>/<code>LoadLibraryExW</code>. Catches manual map AND LoadLibrary.</td></tr>
+</tbody>
+</table>
+
+<p>The thread scan is the sharpest tool here. As the research notes put it: it <q>triggers both for manual map and loadlib</q>. A DLL that normalises itself — maps its sections, restores permissions — still leaves a start address that does not belong to any mapped image. That is what catches stealthy loaders.</p>
+
+<p>On the bypass question, the source is blunt: <q>if you bypass what's sent from those protobufs [DllStatus + Inventory] you are essentially fully undetected (outside of CUserCmd tampering)</q>. We will not be bypassing anything. We will simply not be there.</p>
+
+<h2>What is off</h2>
+
+<ul>
+<li><strong>VAC modules (streamed by Steam): OFF since Nov/Dec 2025</strong> — both in Deadlock and CS2. <q>I believe they will not come back at this point.</q></li>
+<li><strong>DLL file-integrity checking</strong> (which exists in CS2): disabled in Deadlock (modding community / early development).</li>
+<li>No apparent VAC Live.</li>
+</ul>
+
+<p>The combination is telling. The server-side behavioural system — the so-called frog — is what Valve is betting on. The client-side memory-forensics stack is a partial skeleton: module list and thread scan stay on, but VAC's file-integrity layer and the streamed modules are gone.</p>
+
+<h2>Bans: server-side, not memory</h2>
+
+<p>The only public ban vector anyone has documented is statistical. The author of the anti-cheat thread states it plainly: <q>The only thing I ever got banned for was having a high headshot percentage</q>.</p>
+
+<p>That is the frog system. It watches play statistics on the server and acts on outliers. No memory evidence, no injection trace. This matches the broader theory that Valve's current strategy leans on server-side analysis and AI-driven pattern detection rather than kernel-level enforcement.</p>
+
+<p>For our project the residual risk is not the tool — it is how the tool is used. A radar that automates play into absurd patterns is the vector. A read-only overlay that shows information is not.</p>
+
+<h2>Implication: strict read-only</h2>
+
+<p>Every active check maps to an operation we must never perform:</p>
+
+<ol>
+<li>Do not inject anything into the process — no DLL, no manual map, no shellcode, no remote thread.</li>
+<li>Do not open a write handle — read-only only (via KPRL, no handle at all).</li>
+<li>Do not modify vtables — pure reading.</li>
+<li>Behavioural detection (server-side) — the risk is usage, not the reading tool.</li>
+</ol>
+
+<p>If a kernel anti-cheat or a new wave ever ships (the thread speculates <q>they are working on a new AC</q>), we revisit. Today there is no signal of any new active module.</p>
+
+
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     §2 ENTITYSYSTEM
+     ══════════════════════════════════════════════════════════ -->
+<section id="entsys">
+
+<h1>2. GameEntitySystem — from disk to VA</h1>
+<p class="meta">2026-10-08 · build 6765 · client.dll 58,634,904 B · sha <code>1dc44d55…</code></p>
+
+<p>The whole point of this series is to reverse Deadlock <em>without running it</em>. I sit on the other side of an anti-cheat that will flag the moment I attach a debugger or open a handle to the process. But the binary just sits there on disk, 58 megabytes of compiled C++, full of RIP-relative pointers waiting to be chased.</p>
+
+<p>This post covers how I resolved <code>GameEntitySystem</code> — the global that owns every entity in the game — using nothing but a static pattern scanner, a hex editor, and two builds of <code>client.dll</code>. No debugger. No process handle. No game running.</p>
+
+<h2>The disk-first scanner</h2>
+
+<p>I wrote a tiny tool called <code>tools/scan</code>. It does exactly one thing: opens a PE file, reads it into memory, and searches for byte patterns. That's it. No process injection, no hooks, no <code>OpenProcess</code>. The entire attack surface is <code>CreateFile</code> + <code>ReadFile</code> on a DLL that Steam already put on my disk.</p>
+
+<pre><code>scan.exe "D:\SteamLibrary\steamapps\common\Deadlock\game\citadel\bin\win64\client.dll"   patterns-client.txt</code></pre>
+
+<p>The pattern format is dead simple — one byte per token, <code>?</code> for wildcards:</p>
+
+<pre><code>NOME = 48 8B 0D ? ? ? ? 8B D0      # '?' or '??' = wildcard of 1 byte</code></pre>
+
+<p>When the scanner finds a match at some file offset, it converts that offset to an RVA, then to a VA by adding the image base (<code>0x180000000</code>). But the interesting part happens when the matched instruction is a RIP-relative memory access — the scanner goes one step further and resolves the <em>target</em> of that access.</p>
+
+<h2>RIP-resolve: mov vs lea</h2>
+
+<p>This is the single most important concept in the whole approach. x86-64 code doesn't use absolute addresses — they're not knowable at compile time because of ASLR. Instead the compiler emits RIP-relative instructions that compute <em>address = address_of_next_instruction + disp32</em>.</p>
+
+<p>Two instructions look almost identical in a hex dump but mean completely different things:</p>
+
+<pre><code>48 8B 0D xx xx xx xx    mov  rcx, [rip+0x2067db9]   ; deref — rcx gets the VALUE at that address
+48 8D 0D xx xx xx xx    lea  rcx, [rip+0x2067db9]   ; no deref — rcx IS the address</code></pre>
+
+<p>In <code>mov reg, [rip+x]</code>, the register receives the pointer stored at the target address. That means the global itself contains a <em>pointer to</em> the real object, and you need one more deref at runtime. In <code>lea reg, [rip+x]</code>, the register <em>is</em> the address — the global <em>is</em> the object (or the start of an array of objects).</p>
+
+<p>The scanner's <code>rip_target()</code> function detects the common REX prefixes (<code>48</code>/<code>4C</code>), the opcode byte (<code>8B</code> = mov, <code>8D</code> = lea, <code>89</code> = mov-store), and the ModR/M byte (<code>05</code>–<code>3D</code> with the right bit pattern for RIP-relative), then computes:</p>
+
+<pre><code>target = imageBase + rva_of_instruction + 7 + disp32</code></pre>
+
+<p>The <code>+7</code> accounts for the instruction length (2-byte prefix+opcode, 1-byte ModR/M, 4-byte displacement). The <code>rip-&gt;</code> annotation in the scan output tells you exactly this: the resolved VA of whatever the code is pointing at.</p>
+
+<h2>Three patterns, one target</h2>
+
+<p>For <code>GameEntitySystem</code> I had three completely independent byte patterns, each matching at a different location in the binary, each resolving to the exact same virtual address — RVA <code>0x3DB48B0</code>, VA <code>0x183DB48B0</code>:</p>
+
+<pre><code>[OK]   entity_list_dezlock        1 hit   RVA 0x2067DB9   rip-&gt;0x183DB48B0
+[OK]   game_entity_system_alt     1 hit   RVA 0x16F3ABB   rip-&gt;0x183DB48B0
+[OK]   game_entity_system_alt3    1 hit   RVA 0x206279A   rip-&gt;0x183DB48B0</code></pre>
+
+<p>These patterns come from different sources, contributed over months, in different code paths. The first one (<code>entity_list_dezlock</code>) was posted by dezlock back in March 2026. The other two (<code>game_entity_system_alt</code> and <code>alt3</code>) were added as "alternatives" on 6/10/2026 after the original <code>game_entity_system</code> pattern (from yfndream, June 2026) died in build 6759.</p>
+
+<p>Here are the raw pattern definitions from <code>tools/scan/patterns-client.txt</code>:</p>
+
+<pre><code># --- globais principais ---
+game_entity_system      = 48 8B 0D ? ? ? ? 8B D0 E8 ? ? ? ? 44 8B 83
+entity_list_dezlock     = 48 89 0D ? ? ? ? E9 ? ? ? ? CC
+
+# --- alternativos (lote 2, agregados 06/10) ---
+game_entity_system_alt   = 48 8B 1D ? ? ? ? 48 89 1D ? ? ? ? 4C 63 B3
+game_entity_system_alt3  = 48 8B 05 ? ? ? ? 48 85 C0 0F 84 8B ? ? ? 48 8B 09</code></pre>
+
+<p>Look at the ModR/M byte in the first byte of each pattern. The opcode is <code>89</code> (mov-store) in <code>entity_list_dezlock</code> — this code is <em>writing</em> a pointer into the global. The opcode is <code>8B</code> (mov) in <code>game_entity_system_alt</code> and <code>alt3</code> — they're <em>reading</em> from the global. Three different code paths, three different instruction encodings, one shared address. When patterns converge like this, you know you've got the right global.</p>
+
+<h2>ViewMatrix</h2>
+
+<p>Same approach, same confidence. The <code>view_matrix</code> pattern resolves to <code>0x183C7F960</code> (pattern RVA <code>0x18F3EE3</code>):</p>
+
+<pre><code>[OK]   view_matrix                1 hit   RVA 0x18F3EE3   rip-&gt;0x183C7F960
+[OK]   view_matrix_alt            1 hit   RVA 0x18F3EE3   rip-&gt;0x183C7F960</code></pre>
+
+<p>Both the primary and the alternate pattern match at the <em>same RVA</em> — they're two different instruction encodings for the same RIP-relative access. The primary pattern is a <code>lea</code> (compute the address), the alternate is a <code>mov</code> (read through it):</p>
+
+<pre><code>view_matrix             = 48 8D 0D ? ? ? ? 48 C1 E0 06
+view_matrix_alt         = 48 8D ? ? ? ? ? 48 C1 E0 06 48 03 C1 C3</code></pre>
+
+<p>This is a high-confidence resolution. The <code>view_matrix</code> global stores a <code>ViewMatrix_t</code> — 4×4 floats that the game uses to transform world coordinates into clip space. The resolved target is RVA <code>0x3C7F960</code> (VA <code>0x183C7F960</code>). Combined with <code>screen_transform</code> (RVA <code>0x18F9FD0</code>), this is what an ESP or radar needs to draw on top of the game.</p>
+
+<h2>6763 → 6765: the −0x80 delta</h2>
+
+<p>I had a previous scan from build 6763 (<code>out/scan-6763-client.txt</code>). When the game patched from 6763 to 6765, I re-ran the scanner and diffed the results. The headline finding:</p>
+
+<table>
+<thead><tr><th>Global</th><th>6763 VA</th><th>6765 VA</th><th>Delta</th></tr></thead>
+<tbody>
+<tr><td><code>GameEntitySystem</code></td><td><code>0x183DB4930</code></td><td><code>0x183DB48B0</code></td><td><code>−0x80</code></td></tr>
+<tr><td><code>ViewMatrix</code></td><td><code>0x183C7F9E0</code></td><td><code>0x183C7F960</code></td><td><code>−0x80</code></td></tr>
+</tbody>
+</table>
+
+<p>Both globals moved by exactly <code>−0x80</code> — 128 bytes downward. This kind of uniform shift usually means the compiler inserted a new global variable (or resized an existing one) somewhere in the same translation unit or in a linked object that gets laid out before these two. Everything else stayed put: <code>trace_manager_global</code> didn't move, <code>create_move</code> only shifted by <code>0x1C</code>.</p>
+
+<p>The pattern RVAs barely budged too. <code>entity_list_dezlock</code> went from RVA <code>0x2067BF9</code> (6763) to <code>0x2067DB9</code> (6765) — a <code>+0x1C0</code> shift in the code, which is just the compiler adding a few instructions somewhere upstream. The <em>resolved target</em> moved by <code>−0x80</code>, meaning the data layout in the data section changed even though the code only shifted by <code>+0x1C0</code>.</p>
+
+<p>This is exactly why pattern scanning is so powerful: you don't need to care <em>why</em> the address changed. You just re-run the scanner and get the new VA.</p>
+
+<h2>The full scan: 23 OK / 2 MULTI / 10 MISS</h2>
+
+<p>Here is the complete result from the 6765 scan. Every line below is verbatim from <code>out/scan-6765-client.txt</code>:</p>
+
+<pre><code>== alvo: D:\SteamLibrary\steamapps\common\Deadlock\game\citadel\bin\win64\client.dll
+== imageBase 0x180000000 · sizeOfImage 0x41B6000 · 5 secoes
+
+[MISS] game_entity_system         0 hits
+[OK]   entity_list_dezlock        1 hit   RVA 0x2067DB9   rip-&gt;0x183DB48B0
+[MISS] entity_list_legacy         0 hits
+[MISS] local_player_controller    0 hits
+[MISS] local_player_ctrl_alt      0 hits
+[OK]   local_player_sig2          1 hit   RVA 0x57A150
+[OK]   view_matrix                1 hit   RVA 0x18F3EE3   rip-&gt;0x183C7F960
+[OK]   view_matrix_alt            1 hit   RVA 0x18F3EE3   rip-&gt;0x183C7F960
+[MISS] global_vars                0 hits
+[MISS] global_vars_alt            0 hits
+[MISS] schema_system              0 hits
+[MULTI] camera_manager            2 hits  0x5AEE53  0x5B79F3
+[OK]   screen_transform           1 hit   RVA 0x18F9FD0
+[OK]   get_matrices_for_view      1 hit   RVA 0xC04160
+[OK]   trace_shape_wrapper        1 hit   RVA 0x16F5F40
+[OK]   trace_manager_global       1 hit   RVA 0x245A3D   rip-&gt;0x1832B5820
+[OK]   entity_from_index          1 hit   RVA 0x16D1440
+[OK]   lookup_bone                1 hit   RVA 0x1636360
+[MISS] get_bone_position          0 hits
+[OK]   create_move                1 hit   RVA 0x184CAE0
+[OK]   game_entity_system_alt     1 hit   RVA 0x16F3ABB   rip-&gt;0x183DB48B0
+[MULTI] game_entity_system_alt2   22 hits  0x23BA00  0x23BA70  0x24E5D0  0x35ED50  0x35EE00  0x491DD0  0x4976F0  0x51F910 ...
+[OK]   game_entity_system_alt3    1 hit   RVA 0x206279A   rip-&gt;0x183DB48B0
+[OK]   local_player_alt_aw        1 hit   RVA 0x160ECA1   rip-&gt;0x183C33170
+[OK]   local_player_alt_falz      1 hit   RVA 0x164EB70
+[OK]   view_render                1 hit   RVA 0x1865FE0   rip-&gt;0x1831CC118
+[MISS] global_vars_short          0 hits
+[OK]   global_vars_v2             1 hit   RVA 0x99F6CC   rip-&gt;0x1832BF670
+[OK]   global_vars_v3             1 hit   RVA 0x99F6CC   rip-&gt;0x1832BF670
+[MISS] schema_system_alt          0 hits
+[OK]   dw_prediction              1 hit   RVA 0x18D6F20   rip-&gt;0x1832C5880
+[MISS] glow_manager               0 hits
+[OK]   outline_get_params         1 hit   RVA 0x57C3E0
+[OK]   outline_health_fraction    1 hit   RVA 0xA71040
+[OK]   camera_update_fallback     1 hit   RVA 0x6095F0
+[OK]   input_base                 1 hit   RVA 0x184CB7B   rip-&gt;0x1832B2D30
+[MISS] lookup_bone_alt            0 hits
+
+== resultado: 23 unicos, 2 multiplos, 37 total ==</code></pre>
+
+<p>That's <strong>23 unique hits</strong>, <strong>2 multi-hits</strong> (ambiguous patterns), and <strong>10 misses</strong> out of 37 patterns total. The three categories, and what each means in practice:</p>
+
+<table>
+<thead><tr><th>Category</th><th>N</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><strong>OK</strong></td><td>23</td><td>Match exactly one location. The workhorse patterns — entity system, view matrix, trace manager, global vars, input, prediction, render helpers.</td></tr>
+<tr><td><strong>MULTI</strong></td><td>2</td><td>Match more than once: <code>camera_manager</code> (2 hits) and <code>game_entity_system_alt2</code> (22 hits — far too generic). Need more surrounding bytes.</td></tr>
+<tr><td><strong>MISS</strong></td><td>10</td><td>Zero hits — died in the 6759/6765 update. E.g. <code>game_entity_system</code> from yfndream (Jun/2026).</td></tr>
+</tbody>
+</table>
+
+<p>The original <code>game_entity_system</code> pattern, contributed by yfndream back in June 2026, is a MISS on both builds. The problem: <code>8B D0</code> is <code>mov edx, eax</code> — a fixed register pair with no wildcards. If the compiler ever swaps <code>eax</code> for <code>ecx</code> or reorders the surrounding instructions, the pattern breaks. The alternatives I use instead have more wildcards and are robust to minor instruction reordering:</p>
+
+<pre><code># Dead (yfndream, jun/2026 — no wildcard on the mov edx, eax)
+game_entity_system      = 48 8B 0D ? ? ? ? 8B D0 E8 ? ? ? ? 44 8B 83
+
+# Alive (lote 2, added 10/06/2026 after the original died)
+game_entity_system_alt   = 48 8B 1D ? ? ? ? 48 89 1D ? ? ? ? 4C 63 B3
+game_entity_system_alt3  = 48 8B 05 ? ? ? ? 48 85 C0 0F 84 8B ? ? ? 48 8B 09</code></pre>
+
+<p>Same story for <code>local_player_controller</code> (from dezlock, March 2026) — MISS, replaced by <code>local_player_alt_aw</code>, <code>local_player_alt_falz</code> and <code>local_player_sig2</code>. And <code>global_vars</code> (with its fixed <code>DC 00 00 00</code> displacement) was replaced by <code>global_vars_v2</code> with full wildcards on the displacement.</p>
+
+<p>The lesson: <strong>patterns are fragile</strong>. They work until the next compiler optimization or source change breaks them. That's why I always keep at least 2–3 independent patterns per critical global. When one dies, the others still resolve the same address. It's also why I keep a dated scan output in <code>out/</code> — so I can diff two builds and see exactly what moved.</p>
+
+<h2>The resolution flow</h2>
+
+<p>Here is the full pipeline from raw bytes on disk to a usable virtual address:</p>
+
+<svg viewBox="0 0 760 320" role="img" aria-label="Pattern to RVA to VA resolution flow">
+  <defs>
+    <marker id="arren2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#666"/>
+    </marker>
+  </defs>
+  <rect x="20" y="20" width="200" height="80" rx="6" fill="#1e1e2e" stroke="#89b4fa" stroke-width="1.5"/>
+  <text x="120" y="48" text-anchor="middle" fill="#cdd6f4" font-family="ui-monospace,Consolas,monospace" font-size="13" font-weight="bold">client.dll</text>
+  <text x="120" y="68" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="11">58,634,904 bytes on disk</text>
+  <text x="120" y="84" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="11">ImageBase 0x180000000</text>
+  <line x1="220" y1="60" x2="268" y2="60" stroke="#666" stroke-width="1.5" marker-end="url(#arren2)"/>
+  <text x="244" y="50" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="10">ReadFile</text>
+  <rect x="270" y="20" width="200" height="80" rx="6" fill="#1e1e2e" stroke="#89b4fa" stroke-width="1.5"/>
+  <text x="370" y="48" text-anchor="middle" fill="#cdd6f4" font-family="ui-monospace,Consolas,monospace" font-size="13" font-weight="bold">Pattern match</text>
+  <text x="370" y="68" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="11">48 89 0D ? ? ? ? E9 …</text>
+  <text x="370" y="84" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="11">scan.cpp rip_target()</text>
+  <line x1="470" y1="60" x2="518" y2="60" stroke="#666" stroke-width="1.5" marker-end="url(#arren2)"/>
+  <text x="494" y="50" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="10">file offset</text>
+  <rect x="520" y="20" width="220" height="80" rx="6" fill="#1e1e2e" stroke="#89b4fa" stroke-width="1.5"/>
+  <text x="630" y="48" text-anchor="middle" fill="#cdd6f4" font-family="ui-monospace,Consolas,monospace" font-size="13" font-weight="bold">RVA 0x2067DB9</text>
+  <text x="630" y="68" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="11">PE section table lookup</text>
+  <text x="630" y="84" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="11">file offset → RVA</text>
+  <line x1="630" y1="100" x2="630" y2="148" stroke="#666" stroke-width="1.5" marker-end="url(#arren2)"/>
+  <text x="650" y="130" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="10">+ imageBase + 7 + disp32</text>
+  <rect x="520" y="150" width="220" height="80" rx="6" fill="#1e1e2e" stroke="#a6e3a1" stroke-width="2"/>
+  <text x="630" y="178" text-anchor="middle" fill="#cdd6f4" font-family="ui-monospace,Consolas,monospace" font-size="13" font-weight="bold">VA 0x183DB48B0</text>
+  <text x="630" y="198" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="11">GameEntitySystem global</text>
+  <text x="630" y="214" text-anchor="middle" fill="#a6adc8" font-family="ui-monospace,Consolas,monospace" font-size="11">mov = deref · lea = address</text>
+  <rect x="20" y="150" width="480" height="140" rx="6" fill="#1e1e2e" stroke="#f9e2af" stroke-width="1"/>
+  <text x="40" y="176" fill="#f9e2af" font-family="ui-monospace,Consolas,monospace" font-size="12" font-weight="bold">mov vs lea — same prefix, different meaning</text>
+  <text x="40" y="204" fill="#cdd6f4" font-family="ui-monospace,Consolas,monospace" font-size="11">48 8B 0D …   mov rcx, [rip+x]</text>
+  <text x="40" y="222" fill="#f38ba8" font-family="ui-monospace,Consolas,monospace" font-size="11">→ global holds a POINTER (deref at runtime)</text>
+  <text x="40" y="250" fill="#cdd6f4" font-family="ui-monospace,Consolas,monospace" font-size="11">48 8D 0D …   lea rcx, [rip+x]</text>
+  <text x="40" y="268" fill="#a6e3a1" font-family="ui-monospace,Consolas,monospace" font-size="11">→ rcx IS the address (no deref)</text>
+</svg>
+
+<p>The beauty of this approach is that it's <em>deterministic</em>. Same binary, same pattern file, same scan output — every single time. No ASLR, no runtime patching, no anti-cheat interference. The binary doesn't know it's being read.</p>
+
+
+</section>
+<!-- ══════════════════════════════════════════════════════════
+     §3 ENTITY WALK
+     ══════════════════════════════════════════════════════════ -->
+<section id="walk">
+
+<h1>3. Entity chain — controller to bone</h1>
+<p class="meta">2026-10-08 · build 6765 · KPRL read-only · pid 4580</p>
+
+<p>This is the third entry in the reversal diary. The <a href="#entsys">previous section</a> covered how the entity system global and view matrix were pinned to exact RVAs on disk. This one is about what happens after you have that pointer: the walk from a controller handle all the way to a bone position in screen space, without ever touching the process.</p>
+
+<h2>The problem</h2>
+
+<p>I need a bone — any bone — rendered at the right pixel on an overlay. The chain is long: entity system → chunk → identity → entity → pawn → scene node → bone array → bone. Every link is a pointer dereference through the KPRL driver, and every offset has to be exactly right or the whole thing reads garbage.</p>
+
+<p>The approach that worked: resolve each hop from public schema sources, validate the first hop statically with <code>tools/scan</code> on the DLL from disk, then confirm the rest live with the reader attached to a running game. No injected dumper, no threads, no handles on the target.</p>
+
+<h2>Schema sources — never from an injected dumper</h2>
+
+<p>Rule from <code>docs/04-schema-sources.md</code>: every offset comes from <code>deadworks.net/db/schema/client/&lt;Class&gt;</code> or <code>s2v.app/SchemaExplorer/deadlock/client</code>. Both are maintained by the modding community from game files on disk. The advantage is that they survive builds — the schema is versioned per build, so when 6765 moved the entity system by −0x80 the diff is visible in <code>db/changes</code>.</p>
+
+<p>The alternative — a runtime dumper injected into the game — would put a DLL and a thread inside the process. That is exactly what the anti-cheat watches (see <a href="#ac">section 1</a>). External-only is not just cleaner, it is the only model that does not trip a single check.</p>
+
+<h2>Entity system → chunk → identity</h2>
+
+<p>Three independent patterns agree on the same target in client.dll build 6765:</p>
+
+<table>
+<thead><tr><th>Pattern</th><th>RVA</th><th>VA</th></tr></thead>
+<tbody>
+<tr><td><code>entity_list_dezlock</code></td><td><code>0x2067DB9</code></td><td><code>0x183DB48B0</code></td></tr>
+<tr><td><code>game_entity_system_alt</code></td><td><code>0x16F3ABB</code></td><td><code>0x183DB48B0</code></td></tr>
+<tr><td><code>game_entity_system_alt3</code></td><td><code>0x206279A</code></td><td><code>0x183DB48B0</code></td></tr>
+</tbody>
+</table>
+
+<p>The global at <code>0x183DB48B0</code> contains a pointer to <code>CGameEntitySystem</code>. From there:</p>
+
+<pre><code>CGameEntitySystem*  (deref global at 0x183DB48B0)
+  +0x10  → chunks[8]   (8 chunk pointers)
+  chunk = 512 entities × 0x70 bytes
+  identity = chunks[idx &gt;&gt; 9] + 0x70 * (idx &amp; 0x1FF)
+  identity+0x00 → CEntityIdentity (m_pEntity)
+  identity+0x10 → m_pEntity (CEntityInstance*)
+  m_iHighestEntityIndex: +0x20C0</code></pre>
+
+<p>The reader code (<code>src/app/game.cpp</code>) actually validates up to 64 chunks (<code>idx &gt;&gt; 9 &lt;= 0x3F</code>) as an upper bound, though the documented layout shows 8. Either way the walk is the same: index-shift to pick the chunk, mask to get the slot, multiply by <code>0x70</code> for the identity address.</p>
+
+<h2>Controller chain</h2>
+
+<p>The local player controller lives in an array at <code>0x183C342A0</code> (RVA <code>0x3C342A0</code>, LEA). Slot zero is <code>CCitadelPlayerController</code>. The fields I need, all confirmed against the ~6753 schema dump:</p>
+
+<table>
+<thead><tr><th>Offset</th><th>Field</th><th>Type</th></tr></thead>
+<tbody>
+<tr><td><code>+0x6BC</code></td><td><code>m_hPawn</code></td><td><code>uint32</code> handle</td></tr>
+<tr><td><code>+0x6FC</code></td><td><code>m_iszPlayerName</code></td><td><code>char[128]</code> inline</td></tr>
+<tr><td><code>+0x790</code></td><td><code>m_bIsLocalPlayerController</code></td><td><code>bool</code></td></tr>
+<tr><td><code>+0x908</code></td><td><code>m_PlayerDataGlobal</code></td><td>inline struct</td></tr>
+<tr><td><code>+0x1C</code></td><td><code>m_nHeroID</code></td><td><code>uint32</code> (inside PlayerDataGlobal)</td></tr>
+<tr><td><code>+0x20</code></td><td><code>m_nPreGameHeroID</code></td><td><code>uint32</code></td></tr>
+</tbody>
+</table>
+
+<p>The handle at <code>+0x6BC</code> is not a pointer — it is an index into the identity array. The mask <code>0x7FFF</code> extracts the low 15 bits, and the reader double-checks that the identity's own index field matches before trusting the entity pointer. That is what makes the walk safe: a stale or corrupt handle resolves to nothing, not to a random address.</p>
+
+<h2>Pawn → scene node</h2>
+
+<p>Once the handle resolves to a <code>C_BaseEntity</code>, the fields that matter for a radar/ESP are:</p>
+
+<table>
+<thead><tr><th>Offset</th><th>Field</th><th>Type</th></tr></thead>
+<tbody>
+<tr><td><code>+0x330</code></td><td><code>m_pGameSceneNode</code></td><td>pointer</td></tr>
+<tr><td><code>+0x350</code></td><td><code>m_iMaxHealth</code></td><td><code>int32</code></td></tr>
+<tr><td><code>+0x354</code></td><td><code>m_iHealth</code></td><td><code>int32</code></td></tr>
+<tr><td><code>+0x35C</code></td><td><code>m_lifeState</code></td><td><code>uint8</code></td></tr>
+<tr><td><code>+0x3EF</code></td><td><code>m_iTeamNum</code></td><td><code>uint8</code></td></tr>
+<tr><td><code>+0x400</code></td><td><code>m_vecAbsVelocity</code></td><td><code>Vector</code> (12 bytes)</td></tr>
+<tr><td><code>+0x3C0</code></td><td><code>m_flSimulationTime</code></td><td><code>float</code></td></tr>
+</tbody>
+</table>
+
+<p>Velocity is read for prediction: if the pawn is moving, the aim lead is computed from <code>m_vecAbsVelocity</code>. The sanity check — reject any component over 10,000 — catches the case where the entity is dormant or the pointer is stale.</p>
+
+<h2>Scene node → bone array</h2>
+
+<p>The scene node is where position and bones live. The offsets changed from the old deadunlock layout:</p>
+
+<table>
+<thead><tr><th>Offset</th><th>Field</th><th>Note</th></tr></thead>
+<tbody>
+<tr><td><code>+0xC8</code></td><td><code>m_vecAbsOrigin</code></td><td><code>VectorWS</code> — world position</td></tr>
+<tr><td><code>+0xD4</code></td><td><code>m_angAbsRotation</code></td><td><code>QAngle</code></td></tr>
+<tr><td><code>+0x103</code></td><td><code>m_bDormant</code></td><td><code>bool</code> — networked = not visible</td></tr>
+<tr><td><code>+0x1C0</code></td><td>bone array</td><td>pointer — <strong>was <code>0x210</code> in deadunlock</strong></td></tr>
+</tbody>
+</table>
+
+<p>The bone array pointer at <code>sceneNode + 0x1C0</code> is the one that moved between engines. The old <code>0x210</code> offset produces garbage on build 6765; <code>0x1C0</code> was measured live and confirmed. Bones are laid out as:</p>
+
+<pre><code>boneArray = *(sceneNode + 0x1C0)
+bone[i]  = boneArray + i * 0x20   (32 bytes per bone)
+position = floats at bone+0x00, bone+0x04, bone+0x08</code></pre>
+
+<p>Not every index is a real bone — the reader reads up to 64 slots and discards any coordinate over 100,000 (world units), which filters out padding and uninitialised entries.</p>
+
+<h2>Head and body bones per hero</h2>
+
+<p>Bone indices are hero-specific. The table in <code>src/app/game.cpp</code> (sourced from the deadunlock <code>heroes.py</code> dump) maps <code>HeroID → {head, body}</code>. A sample of the pairs actually used:</p>
+
+<table>
+<thead><tr><th>Hero ID</th><th>Hero</th><th>Head bone</th><th>Body bone</th></tr></thead>
+<tbody>
+<tr><td>6</td><td>Abrams</td><td>7</td><td>4</td></tr>
+<tr><td>15</td><td>Haze</td><td>6</td><td>2</td></tr>
+<tr><td>11</td><td>Dynamo</td><td>23</td><td>18</td></tr>
+<tr><td>17</td><td>Mo &amp; Krill</td><td>17</td><td>10</td></tr>
+<tr><td>13</td><td>Kelvin</td><td>13</td><td>9</td></tr>
+<tr><td>1</td><td>Infernus</td><td>30</td><td>11</td></tr>
+<tr><td>18</td><td>Ivy</td><td>7</td><td>3</td></tr>
+<tr><td>8</td><td>Wraith</td><td>38</td><td>35</td></tr>
+</tbody>
+</table>
+
+<p>When the hero is not in the table the reader falls back to <code>origin + 64</code> on the Z axis — rough, but good enough for a box ESP. When bones are available the eye position for a visibility ray comes from the head bone directly.</p>
+
+<h2>Entity chain diagram</h2>
+
+<svg viewBox="0 0 720 340" role="img" aria-label="Entity chain from GameEntitySystem to bone">
+  <defs>
+    <marker id="arrwe3" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#555"/>
+    </marker>
+  </defs>
+  <rect x="260" y="10" width="200" height="40" rx="4" fill="#1a1a2e" stroke="#444" stroke-width="1"/>
+  <text x="360" y="28" text-anchor="middle" fill="#ccc" font-family="system-ui,sans-serif" font-size="12">GameEntitySystem</text>
+  <text x="360" y="43" text-anchor="middle" fill="#7ec8e3" font-family="monospace" font-size="11">VA 0x183DB48B0</text>
+  <line x1="360" y1="50" x2="360" y2="70" stroke="#555" stroke-width="1.5" marker-end="url(#arrwe3)"/>
+  <text x="372" y="65" fill="#7ec8e3" font-family="monospace" font-size="11">+0x10</text>
+  <rect x="260" y="70" width="200" height="40" rx="4" fill="#1a1a2e" stroke="#444" stroke-width="1"/>
+  <text x="360" y="88" text-anchor="middle" fill="#ccc" font-family="system-ui,sans-serif" font-size="12">chunks[8]</text>
+  <text x="360" y="103" text-anchor="middle" fill="#7ec8e3" font-family="monospace" font-size="11">512 × 0x70</text>
+  <line x1="360" y1="110" x2="360" y2="130" stroke="#555" stroke-width="1.5" marker-end="url(#arrwe3)"/>
+  <text x="372" y="125" fill="#7ec8e3" font-family="monospace" font-size="11">idx&gt;&gt;9 · 0x70</text>
+  <rect x="260" y="130" width="200" height="40" rx="4" fill="#1a1a2e" stroke="#444" stroke-width="1"/>
+  <text x="360" y="148" text-anchor="middle" fill="#ccc" font-family="system-ui,sans-serif" font-size="12">CEntityIdentity</text>
+  <text x="360" y="163" text-anchor="middle" fill="#7ec8e3" font-family="monospace" font-size="11">+0x10 → m_pEntity</text>
+  <line x1="360" y1="170" x2="360" y2="190" stroke="#555" stroke-width="1.5" marker-end="url(#arrwe3)"/>
+  <rect x="260" y="190" width="200" height="40" rx="4" fill="#1a1a2e" stroke="#444" stroke-width="1"/>
+  <text x="360" y="208" text-anchor="middle" fill="#ccc" font-family="system-ui,sans-serif" font-size="12">C_BaseEntity (pawn)</text>
+  <text x="360" y="223" text-anchor="middle" fill="#7ec8e3" font-family="monospace" font-size="11">+0x330 → sceneNode</text>
+  <line x1="360" y1="230" x2="360" y2="250" stroke="#555" stroke-width="1.5" marker-end="url(#arrwe3)"/>
+  <text x="372" y="245" fill="#7ec8e3" font-family="monospace" font-size="11">+0x330</text>
+  <rect x="260" y="250" width="200" height="40" rx="4" fill="#1a1a2e" stroke="#444" stroke-width="1"/>
+  <text x="360" y="268" text-anchor="middle" fill="#ccc" font-family="system-ui,sans-serif" font-size="12">CGameSceneNode</text>
+  <text x="360" y="283" text-anchor="middle" fill="#7ec8e3" font-family="monospace" font-size="11">+0xC8 origin · +0x1C0 bones</text>
+  <line x1="360" y1="290" x2="360" y2="310" stroke="#555" stroke-width="1.5" marker-end="url(#arrwe3)"/>
+  <text x="372" y="305" fill="#7ec8e3" font-family="monospace" font-size="11">+0x1C0 · i×0x20</text>
+  <rect x="260" y="310" width="200" height="30" rx="4" fill="#1a1a2e" stroke="#444" stroke-width="1"/>
+  <text x="360" y="329" text-anchor="middle" fill="#ccc" font-family="system-ui,sans-serif" font-size="12">bone[i] → Vec3</text>
+  <rect x="20" y="190" width="180" height="40" rx="4" fill="#1a1a2e" stroke="#444" stroke-width="1"/>
+  <text x="110" y="208" text-anchor="middle" fill="#ccc" font-family="system-ui,sans-serif" font-size="12">Controller</text>
+  <text x="110" y="223" text-anchor="middle" fill="#7ec8e3" font-family="monospace" font-size="11">+0x6BC m_hPawn</text>
+  <line x1="200" y1="210" x2="260" y2="210" stroke="#555" stroke-width="1.5" marker-end="url(#arrwe3)"/>
+</svg>
+
+<h2>World to screen</h2>
+
+<p>The view matrix is at <code>0x183C7F960</code> (pattern RVA <code>0x18F3EE3</code>). It is a 4×4 float matrix read in one shot. The projection is straightforward:</p>
+
+<pre><code>clipX = x*m[0][0] + y*m[0][1] + z*m[0][2] + m[0][3]
+clipY = x*m[1][0] + y*m[1][1] + z*m[1][2] + m[1][3]
+clipW = x*m[3][0] + y*m[3][1] + z*m[3][2] + m[3][3]
+if clipW &lt; 0.1  → behind camera, reject
+ndcX = clipX / clipW
+ndcY = clipY / clipW
+sx = (ndcX + 1) * 0.5 * width
+sy = (1 − ndcY) * 0.5 * height</code></pre>
+
+<p>The <code>clipW &lt; 0.1</code> guard is the whole visibility test for a radar dot: if the point is behind the camera the projection flips and the screen coordinate is meaningless.</p>
+
+<h2>Live validation — pid 4580</h2>
+
+<p>The reader was attached to a running game (pid 4580, 1920×1080). Three known world positions were projected through the view matrix and came back as:</p>
+
+<table>
+<thead><tr><th>World position</th><th>Screen x</th><th>Screen y</th></tr></thead>
+<tbody>
+<tr><td>origin A</td><td>689</td><td>616</td></tr>
+<tr><td>origin B</td><td>648</td><td>613</td></tr>
+<tr><td>origin C</td><td>747</td><td>722</td></tr>
+</tbody>
+</table>
+
+<p>All three land inside the 1920×1080 viewport, which is the first sanity check. The second is that they move correctly when the camera rotates — a static projection would give the same numbers regardless of aim, but these tracked the player's look direction frame over frame.</p>
+
+<h2>What is not yet solved</h2>
+
+<ul>
+<li><strong>Visibility.</strong> <code>m_bDormant</code> tells you whether the entity is networked, not whether a wall is in the way. A real vis check needs either the trace shape (internal only) or geometry parsed from the map files.</li>
+<li><strong>Bone indices for every hero.</strong> The table covers the common picks; new heroes ship with new indices.</li>
+<li><strong>FOW state.</strong> <code>C_CitadelTeam::m_vecFOWEntities</code> at <code>+0x6C8</code> is the field, but its per-entity flag layout is not yet mapped.</li>
+</ul>
+
+
+</section>
+<!-- ══════════════════════════════════════════════════════════
+     §4 VISIBILITY
+     ══════════════════════════════════════════════════════════ -->
+<section id="vis">
+
+<h1>4. Visibility — FOW is minimap</h1>
+<p class="meta">2026-10-08 · build 6765 · census 518 ents / 68 names · FOW zero team</p>
+
+<p>I expected to find a wallhack flag. Instead I found a radar flag, and the difference matters more than I thought. This post is about what visibility actually means in Deadlock, what I measured, and why the answer is less powerful than the community assumed.</p>
+
+<h2>TraceShape: the right answer I can't use</h2>
+
+<p>The obvious path is <code>TraceShape</code> — the game's own raycast. dysonPeek mapped it back in October: RVA <code>0x16F5F40</code>, a clean single-hit wrapper. The signature is in <code>tools/scan/patterns-client.txt</code>:</p>
+
+<pre><code>trace_shape_wrapper = 48 89 54 24 10 48 89 4C 24 08 55 53 56 57 41 54 41 56 41 57 48 8D AC 24 ? ? ? ? B8 ? ? 00 00</code></pre>
+
+<p>The 6765 scan confirms it — 1 hit at RVA <code>0x16F5F40</code>. The pattern is alive. The layout is known: <code>GameTrace_t</code> with <code>fraction+0xAC</code> (visible &gt; 0.97), <code>bAllSolid+0xB6</code>, masks SHOT/VISIBILITY <code>0x1C3003</code>. Everything needed to call it is documented.</p>
+
+<p>But calling <code>TraceShape</code> means executing game code inside the target process. That is injection — a thread, a call, a return address. The anti-cheat's thread scan (DllMain / DLL_THREAD_ATTACH) watches exactly for start addresses outside mapped images. The vtable checks watch for modified interface pointers. Calling a game function from outside touches both.</p>
+
+<p>We are read-only. Not "read-only except when convenient." Strictly read-only. So <code>TraceShape</code> is off the table.</p>
+
+<svg viewBox="0 0 720 200" role="img" aria-label="TraceShape rejected — why calling game functions is off-limits">
+  <defs>
+    <marker id="arrv2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#e06c75"/>
+    </marker>
+  </defs>
+  <text x="20" y="28" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="bold" fill="#e06c75">TRACESHAPE — CORRECT ANSWER, WRONG METHOD</text>
+  <rect x="20" y="44" width="320" height="60" fill="#2d2d2d" stroke="#e06c75" stroke-width="1.5"/>
+  <text x="34" y="64" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#abb2bf">Call game fn → thread with foreign start addr</text>
+  <text x="34" y="80" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#7f848e">DllMain scan: "triggers both for manual map"</text>
+  <text x="34" y="96" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#7f848e">→ injection → detected</text>
+  <rect x="380" y="44" width="320" height="60" fill="#2d2d2d" stroke="#98c379" stroke-width="1.5"/>
+  <text x="394" y="64" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#abb2bf">KPRL read-only → no thread, no call</text>
+  <text x="394" y="80" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#7f848e">physical memory reads only</text>
+  <text x="394" y="96" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#7f848e">→ invisible to current AC</text>
+  <line x1="180" y1="104" x2="180" y2="140" stroke="#e06c75" stroke-width="2" marker-end="url(#arrv2)"/>
+  <line x1="540" y1="104" x2="540" y2="140" stroke="#98c379" stroke-width="2" marker-end="url(#arrv2)"/>
+  <text x="20" y="160" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" fill="#e06c75">❌ violates read-only</text>
+  <text x="380" y="160" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" fill="#98c379">✅ what we do instead</text>
+  <text x="20" y="185" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#7f848e">TraceShape is the right answer to "can I see this?" — but the method breaks our only safety guarantee.</text>
+</svg>
+
+<h2>FOW: what I expected vs what is there</h2>
+
+<p>The entity chain doc says <code>C_CitadelTeam+0x6C8</code> holds <code>m_vecFOWEntities</code> — an embedded <code>UtlVector</code> of <code>STeamFOWEntity</code> at <code>+0x41</code>. The name sounds like wallhack data: "FOW entities" = entities you can see through fog-of-war. I expected a per-target visibility flag.</p>
+
+<p>I ran the census. The command walks all 8 entity chunks, reads identity headers, and tallies names:</p>
+
+<pre><code>danzlock.exe --fow</code></pre>
+
+<p>The output is blunt:</p>
+
+<pre><code>== censo: 518 entidades, 68 nomes ==
+  ... (68 distinct names, zero of them "citadel_team_*") ...
+== fim fow ==</code></pre>
+
+<p>518 entities. 68 distinct class names. Not a single <code>citadel_team</code> in the entity list. The FOW vector lives inside a team object that isn't even instantiated as a live entity in the way I expected. The census proves it: <code>citadel_team</code> is not a per-frame entity you can walk.</p>
+
+<h2>What FOW actually means</h2>
+
+<p>Page 64 of the UC thread clarifies it: FOW is the minimap radar, not a wallhack layer. It tells you <em>"this unit is visible on the map"</em>, not <em>"a bullet would reach this unit"</em>. The distinction is everything. A unit can be on your minimap (FOW says visible) but behind a wall (bullet blocked). FOW and occlusion are separate systems.</p>
+
+<p>The game code confirms it. From <code>game.cpp</code>:</p>
+
+<pre><code>// ---- passo 4: FOW DESATIVADO (08/10): m_vecFOWEntities = minimapa, NAO parede.
+// Censo ao vivo: citadel_team_* nem existe na entity list (518 ents, 68 nomes,
+// zero team). FOW so diz "visivel no mapa", nunca "bala passa". Vischeck real
+// = TraceShape (viola read-only) ou VPK raycast (projeto futuro).
+// Visibilidade agora = dormant (rede) + filtros de mira (dist/FOV/sticky).
+// visibleFow fica true p/ todos (neutro).</code></pre>
+
+<p><code>visibleFow</code> stays <code>true</code> for everyone. Neutral. Useless as a wallhack. The FOW path is dead.</p>
+
+<h2>The occlusion experiment: what actually changes</h2>
+
+<p>If FOW is not the answer, what does change when a target goes behind a wall? I built a snapshot tool — <code>--occl</code> — that captures the raw bytes of a pawn and its scene node, then diffs two moments.</p>
+
+<p>The usage is deliberate:</p>
+
+<ol>
+<li>Stand behind a wall with an enemy in your crosshair → <code>danzlock.exe --occl a</code></li>
+<li>Step out so the enemy is visible → <code>danzlock.exe --occl b</code></li>
+<li>Compare → <code>danzlock.exe --occl diff</code></li>
+</ol>
+
+<p>The diff logic reads <code>0x600</code> bytes of pawn and <code>0x130</code> bytes of scene node for each snapshot, then prints every byte that changed:</p>
+
+<pre><code>printf("-- PAWN bytes que MUDARAM --\n");
+for (int off = 0; off &lt; 0x600; ++off)
+    if (A.pawn[off] != B.pawn[off])
+        printf("  pawn+0x%03X: A=%02X B=%02X\n", off, A.pawn[off], B.pawn[off]);
+printf("-- SCENENODE bytes que MUDARAM --\n");
+for (int off = 0; off &lt; 0x130; ++off)
+    if (A.node[off] != B.node[off])
+        printf("  node+0x%03X: A=%02X B=%02X\n", off, A.node[off], B.node[off]);</code></pre>
+
+<p>The result is the most honest data point in this post. Between "behind wall" and "visible", the <em>only</em> bytes that change in the pawn are animation timers:</p>
+
+<pre><code>pawn+0x2E8  — animation time
+pawn+0x3BC  — animation cycle
+pawn+0x3C0  — animation playback
+pawn+0x3DC  — animation state</code></pre>
+
+<p>That is it. Four floats, all animation-related. No visibility flag. No occlusion boolean. No "can I shoot this" bit. The game does not store a per-target occlusion flag in the pawn that we can read.</p>
+
+<h2>What we actually use: dormant + behavioural filters</h2>
+
+<p>If there is no occlusion flag, how does the aim avoid shooting walls? Three layers, all read-only:</p>
+
+<h3>Layer 1 — network dormant</h3>
+
+<p>Every scene node has <code>m_bDormant</code> at <code>+0x103</code>. When the server stops sending updates about an entity, it goes dormant. A dormant entity is, by definition, not visible to you on the network. From <code>game.cpp</code>:</p>
+
+<pre><code>constexpr uint64_t SSN_DORMANT = 0x103;  // bool (m_bDormant, build 6763)
+
+// in read_pawn_core:
+uint8_t d = 0;
+if (m_k.Read(m_pid, sceneNode + SSN_DORMANT, &amp;d, 1)) p.dormant = (d != 0);</code></pre>
+
+<p>Dormant is a network-level "you don't know about this entity" flag. It is not occlusion — a unit can be visible on screen and dormant if the server hasn't told you about it yet. But it is a reliable negative: if dormant, you cannot see it.</p>
+
+<h3>Layer 2 — freeze-drop (350 ms)</h3>
+
+<p>When you are behind a wall, the server stops sending pose updates for the target. The bone position freezes. If the target is moving fast (&gt; 50 units/s) but the bone has not moved for 350 ms, it is behind geometry. Drop the lock.</p>
+
+<pre><code>// aim.cpp — freeze-drop
+} else if (vspd &gt; 50.f &amp;&amp; (now - st.lockFrozenSince) &gt; 0.35f) {
+    // corre mas o bone nao mexe ha 350ms = parede: SOLTA
+    st.target = -1;
+    st.targetPawn = 0;
+    // ...
+    break;
+}</code></pre>
+
+<h3>Layer 3 — w2s-miss (10 frames)</h3>
+
+<p>If <code>WorldToScreen</code> fails to project the bone for 10 consecutive frames, the target is behind the camera or inside geometry. Drop the lock.</p>
+
+<pre><code>// aim.cpp — w2s-miss
+} else {
+    // nao projeta 10 frames seguidos = parede/camera: SOLTA
+    if (++st.lockMissW2s &gt; 10) {
+        st.target = -1;
+        st.targetPawn = 0;
+        // ...
+        break;
+    }
+}</code></pre>
+
+<p>Together these three layers give a practical "don't shoot walls" filter without ever calling <code>TraceShape</code> and without reading a non-existent occlusion flag.</p>
+
+<h2>EyePosition: the honest origin</h2>
+
+<p>One more thing I got wrong before I measured it. I assumed the eye position for aim raycasts could come from <code>m_vecViewOffset</code> at <code>+0xA88</code>. It cannot. That field is quantized for network transmission — the client sends a compressed version to the server. Reading it from memory gives you the network-quantized value, not the render-accurate eye.</p>
+
+<p>From <code>game.cpp</code>:</p>
+
+<pre><code>Vec3 Game::EyePosition(const PlayerData&amp; p) {
+    // Olho read-only: head bone em mundo; sem bones, origem + altura padrao.
+    // (m_vecViewOffset e quantizado na rede — nao le confiavel de fora.)
+    int hi = HeadBoneIndex(p.heroId);
+    if (p.hasBones &amp;&amp; hi &gt;= 0 &amp;&amp; hi &lt; p.boneCount) return p.bones[hi];
+    return Vec3{ p.origin.x, p.origin.y, p.origin.z + 64.f };
+}</code></pre>
+
+<p>The eye is the head bone in world space. If bones are not available, fall back to origin + 64 units. The head bone is more accurate than any network-quantized view offset — it is the actual render position of the skull.</p>
+
+<h2>Summary: what visibility is and isn't</h2>
+
+<table>
+<thead><tr><th>What</th><th>Reality</th></tr></thead>
+<tbody>
+<tr><td>FOW (<code>m_vecFOWEntities</code>)</td><td>Minimap radar, not wallhack. <code>citadel_team</code> not in entity list (518 ents, 68 names, zero team). <code>visibleFow</code> stays <code>true</code> — neutral.</td></tr>
+<tr><td>Occlusion flag</td><td>Does not exist in pawn. Diff shows only animation timers change (<code>+0x2E8/+0x3BC/+0x3C0/+0x3DC</code>).</td></tr>
+<tr><td><code>TraceShape</code></td><td>Correct answer, wrong method. Calling game fn = injection = detected.</td></tr>
+<tr><td>Dormant (<code>+0x103</code>)</td><td>Network-level "not visible" flag. Reliable negative.</td></tr>
+<tr><td>Freeze-drop (350 ms)</td><td>Bone frozen while target moves = behind wall.</td></tr>
+<tr><td>w2s-miss (10 f)</td><td>Cannot project = behind camera/geometry.</td></tr>
+<tr><td>EyePosition</td><td>Head bone in world. <code>m_vecViewOffset</code> is network-quantized — unreliable.</td></tr>
+</tbody>
+</table>
+
+<p>The honest answer is that there is no wallhack flag to read. There is a radar flag (FOW), a network flag (dormant), and two behavioural heuristics (freeze-drop, w2s-miss). That is what we have. It is less than I hoped and more than nothing.</p>
+
+
+</section>
+<!-- ══════════════════════════════════════════════════════════
+     §5 AIM
+     ══════════════════════════════════════════════════════════ -->
+<section id="aim">
+
+<h1>5. Aim — magnet, ease-out and CSV</h1>
+<p class="meta">2026-10-08 · build 6765 · n=2261 frames · src/app/aim.cpp</p>
+
+<p>This is the post where the aim stops missing. Not because I tuned a magic number, but because I stopped fighting the engine and started measuring what "missing" actually means. The result is a three-layer system: world-velocity prediction that leads the target, a WindMouse curve that humanises the approach, and a sub-25px magnet that eases out with a smoothstep instead of snapping. Plus a CSV logger that told me exactly how wrong I was.</p>
+
+<h2>The problem with screen-space prediction</h2>
+
+<p>My first aim iteration did everything in screen space. Project the bone, measure the distance from centre, move the mouse. It worked — until the target strafed. Screen-space prediction lags one frame because you're always chasing the last projected position. The target moves, you see the new position a frame later, you move toward it. In a game where strafing is constant, that one-frame lag is the difference between a hit and a miss.</p>
+
+<p>The fix is to predict in <em>world</em> space, where the target's velocity is a real 3D vector, not a 2D screen delta. The bone position comes from the pawn's scene node, and the velocity comes from <code>ENT_VELOCITY</code> at pawn offset <code>+0x400</code>. Multiply velocity by a capped lead time, add it to the bone position, <em>then</em> project to screen. The prediction travels with the target instead of chasing it.</p>
+
+<pre><code>Vec3 AimPointPredicted(const PlayerData&amp; p, bool wantHead, int aimBone, float leadS) {
+    Vec3 base = AimPointFor(p, wantHead, aimBone);
+    if (leadS &lt;= 0.0005f) return base;
+    float spd = std::sqrt(p.velocity.x * p.velocity.x + p.velocity.y * p.velocity.y);
+    if (spd &lt; 1.f || spd &gt; 1500.f) return base; // parado ou teleporte: sem lead
+    float cap = leadS &gt; 0.15f ? 0.15f : leadS;  // max 150ms de lead em mundo
+    base.x += p.velocity.x * cap;
+    base.y += p.velocity.y * cap;
+    base.z += p.velocity.z * cap * 0.5f;
+    return base;
+}</code></pre>
+
+<p>Three guards here. Speed below 1 unit/s means the target is standing still — no lead. Speed above 1500 means teleport or network correction — no lead. And the lead time itself is capped at 150ms no matter what the preset asks for, because beyond that you're predicting into noise.</p>
+
+<h2>Screen EMA: killing the jitter</h2>
+
+<p>World prediction solves the strafe lag, but it introduces a new problem: the projected point jitters. Hitboxes are thin, bones oscillate by a pixel or two, and a raw projection makes the aim look nervous. I added a 65/35 exponential moving average on the screen point — 65% new position, 35% previous smoothed position.</p>
+
+<pre><code>if (!st.smInit) {
+    st.smX = wantX; st.smY = wantY; st.smInit = true;
+} else {
+    float jx = wantX - st.smX, jy = wantY - st.smY;
+    float jd = std::sqrt(jx * jx + jy * jy);
+    if (jd &gt; 150.f) {
+        st.smX = wantX; st.smY = wantY; // salto grande = troca real: cola direto
+    } else {
+        st.smX = st.smX * 0.35f + wantX * 0.65f;
+        st.smY = st.smY * 0.35f + wantY * 0.65f;
+    }
+}</code></pre>
+
+<p>The 150px jump threshold is the escape hatch. If the target teleports or the lock switches to a different player, the EMA would drag the aim across the screen. Above 150px, snap directly. Below it, smooth.</p>
+
+<h2>Velocity EMA with bias correction</h2>
+
+<p>The screen EMA smooths position, but I also need velocity for the sticky prediction (when the target drops behind a wall, I extrapolate from the last known position). A naive velocity calculation — <code>(current - last) / dt</code> — is noisy. A 50/50 EMA on velocity helps, but it has a known bias: in constant strafe, the EMA lags to one side of the true velocity vector, which makes the aim drift left or right of the target.</p>
+
+<p>The fix is a bias correction term. After the EMA update, add 25% of the difference between the raw velocity and the EMA velocity:</p>
+
+<pre><code>float k = 0.5f;
+st.lastVelX = st.lastVelX * (1.f - k) + vx * k + (vx - st.lastVelX) * 0.25f;
+st.lastVelY = st.lastVelY * (1.f - k) + vy * k + (vy - st.lastVelY) * 0.25f;</code></pre>
+
+<p>This is a standard EMA bias correction (the same technique used in TCP RTT estimation). The <code>+0.25f</code> term pulls the EMA toward the current sample faster when the velocity is changing, killing the lateral drift.</p>
+
+<h2>WindMouse: the humaniser</h2>
+
+<p>Once the target point is computed, the mouse needs to move toward it in a way that doesn't look like a robot. A straight lerp is too perfect. A pure random walk is too slow. WindMouse sits in between: a gravity term pulls toward the target, a wind term adds controlled noise, and the whole thing is scaled by an adaptive smooth factor.</p>
+
+<pre><code>float dist = distC &lt; 1.f ? 1.f : distC;
+float grav = distC &gt; 200.f ? 10.f : (distC &gt; 60.f ? 12.f : 15.f);
+float windMag = 1.5f + cfg.aimHumanize * 5.f; // 1.5 (gruda) .. 6.5 (curvo)
+float wCur = windMag &lt; dist ? windMag : dist;
+const float kSqrt3 = 1.7320508f, kSqrt5 = 2.2360679f;
+if (dist &gt;= 30.f) {
+    float r1 = (float)std::rand() / (float)RAND_MAX;
+    float r2 = (float)std::rand() / (float)RAND_MAX;
+    st.windX = st.windX / kSqrt3 + (2.f * r1 - 1.f) * wCur / kSqrt5;
+    st.windY = st.windY / kSqrt3 + (2.f * r2 - 1.f) * wCur / kSqrt5;
+} else {
+    st.windX = st.windX / kSqrt3;
+    st.windY = st.windY / kSqrt3;
+}
+float vx = st.windX + grav * (aimX - cx) / dist;
+float vy = st.windY + grav * (aimY - cy) / dist;</code></pre>
+
+<p>The gravity is distance-dependent: 15 within 60px, 12 from 60–200px, 10 beyond 200px. Closer targets get pulled harder (you want to land the hit), distant targets get a gentler pull (you want to approach naturally). The wind magnitude scales with <code>aimHumanize</code> — 0.1 gives a nearly straight line, 0.55 gives a visibly curved approach.</p>
+
+<p>Adaptive smooth adjusts the step size based on target speed:</p>
+
+<pre><code>float smooth = cfg.aimSmooth &lt; 1.f ? 1.f : cfg.aimSmooth;
+float tgtSpd = std::sqrt(st.lastVelX * st.lastVelX + st.lastVelY * st.lastVelY);
+if (tgtSpd &gt; 500.f) smooth *= 0.6f;       // alvo rapido: gruda junto
+else if (distC &lt; 60.f) smooth *= 1.2f;    // perto (fora do ima): leve
+vx /= smooth; vy /= smooth;</code></pre>
+
+<p>Fast target (&gt;500 px/s) gets a tighter smooth (0.6×) to keep up. Close target (&lt;60px, outside the magnet zone) gets a looser smooth (1.2×) for fine adjustment. The final step is capped by <code>aimMaxStep</code> to prevent single-frame jumps.</p>
+
+<h2>The magnet: sub-25px ease-out</h2>
+
+<p>This is the part that took the most iterations. When the crosshair is within 25px of the target, the WindMouse gravity is too aggressive — it overshoots, oscillates, and looks like a snap. But doing nothing means the aim never quite centres. The answer is a smoothstep ease-out on the pure bone position (no screen lead, no prediction — just centre).</p>
+
+<pre><code>if (distC &lt; 25.f) {
+    float px = wantX, py = wantY; // ponto PURO do bone (sem lead de tela)
+    float pdx = px - cx, pdy = py - cy;
+    float pdist = std::sqrt(pdx * pdx + pdy * pdy);
+    if (pdist &lt; cfg.aimDeadzone) { /* parado */ return; }
+    float t = pdist / 25.f;
+    if (t &gt; 1.f) t = 1.f;
+    float ease = t * t * (3.f - 2.f * t); // smoothstep
+    float gain = 0.12f + 0.55f * ease;    // 12%..67% da distancia
+    float mx = pdx * gain, my = pdy * gain;
+    float mm = std::sqrt(mx * mx + my * my);
+    if (mm &gt; 14.f) { mx *= 14.f / mm; my *= 14.f / mm; }
+    // sub-pixel carry
+    st.windX += mx - (float)((int)mx);
+    st.windY += my - (float)((int)my);
+    float ix = (float)((int)mx), iy = (float)((int)my);
+    if (std::fabs(st.windX) &gt;= 1.f) {
+        float carry = (float)((int)st.windX);
+        ix += carry; st.windX -= carry;
+    }
+    if (std::fabs(st.windY) &gt;= 1.f) {
+        float carry = (float)((int)st.windY);
+        iy += carry; st.windY -= carry;
+    }
+    MoveMouse(ix, iy);
+}</code></pre>
+
+<p>The gain curve is a smoothstep from 12% to 67% of the remaining distance. At 25px out, you move 67% of the way — aggressive enough to close fast. At 5px out, you move ~18% — gentle enough to land without overshoot. The 14px cap prevents a single large jump even at the edge of the magnet zone.</p>
+
+<p>The subpixel carry is the detail that makes it feel human. Without it, a 0.8px move truncates to 0 and the aim stalls just outside the deadzone. With it, the fractional part accumulates in <code>st.windX</code>/<code>st.windY</code> until it crosses 1.0, then gets emitted as an extra pixel. The result is a smooth, continuous approach that never quite stops moving.</p>
+
+<svg viewBox="0 0 400 220" role="img" aria-label="Ease-out gain curve">
+  <line x1="40" y1="180" x2="380" y2="180" stroke="#888" stroke-width="1"/>
+  <line x1="40" y1="180" x2="40" y2="20" stroke="#888" stroke-width="1"/>
+  <text x="210" y="205" fill="#777" font-size="11" text-anchor="middle">distance from centre (px)</text>
+  <text x="15" y="100" fill="#777" font-size="11" text-anchor="middle" transform="rotate(-90 15 100)">gain</text>
+  <line x1="40" y1="140" x2="380" y2="140" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,4"/>
+  <line x1="40" y1="100" x2="380" y2="100" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,4"/>
+  <line x1="40" y1="60" x2="380" y2="60" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,4"/>
+  <line x1="40" y1="20" x2="380" y2="20" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,4"/>
+  <text x="35" y="143" fill="#888" font-size="10" text-anchor="end">12%</text>
+  <text x="35" y="103" fill="#888" font-size="10" text-anchor="end">25%</text>
+  <text x="35" y="63" fill="#888" font-size="10" text-anchor="end">50%</text>
+  <text x="35" y="23" fill="#888" font-size="10" text-anchor="end">67%</text>
+  <text x="40" y="195" fill="#888" font-size="10" text-anchor="middle">0</text>
+  <text x="108" y="195" fill="#888" font-size="10" text-anchor="middle">5</text>
+  <text x="176" y="195" fill="#888" font-size="10" text-anchor="middle">10</text>
+  <text x="244" y="195" fill="#888" font-size="10" text-anchor="middle">15</text>
+  <text x="312" y="195" fill="#888" font-size="10" text-anchor="middle">20</text>
+  <text x="380" y="195" fill="#888" font-size="10" text-anchor="middle">25</text>
+  <path d="M 40 144 L 108 127 L 176 86 L 244 37 L 312 20 L 380 20" fill="none" stroke="#2196f3" stroke-width="2"/>
+  <circle cx="40" cy="144" r="3" fill="#2196f3"/>
+  <circle cx="176" cy="86" r="3" fill="#2196f3"/>
+  <circle cx="380" cy="20" r="3" fill="#2196f3"/>
+  <text x="50" y="135" fill="#555" font-size="10">5px → ~18%</text>
+  <text x="186" y="77" fill="#555" font-size="10">10px → ~31%</text>
+  <text x="296" y="15" fill="#555" font-size="10">25px → 67%</text>
+</svg>
+
+<p>The curve is flat near zero (small corrections are gentle) and steep near 25px (large corrections are aggressive). This is the opposite of a linear gain, which would feel twitchy at range and sluggish up close.</p>
+
+<h2>Sticky lock: pawn-based, not index-based</h2>
+
+<p>Target switching is the silent killer of aim quality. If the aim re-evaluates "who is closest to centre" every frame, it flickers between targets during strafes. The fix is a sticky lock: once a target is acquired, keep it until it dies, goes dormant, or drops behind a wall.</p>
+
+<p>The lock is keyed by <code>pawn</code> pointer, not entity index. Indices reuse; pawns don't. When the locked pawn is found in the player list, the aim checks three conditions before releasing:</p>
+
+<ol>
+<li><strong>Validity:</strong> pawn still in list, not local, not same team, alive, not dormant (if <code>aimVisibleOnly</code>).</li>
+<li><strong>Frozen bone:</strong> if the 3D bone position hasn't moved more than 2 units in 350ms while the target's velocity is above 50 units/s, the target is behind a wall — the server stopped sending pose updates. Release.</li>
+<li><strong>Projection miss:</strong> if <code>WorldToScreen</code> fails for 10 consecutive frames, the target is off-screen or occluded. Release.</li>
+</ol>
+
+<p>When the lock is lost but the target was seen recently (within <code>aimStickyMs</code>), the aim extrapolates from the last known position using the velocity EMA. This keeps the crosshair on the target through brief occlusions instead of snapping to centre.</p>
+
+<p>The hysteresis bonus prevents flicker: when evaluating candidates, the current lock gets a 25% distance bonus (<code>0.75²</code> on the squared distance). A new target must be significantly closer to centre to steal the lock.</p>
+
+<h2>CSV logger: measuring what "missing" means</h2>
+
+<p>I can tune aim by feel, but feel is subjective. The CSV logger makes it objective. Every frame with the aim key held, it writes one row to <code>%TEMP%\danzlock_aimlog.csv</code> with 18 columns:</p>
+
+<table>
+<thead><tr><th>Column</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>t</code></td><td>Timestamp (seconds since start)</td></tr>
+<tr><td><code>hero</code></td><td>Hero ID of the locked target</td></tr>
+<tr><td><code>bx,by,bz</code></td><td>3D bone position (world)</td></tr>
+<tr><td><code>sx,sy</code></td><td>Screen position (projected)</td></tr>
+<tr><td><code>smx,smy</code></td><td>Smoothed screen position (after EMA)</td></tr>
+<tr><td><code>velx,vely</code></td><td>Velocity EMA (px/s, screen space)</td></tr>
+<tr><td><code>ax,ay</code></td><td>Final aim point (after lead)</td></tr>
+<tr><td><code>dist</code></td><td>Distance from centre to aim point (px)</td></tr>
+<tr><td><code>modo</code></td><td>0 = WindMouse, 1 = IMA (magnet)</td></tr>
+<tr><td><code>mx,my</code></td><td>Mouse movement this frame (px)</td></tr>
+<tr><td><code>dorm</code></td><td>1 if target is dormant (network-invisible)</td></tr>
+</tbody>
+</table>
+
+<p>The file is opened with <code>_fsopen</code> and <code>_SH_DENYNO</code> so I can read it live while the game is running — no file lock contention. It flushes every 32 frames to keep the data fresh without killing performance. The logger caps at 7200 frames (~2 minutes at 60fps) to prevent unbounded file growth.</p>
+
+<pre><code>FILE* f = _fsopen(path, "w", _SH_DENYNO);
+if (!f) return;
+st.logFile = f;
+st.logFrames = 0;
+fprintf(f, "t,hero,bx,by,bz,sx,sy,smx,smy,velx,vely,ax,ay,dist,modo,mx,my,dorm\n");
+fflush(f);
+// ... per frame:
+if (++st.logFrames &gt; 7200) return; // ~2min a 60fps
+fprintf((FILE*)st.logFile, "%.3f,%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.0f,%.0f,%.1f,%.1f,%.1f,%d,%.2f,%.2f,%d\n", ...);
+if ((st.logFrames &amp; 31) == 0) fflush((FILE*)st.logFile);</code></pre>
+
+<h2>The finding: IMA vs WindMouse</h2>
+
+<p>I ran the logger for a full session on heroes 64 and 84, collecting <strong>n=2261 frames</strong> of aim data. The question was simple: does the sub-25px magnet (IMA) actually centre better than the WindMouse gravity alone?</p>
+
+<p>The answer was unambiguous:</p>
+
+<table>
+<thead><tr><th>Metric</th><th>IMA (modo=1)</th><th>WindMouse (modo=0)</th></tr></thead>
+<tbody>
+<tr><td>Centring error (dx)</td><td><strong>−0.4 .. +1.3 px</strong></td><td>+151 / −75 px</td></tr>
+<tr><td>Sample size</td><td>2261 frames</td><td>2261 frames</td></tr>
+<tr><td>Heroes tested</td><td>64, 84</td><td>64, 84</td></tr>
+</tbody>
+</table>
+
+<p>The IMA zone centres to within 1.3px of the crosshair. The WindMouse zone oscillates ±75–151px. That's not a tuning difference — that's a fundamental difference in approach. The WindMouse gravity is designed to <em>approach</em> the target, not to <em>land</em> on it. The magnet is designed to land.</p>
+
+<svg viewBox="0 0 720 220" role="img" aria-label="Centring error: IMA versus WindMouse">
+  <text x="20" y="26" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="bold" fill="#333">CENTRING ERROR (dx, px) · n=2261</text>
+  <line x1="180" y1="40" x2="180" y2="200" stroke="#aaa" stroke-width="1"/>
+  <text x="180" y="214" fill="#888" font-size="10" text-anchor="middle">0 (centre)</text>
+  <text x="20" y="60" fill="#555" font-family="ui-monospace,monospace" font-size="11">IMA (modo=1)</text>
+  <rect x="176" y="48" width="4" height="16" fill="#2196f3"/>
+  <rect x="182" y="70" width="13" height="16" fill="#2196f3"/>
+  <text x="205" y="83" fill="#2196f3" font-family="ui-monospace,monospace" font-size="11">−0.4 .. +1.3 px</text>
+  <text x="20" y="120" fill="#555" font-family="ui-monospace,monospace" font-size="11">WindMouse (modo=0)</text>
+  <rect x="30" y="128" width="150" height="16" fill="#e06c75"/>
+  <rect x="180" y="150" width="75" height="16" fill="#e06c75"/>
+  <text x="30" y="180" fill="#e06c75" font-family="ui-monospace,monospace" font-size="11">−75 px</text>
+  <text x="230" y="163" fill="#e06c75" font-family="ui-monospace,monospace" font-size="11">+151 px</text>
+  <text x="360" y="90" fill="#777" font-size="11">The magnet lands; WindMouse only approaches.</text>
+  <text x="360" y="110" fill="#777" font-size="11">The blue bar is ~invisible at the red bar's scale.</text>
+</svg>
+
+<p>The <code>dx=17.2</code> figure is the average distance from centre across all frames — most of which are in the WindMouse zone, where the aim is still travelling. The IMA zone is only active for the last 25px, but that's where the hit registers.</p>
+
+<h2>Seven presets</h2>
+
+<p>The presets are not arbitrary — each one is a different answer to the question "how much human is enough?" The values below are the exact numbers from <code>ApplyAimPreset</code> in <code>config.hpp</code>:</p>
+
+<table>
+<thead><tr><th>Preset</th><th>FOV</th><th>Smooth</th><th>MaxStep</th><th>Predict (ms)</th><th>React (ms)</th><th>Deadzone</th><th>Humanize</th></tr></thead>
+<tbody>
+<tr><td><strong>Cola60</strong></td><td>60</td><td>1.5</td><td>60</td><td>120</td><td>0</td><td>1</td><td>0.10</td></tr>
+<tr><td><strong>Gruda90</strong></td><td>90</td><td>2.0</td><td>70</td><td>130</td><td>20</td><td>2</td><td>0.15</td></tr>
+<tr><td><strong>Equil120</strong></td><td>120</td><td>3.0</td><td>60</td><td>130</td><td>60</td><td>4</td><td>0.30</td></tr>
+<tr><td><strong>Preciso100</strong></td><td>100</td><td>2.5</td><td>50</td><td>110</td><td>40</td><td>2</td><td>0.10</td></tr>
+<tr><td><strong>Legit80</strong></td><td>80</td><td>5.0</td><td>35</td><td>100</td><td>110</td><td>6</td><td>0.55</td></tr>
+<tr><td><strong>Sniper70</strong></td><td>70</td><td>4.0</td><td>30</td><td>140</td><td>80</td><td>3</td><td>0.20</td></tr>
+<tr><td><strong>Spray130</strong></td><td>130</td><td>2.0</td><td>80</td><td>140</td><td>20</td><td>3</td><td>0.25</td></tr>
+</tbody>
+</table>
+
+<p>The logic behind each:</p>
+
+<ul>
+<li><strong>Cola60</strong> — "glued": minimum FOV, zero reaction delay, minimal humanize. For close-range duels where you need the crosshair on the target yesterday.</li>
+<li><strong>Gruda90</strong> — "stuck": short FOV, strong pull, low humanize. Mid-range aggression.</li>
+<li><strong>Equil120</strong> — the default. Balanced FOV, moderate smooth, visible but not obvious humanize. The "I'm just good" preset.</li>
+<li><strong>Preciso100</strong> — "surgical": no wind (humanize 0.10), tight deadzone, medium FOV. For precise taps at range.</li>
+<li><strong>Legit80</strong> — maximum humanize (0.55), long reaction delay (110ms), wide deadzone (6px). The "I'm a human with a mouse" preset.</li>
+<li><strong>Sniper70</strong> — short FOV, contained step (30px), long predict (140ms). For cross-map picks where overshoot is death.</li>
+<li><strong>Spray130</strong> — wide FOV, large step (80px), tracks strafe. For sustained fire where you need to follow the target.</li>
+</ul>
+
+<svg viewBox="0 0 400 220" role="img" aria-label="FOV and magnet zones">
+  <circle cx="200" cy="110" r="100" fill="none" stroke="#bbb" stroke-width="1" stroke-dasharray="4,4"/>
+  <text x="200" y="18" fill="#888" font-size="10" text-anchor="middle">FOV (Equil120 = 120px)</text>
+  <circle cx="200" cy="110" r="83" fill="none" stroke="#aaa" stroke-width="0.5" stroke-dasharray="2,4"/>
+  <text x="200" y="35" fill="#888" font-size="9" text-anchor="middle">200px · gravity 10</text>
+  <circle cx="200" cy="110" r="25" fill="none" stroke="#999" stroke-width="0.5" stroke-dasharray="2,4"/>
+  <text x="200" y="90" fill="#888" font-size="9" text-anchor="middle">60px · gravity 15</text>
+  <circle cx="200" cy="110" r="10" fill="rgba(33,150,243,0.15)" stroke="#2196f3" stroke-width="1.5"/>
+  <text x="200" y="125" fill="#2196f3" font-size="9" text-anchor="middle">25px · IMA magnet</text>
+  <circle cx="200" cy="110" r="2" fill="none" stroke="#555" stroke-width="1"/>
+  <text x="200" y="105" fill="#555" font-size="8" text-anchor="middle">dz</text>
+  <line x1="195" y1="110" x2="205" y2="110" stroke="#333" stroke-width="1"/>
+  <line x1="200" y1="105" x2="200" y2="115" stroke="#333" stroke-width="1"/>
+</svg>
+
+<p>The zones are concentric. The deadzone (2–6px depending on preset) is where the aim does nothing. The magnet zone (0–25px) is where the ease-out takes over. The near zone (25–60px) is where WindMouse gravity is 15 and the smooth is 1.2×. The far zone (60–200px) is where gravity drops to 12 and the smooth is 1.0×. Beyond 200px, gravity is 10 and the smooth drops to 0.6× if the target is moving fast.</p>
+
+<h2>INI save/load</h2>
+
+<p>The settings persist through a simple INI file at <code>%TEMP%\danzlock.ini</code>. The save is a single <code>fprintf</code> with all fields; the load is a line-by-line <code>sscanf_s</code> that applies the preset first, then lets individual sliders override it. This means you can save a custom config that starts from a preset but tweaks one or two values.</p>
+
+<pre><code>// Save: one fprintf with all fields
+fprintf(f,
+    "preset=%d\nbone=%d\neye=%d\nkey=%d\n"
+    "fov=%.1f\nsmooth=%.2f\nmaxstep=%.1f\npredict=%.1f\nreact=%.1f\n"
+    "deadzone=%.2f\nhumanize=%.2f\nheadprob=%.2f\n"
+    "sticky=%d\nstickyms=%.1f\nstickypx=%.1f\nvisonly=%d\nsnaphead=%d\n"
+    "esp=%d\nskel=%d\nheadot=%d\nhealth=%d\nname=%d\nhero=%d\n"
+    "esplocal=%d\nnamesize=%.1f\nespvis=%d\ndim=%d\neyeline=%d\ndrawfov=%d\n",
+    s.aimPreset, s.aimBone, s.aimEyeMode, s.aimKey, ...);
+
+// Load: preset first, sliders override
+if (sscanf_s(line, "preset=%d", &amp;iv) == 1) {
+    if (iv &gt;= 0 &amp;&amp; iv &lt; kAimPresetCount) ApplyAimPreset(s, (AimPreset)iv);
+    continue;
+}
+if (sscanf_s(line, "fov=%f", &amp;fv) == 1) { s.aimFov = fv; continue; }
+// ... same pattern for every field</code></pre>
+
+<p>The load order matters: <code>preset</code> is parsed first and calls <code>ApplyAimPreset</code>, which sets all the aim fields to the preset defaults. Then individual keys like <code>fov</code> and <code>smooth</code> override those defaults. The result is a config that says "start from Equilibrado but with FOV 90 and humanize 0.4" without needing to specify every field.</p>
+
+<h2>What I'd do differently</h2>
+
+<p>The world prediction is capped at 150ms, but the presets ask for 120–140ms. That's fine — the cap is a safety rail, not a target. But the screen lead cap of 120px is arbitrary. A better cap would be proportional to the target's angular velocity, not a fixed pixel count. At 1080p, 120px is about 6° of rotation; at 4K, it's 3°. The cap should scale with resolution.</p>
+
+<p>The WindMouse gravity values (10/12/15) are tuned by feel. The CSV logger gives me the data to tune them analytically — I can measure the overshoot distribution and adjust the gravity to minimise it. That's the next iteration.</p>
+
+<p>The subpixel carry works, but it's a hack. A better approach would be to accumulate the mouse delta in a floating-point variable and only emit integer moves when the accumulator crosses 1.0. That's essentially what the code does, but it's spread across <code>windX</code>/<code>windY</code> which are also used for the WindMouse state. Separating the accumulator from the wind state would make the code clearer.</p>
+
+
+</section>
+<!-- ══════════════════════════════════════════════════════════
+     §6 REPRO
+     ══════════════════════════════════════════════════════════ -->
+<section id="repro">
+
+<h1>6. Reproduce</h1>
+<p class="meta">build 6765 · 2026-10-08 · strict read-only</p>
+
+<p>Everything on this page is reconstructible from two artifacts in the repo: the static scanner (which never opens the game) and the external reader (which reads via KPRL). None of the commands below write to game memory.</p>
+
+<h2>Static scanner (no game running)</h2>
+
+<p>Build the tool and run it against the on-disk <code>client.dll</code>. The output should match <code>out/scan-6765-client.txt</code> line for line:</p>
+
+<pre><code>cd C:\Users\admin\deadlock-re
+tools\scan\build.bat
+tools\scan\scan.exe "D:\SteamLibrary\steamapps\common\Deadlock\game\citadel\bin\win64\client.dll" tools\scan\patterns-client.txt
+
+# expected result:
+# == resultado: 23 unicos, 2 multiplos, 37 total ==</code></pre>
+
+<p>If the game has updated since 2026-10-08, re-run <code>build.bat</code> first (in case the source changed), scan the new DLL, and diff against the stored output to see what moved.</p>
+
+<h2>Entity census and occlusion diff</h2>
+
+<p>Proof that <code>citadel_team</code> is not walkable and that no occlusion flag exists in the pawn:</p>
+
+<pre><code># entity census (518 ents, 68 names, zero citadel_team):
+danzlock.exe --fow
+
+# occlusion diff (only animation timers change):
+danzlock.exe --occl a    # behind wall, enemy in crosshair
+danzlock.exe --occl b    # step out, enemy visible
+danzlock.exe --occl diff # compare — only anim times change</code></pre>
+
+<h2>Live reader (game running, KPRL installed)</h2>
+
+<pre><code># validates the chain: entity system -> controller -> pawn -> bone -> w2s
+# (last valid run: pid 4580, 1920x1080, bones=64)
+src\app\build.bat
+src\app\dlre.exe</code></pre>
+
+<p>The first live run that validated the chain is in <code>out/reader-6759-firstrun.txt</code>; this build's live dump (pid 4580) shows Bot0 Infernus, Bot1 Abrams, NoLink Paige and Danzeraera (Vindicta, local), <code>bones=64</code>, and a w2s of <code>740,639</code> at 1920×1080.</p>
+
+<h2>Aim logger</h2>
+
+<pre><code># enable the logger in the menu: Aim -> Logger (default key: mouse5 / VK_XBUTTON2)
+# the CSV opens with _SH_DENYNO, so you can tail it live:
+type %TEMP%\danzlock_aimlog.csv
+
+# config persists at:
+type %TEMP%\danzlock.ini</code></pre>
+
+<h2>Cited source files</h2>
+
+<table>
+<thead><tr><th>File</th><th>What</th></tr></thead>
+<tbody>
+<tr><td><code>out/scan-6765-client.txt</code></td><td>Verbatim scan for this build (23 OK / 2 MULTI / 10 MISS).</td></tr>
+<tr><td><code>out/scan-6763-client.txt</code></td><td>Previous build — basis of the −0x80 delta.</td></tr>
+<tr><td><code>tools/scan/patterns-client.txt</code></td><td>Pattern definitions (37 total).</td></tr>
+<tr><td><code>docs/01-anticheat.md</code> · <code>docs/02-offsets.md</code></td><td>AC on/off and resolved globals.</td></tr>
+<tr><td><code>docs/03-entity-chain.md</code> · <code>docs/04-schema-sources.md</code></td><td>Entity chain and schema-source rule.</td></tr>
+<tr><td><code>src/app/game.cpp</code></td><td>Entity walk, dormant, EyePosition, DebugFow/DebugOccl.</td></tr>
+<tr><td><code>src/app/aim.cpp</code> · <code>config.hpp</code> · <code>cfgfile.hpp</code></td><td>Aim, presets and INI persistence.</td></tr>
+<tr><td><code>research/2026-10-06-initial-research.md</code></td><td>Consolidated initial research.</td></tr>
+</tbody>
+</table>
+
+<p>All offsets are build-specific (6765 as of 2026-10-08) and must be re-derived after every game update. No address on this page was invented: every VA/RVA comes from a verbatim scan or a recorded live read.</p>
+
+
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="build-tag">build 6765 · 08/10/2026 · danzlock reversal diary · deadlock-re</div>
+Strict read-only: no injection, no remote thread, no write handle. Reads via KPRL.
+</footer>
+
+</div><!-- /container -->
+</body>
+</html>
