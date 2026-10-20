@@ -10,25 +10,34 @@ import { loadGitHub, timeAgo } from "./github.js";
 import { fmt } from "./util.js";
 
 gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ ignoreMobileResize: true });
 scroller.init(gsap, ScrollTrigger);
 
-const desktop = "(min-width: 901px)";
+const buzz = (ms = 8) => {
+  try {
+    if (!rm) navigator.vibrate?.(ms);
+  } catch {}
+};
 
 /* ---------------------------------------------------------------- helpers */
+// Chars are grouped per WORD (each word is its own clip box) so the title can wrap on narrow screens.
 function splitChars(el) {
   const text = el.textContent;
   el.textContent = "";
   const frag = document.createDocumentFragment();
-  for (const ch of text) {
-    if (ch === " ") {
-      frag.append(" ");
-      continue;
+  text.split(/(\s+)/).forEach((part) => {
+    if (!part) return;
+    if (/^\s+$/.test(part)) return void frag.append(" ");
+    const wd = document.createElement("span");
+    wd.className = "wd";
+    for (const ch of part) {
+      const s = document.createElement("span");
+      s.className = "ch";
+      s.textContent = ch;
+      wd.append(s);
     }
-    const s = document.createElement("span");
-    s.className = "ch";
-    s.textContent = ch;
-    frag.append(s);
-  }
+    frag.append(wd);
+  });
   el.append(frag);
   return $$(".ch", el);
 }
@@ -54,12 +63,46 @@ const menuBtn = $("[data-menu-toggle]");
 let menuOpen = false;
 const palEl = $("[data-palette]");
 
+let menuTl = null;
 function setMenu(open) {
+  if (open === menuOpen) return;
   menuOpen = open;
-  menu.hidden = !open;
   menuBtn.setAttribute("aria-expanded", String(open));
-  open ? scroller.stop() : scroller.start();
-  if (open) header.classList.remove("is-hidden");
+  buzz(10);
+  menuTl?.kill();
+  const links = $$(".mobile-menu nav a, .mm-foot > *", menu);
+  if (open) {
+    menu.hidden = false;
+    scroller.stop();
+    header.classList.remove("is-hidden");
+    if (rm) return;
+    const r = menuBtn.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    const rad = Math.hypot(Math.max(cx, innerWidth - cx), Math.max(cy, innerHeight - cy));
+    menuTl = gsap
+      .timeline()
+      .fromTo(menu, { clipPath: `circle(0px at ${cx}px ${cy}px)` }, { clipPath: `circle(${rad}px at ${cx}px ${cy}px)`, duration: 0.75, ease: "power3.inOut" }, 0)
+      .fromTo(links, { y: 46, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power4.out", stagger: 0.06 }, 0.28);
+  } else {
+    scroller.start();
+    if (rm) {
+      menu.hidden = true;
+      return;
+    }
+    const r = menuBtn.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    menuTl = gsap
+      .timeline({
+        onComplete() {
+          menu.hidden = true;
+          gsap.set([menu, ...links], { clearProps: "all" });
+        },
+      })
+      .to(links, { y: -16, opacity: 0, duration: 0.25, ease: "power2.in", stagger: 0.025 }, 0)
+      .to(menu, { clipPath: `circle(0px at ${cx}px ${cy}px)`, duration: 0.55, ease: "power3.inOut" }, 0.12);
+  }
 }
 menuBtn.addEventListener("click", () => setMenu(!menuOpen));
 
@@ -94,7 +137,12 @@ document.addEventListener("keydown", (e) => {
 });
 
 const api = { theme: { get: () => theme.get(), set: (t) => theme.set(t), toggle: toggleTheme }, goto, stop: () => scroller.stop(), start: () => scroller.start() };
-initPalette({ ...api, theme: { toggle: toggleTheme } });
+const palette = initPalette({ ...api, theme: { toggle: toggleTheme } });
+const mmPal = $("[data-mm-palette]");
+mmPal?.addEventListener("click", () => {
+  setMenu(false);
+  setTimeout(() => palette.open(), 420);
+});
 initTerminal($("[data-terminal]"), api);
 
 /* ------------------------------------------------------ simple behaviours */
@@ -279,9 +327,8 @@ if (rm) {
       ),
   });
 
-  /* ----- desktop only: stacked project cards + pinned method */
-  const mm = gsap.matchMedia();
-  mm.add(desktop, () => {
+  /* ----- stacked project cards + pinned method (CSS sticky does the pinning, on every screen size) */
+  {
     const projs = $$("[data-proj]");
     projs.forEach((p, i) => {
       const next = projs[i + 1];
@@ -289,7 +336,7 @@ if (rm) {
       gsap.to(p, {
         scale: 0.94,
         ease: "none",
-        scrollTrigger: { trigger: next, start: "top 92%", end: () => `top ${78 + (i + 1) * 16}px`, scrub: true },
+        scrollTrigger: { trigger: next, start: "top 92%", end: () => `top ${parseFloat(getComputedStyle(next).top) || 80}px`, scrub: true },
       });
     });
 
@@ -305,6 +352,7 @@ if (rm) {
       steps.forEach((s, k) => s.classList.toggle("on", k === i));
       words.forEach((w, k) => w.classList.toggle("on", k <= i));
       count.textContent = `${String(i + 1).padStart(2, "0")} / ${String(steps.length).padStart(2, "0")}`;
+      if (i > 0) buzz(6);
     };
     set(0);
     ScrollTrigger.create({
@@ -316,11 +364,7 @@ if (rm) {
         set(Math.min(steps.length - 1, Math.floor(self.progress * steps.length)));
       },
     });
-    return () => {
-      cur = -1;
-      steps.forEach((s) => s.classList.remove("on"));
-    };
-  });
+  }
 
   /* ----- tall screenshot auto-scrolls inside its browser frame */
   $$(".frame.is-tall").forEach((frame) => {
@@ -396,7 +440,37 @@ if (rm) {
     });
   } else {
     $$("[data-tilt]").forEach((el) => el.removeAttribute("data-tilt"));
+
+    /* ----- touch layer: scroll-linked parallax inside the hero card + project frames (replaces hover tilt) */
+    $$(".hero-card-img img, .frame:not(.is-tall) .frame-body img").forEach((img) => {
+      const host = img.closest(".hero-card, .proj-shot");
+      gsap.fromTo(img, { yPercent: -7, scale: 1.14 }, { yPercent: 7, scale: 1.14, ease: "none", scrollTrigger: { trigger: host, start: "top bottom", end: "bottom top", scrub: true } });
+    });
   }
+
+  /* ----- swipe row counter (services): dots + count follow the snapped card, with a tiny haptic tick */
+  {
+    const bento = $("[data-bento]");
+    const dots = $$(".bn-dots i");
+    const cur = $("[data-bn-cur]");
+    if (bento && dots.length) {
+      let idx = 0;
+      bento.addEventListener(
+        "scroll",
+        () => {
+          const step = bento.firstElementChild.getBoundingClientRect().width + 10;
+          const i = clamp(Math.round(bento.scrollLeft / step), 0, dots.length - 1);
+          if (i === idx) return;
+          idx = i;
+          dots.forEach((d, k) => d.classList.toggle("on", k === i));
+          cur.textContent = String(i + 1).padStart(2, "0");
+          buzz(6);
+        },
+        { passive: true }
+      );
+    }
+  }
+
   const refresh = () => ScrollTrigger.refresh();
   document.fonts?.ready.then(refresh);
   window.addEventListener("load", () => setTimeout(refresh, 150));

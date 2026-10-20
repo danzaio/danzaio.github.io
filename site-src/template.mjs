@@ -62,7 +62,11 @@ function header(c) {
     </div>
   </header>
   <div class="mobile-menu" id="mobile-menu" data-mobile-menu hidden>
-    <nav aria-label="Mobile">${c.nav.map((n, i) => `<a href="${n.href}" data-mm-link><span class="mm-n">${pad(i + 1)}</span>${esc(n.label)}</a>`).join("")}<a href="${SITE.github}" target="_blank" rel="noopener"><span class="mm-n">${pad(c.nav.length + 1)}</span>${esc(c.contactLabel)}</a></nav>
+    <nav aria-label="Mobile">${c.nav.map((n, i) => `<a href="${n.href}" data-mm-link><span class="mm-n">${pad(i + 1)}</span>${esc(n.label)}</a>`).join("")}<a href="${SITE.github}" target="_blank" rel="noopener" data-mm-link><span class="mm-n">${pad(c.nav.length + 1)}</span>${esc(c.contactLabel)}</a></nav>
+    <div class="mm-foot">
+      <a class="mm-lang" href="${c.altPath}" hreflang="${c.lang === "en" ? "pt-BR" : "en"}" lang="${c.lang === "en" ? "pt-BR" : "en"}"><b>${esc(c.altLabel)}</b><span>${c.altCode}</span></a>
+      <button class="mm-pal" type="button" data-mm-palette>${esc(c.ui.palette)}</button>
+    </div>
   </div>`;
 }
 
@@ -130,7 +134,8 @@ function services(c) {
     .join("");
   return `<section id="capabilities" class="section shell services" aria-labelledby="services-title">
     ${sectionHead(s.num, s.label, s.title, s.lead, "services-title")}
-    <div class="bento">${cards}</div>
+    <div class="bento" data-bento>${cards}</div>
+    <div class="bento-nav" aria-hidden="true"><span class="bn-count"><b data-bn-cur>01</b> / ${pad(s.items.length)}</span><span class="bn-dots">${s.items.map((_, i) => `<i${i === 0 ? " class=\"on\"" : ""}></i>`).join("")}</span></div>
   </section>`;
 }
 
@@ -362,6 +367,7 @@ ${palette(c)}
 </html>
 `;
 }
+
 
 
 

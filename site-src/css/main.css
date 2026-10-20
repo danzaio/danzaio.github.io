@@ -305,10 +305,8 @@ html.js:not(.rm):not(.is-ready) .hero-meta{opacity:0;animation:unhide 0s 5s forw
 .mw.on{background:var(--lime);color:#151612;padding:0 .1em}
 .steps{display:grid;gap:10px}
 .step{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:clamp(14px,1.8vw,26px);align-items:center;padding:clamp(18px,2.2vw,30px);border:1px solid var(--ink);border-radius:16px;background:var(--surface);transition:opacity .5s var(--ease),transform .6s var(--ease),background-color .4s,box-shadow .4s,color .3s}
-@media (min-width:901px){
-  html.js:not(.rm) .step{opacity:.42;transform:scale(.97)}
-  html.js:not(.rm) .step.on{opacity:1;transform:scale(1);background:var(--lime);color:#151612;border-color:#151612;box-shadow:8px 8px 0 var(--shadow)}
-}
+html.js:not(.rm) .step{opacity:.42;transform:scale(.97)}
+html.js:not(.rm) .step.on{opacity:1;transform:scale(1);background:var(--lime);color:#151612;border-color:#151612;box-shadow:8px 8px 0 var(--shadow)}
 .step-n{font:600 .72rem var(--font-mono);opacity:.7}
 .step h3{font:800 clamp(1.9rem,3.2vw,3.2rem)/1 var(--font-display);letter-spacing:-.045em}
 .step p{margin-top:8px;max-width:42ch;font-size:clamp(.88rem,1vw,1rem);opacity:.8;line-height:1.4}
@@ -380,25 +378,11 @@ html.js:not(.rm):not(.is-ready) .hero-meta{opacity:0;animation:unhide 0s 5s forw
   .contact-btn{display:none}
   .hero-grid{grid-template-columns:minmax(0,1fr);grid-template-rows:none;min-height:0}
   .hero-main,.hero-card,.tiles{grid-column:1;grid-row:auto}
-  .hero-main{min-height:min(78svh,640px)}
   .hero-card{min-height:340px}
-  .hero-scroll{display:none}
-  .tiles{flex-direction:column;height:auto}
-  .tile{flex:none;height:96px}
-  .tile-go{display:none}
   .system-grid{grid-template-columns:minmax(0,1fr)}
-  .method-track{height:auto}
-  .method-sticky{position:static;height:auto;grid-template-columns:minmax(0,1fr);padding-top:0}
-  .mw{background:var(--lime);color:#151612;padding:0 .1em}
-  .method-progress{display:none}
-  .proj{position:relative;top:auto;margin-bottom:14px}
-  .proj-inner{min-height:0}
   .contact-cols{align-items:flex-start}
 }
 @media (max-width:640px){
-  .bento{grid-template-columns:minmax(0,1fr)}
-  .cap{min-height:380px}
-  .art-ai{right:-90px;bottom:-150px}
   .why{grid-template-columns:minmax(0,1fr)}
   .term{min-height:480px}
   .term-prompt{display:none}
@@ -559,4 +543,101 @@ html.js .cap:not(.in) .art-commerce .coins ellipse{transform:translateY(-40px);o
 
 
 @media (max-width:1100px),(hover:none){.kbd-btn{display:none}}
+
+
+/* ==========================================================================
+   MOBILE WOW  (<=900px) — appended last so it wins the cascade
+   ========================================================================== */
+:root{--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
+html{-webkit-tap-highlight-color:transparent}
+.site-header{top:calc(12px + var(--sat))}
+.hero{padding-top:calc(var(--header-h) + 20px + var(--sat))}
+.art-ai{overflow:visible}
+
+/* hero title: each WORD owns its clip box, so lines can wrap on small screens without letters leaking */
+.hero-title .wd{display:inline-block;overflow:hidden;vertical-align:top;white-space:nowrap;padding:.04em 0 .12em;margin:-.04em 0 -.12em}
+.hero-title.done .wd{overflow:visible}
+
+.bento-nav,.mm-foot{display:none}
+
+@media (max-width:900px){
+  /* ---- hero: the first screen IS the hero ---- */
+  .hero-main{min-height:calc(100svh - var(--header-h) - 44px - var(--sat))}
+  .hero-title{font-size:clamp(3.2rem,17.2cqi,7.2rem);line-height:.9;padding-top:2rem}
+  .hero-title .ln-in{white-space:normal;display:inline}
+  .hl{display:inline;padding:0;margin:0}
+  .hl::before{display:none}
+  .hl .ln-in{padding:0 .1em;margin-left:-.1em;background:linear-gradient(var(--lime),var(--lime)) no-repeat 0 56%/calc(var(--hl,1)*100%) 80%;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+  .hero-sub{font-size:1.02rem}
+  .hero-scroll{display:none}
+
+  /* ---- swipe rows (native scroll-snap, next card peeks in) ---- */
+  .tiles,.bento{display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;gap:10px;margin-inline:calc(-1 * var(--gutter));padding-inline:var(--gutter);scroll-padding-inline:var(--gutter);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .tiles::-webkit-scrollbar,.bento::-webkit-scrollbar{display:none}
+  .tiles{height:auto}
+  .tile{flex:0 0 min(78%,330px);height:112px;scroll-snap-align:start}
+  .tile-go,.tile-dash{display:none}
+  .bento .cap,.bento .cap-ai,.bento .cap-saas{grid-column:auto;flex:0 0 min(84%,380px);min-height:440px;scroll-snap-align:start}
+  .cap-ai{padding-top:clamp(176px,14.5vw,196px)}
+  .art-ai{width:190px;right:-52px;top:34px;bottom:auto}
+  .cap-ai .cap-num{z-index:2}
+  .bento-nav{display:flex;align-items:center;justify-content:space-between;margin-top:16px;font:600 .72rem var(--font-mono);letter-spacing:.08em;color:var(--muted)}
+  .bn-dots{display:flex;gap:7px}
+  .bn-dots i{width:7px;height:7px;border-radius:50%;background:var(--line-soft);transition:width .4s var(--ease),background-color .3s}
+  .bn-dots i.on{width:26px;border-radius:7px;background:var(--ink)}
+  .bn-count b{color:var(--ink);font-weight:700}
+
+  /* ---- work: the sticky card stack works on phones too ---- */
+  .proj{position:sticky;top:calc(var(--header-h) + var(--sat) + 22px + var(--i) * 10px);margin-bottom:14px;border-radius:16px}
+  .proj-inner{display:flex;flex-direction:column;gap:14px;min-height:0;padding:20px 18px 22px}
+  .proj-info{display:contents}
+  .proj-top{order:1}
+  .proj-title{order:2;margin:0;font-size:clamp(2.1rem,9.6vw,2.9rem)}
+  .proj-shot{order:3;padding:0}
+  .proj-text{order:4;font-size:.95rem}
+  .why{order:5;padding-top:12px}
+  .proj-links{order:6}
+  .frame,.proj-shot:hover .frame{box-shadow:6px 6px 0 #151612}
+
+  /* ---- method: pinned with CSS sticky + svh (no JS pin => no iOS address-bar jump) ---- */
+  .method-track{height:290svh}
+  .method-sticky{position:sticky;top:0;height:100svh;display:flex;flex-direction:column;justify-content:center;gap:16px;padding-top:calc(var(--header-h) + var(--sat) + 26px);padding-bottom:calc(22px + var(--sab))}
+  .method-left{gap:12px}
+  .method-title{font-size:clamp(1.85rem,8.6vw,2.6rem)}
+  .method-left .section-lead{font-size:.88rem;line-height:1.4}
+  .steps{gap:8px}
+  .step{grid-template-columns:auto minmax(0,1fr);padding:13px 15px;gap:12px;border-radius:14px}
+  .step.on{box-shadow:5px 5px 0 var(--shadow)}
+  .step-tag{display:none}
+  .step h3{font-size:1.55rem}
+  .step p{font-size:.82rem;margin-top:4px}
+  .method-progress{display:flex;margin-top:10px}
+
+  /* ---- console: 16px input stops iOS from zooming the page on focus ---- */
+  .term-form input{font-size:16px}
+  .term{box-shadow:5px 5px 0 var(--shadow)}
+
+  /* ---- menu ---- */
+  .mobile-menu{flex-direction:column;justify-content:space-between;align-items:stretch;padding:calc(var(--header-h) + 36px + var(--sat)) var(--gutter) calc(22px + var(--sab))}
+  .mobile-menu nav{margin-block:auto}
+  .mm-foot{display:flex;gap:10px;flex-wrap:wrap}
+  .mobile-menu a.mm-lang,.mm-pal{flex:1 1 150px;display:flex;justify-content:space-between;align-items:center;gap:10px;height:54px;padding:0 20px;border:1.5px solid var(--ink);border-radius:999px;font:600 .92rem/1 var(--font-body);letter-spacing:0;white-space:nowrap}
+  .mobile-menu a.mm-lang b{font:600 .92rem/1 var(--font-body);letter-spacing:0}
+  .mobile-menu a.mm-lang span{font:700 .68rem/1 var(--font-mono);letter-spacing:.08em;background:var(--lime);color:#151612;padding:6px 10px;border-radius:999px;white-space:nowrap}
+  .mm-pal{background:var(--ink);color:var(--paper)}
+}
+@media (max-width:900px) and (max-height:740px){.method-left .section-lead{display:none}}
+
+/* press feedback on touch */
+@media (hover:none){
+  .btn,.chip,.tile,.icon-btn,.mm-lang,.mm-pal,.cta-orb,.term-send{transition:transform .18s var(--ease),translate .25s var(--ease),box-shadow .25s,background-color .25s,color .25s}
+  .btn:active,.chip:active,.tile:active,.icon-btn:active,.mm-lang:active,.mm-pal:active,.term-send:active{transform:scale(.95)}
+  .cta-orb:active{transform:scale(.94)}
+  .cap{transition:transform .25s var(--ease)}
+  .cap:active{transform:scale(.985)}
+  .proj-shot .frame{transition:transform .25s var(--ease),box-shadow .25s}
+  .proj-shot:active .frame{transform:translate(3px,3px);box-shadow:3px 3px 0 #151612}
+}
+
+
 

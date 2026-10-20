@@ -163,7 +163,7 @@ export function initTerminal(root, api) {
   });
   $$("[data-chip]", root).forEach((b) => b.addEventListener("click", () => enqueue(b.dataset.chip)));
   body.addEventListener("click", () => {
-    if (!getSelection().toString()) input.focus({ preventScroll: true });
+    if (!getSelection().toString() && matchMedia("(hover:hover)").matches) input.focus({ preventScroll: true });
   });
 
   // Boot sequence runs once, when the console scrolls into view.
@@ -185,5 +185,6 @@ export function initTerminal(root, api) {
   io.observe(root);
   return { run: enqueue };
 }
+
 
 

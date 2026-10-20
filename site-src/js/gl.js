@@ -7,7 +7,7 @@ precision mediump float;
 uniform vec2 uRes;uniform float uDpr;uniform float uTime;
 uniform vec2 uMouse;uniform float uPower;
 uniform vec3 uClick;
-uniform vec3 uInk;uniform vec3 uAccent;uniform float uDark;
+uniform vec3 uInk;uniform vec3 uAccent;uniform float uDark;uniform float uPortrait;
 float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
   return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
@@ -20,7 +20,7 @@ void main(){
   float f=n(vec2(uv.x*asp,uv.y)*3.2+vec2(uTime*.06,-uTime*.035));
   f=f*.62+n(vec2(uv.x*asp,uv.y)*8.-vec2(uTime*.05,uTime*.02))*.38;
   float shape=smoothstep(.38,.9,f);
-  float txt=smoothstep(.62,.12,uv.y)*smoothstep(1.,.45,uv.x);
+  float txt=mix(smoothstep(.62,.12,uv.y)*smoothstep(1.,.45,uv.x),smoothstep(.70,.38,uv.y),uPortrait);
   shape*=1.-.85*txt;
   float d=distance(c,uMouse);
   float infl=smoothstep(260.*uDpr,0.,d)*uPower;
@@ -32,7 +32,8 @@ void main(){
   float dist=length(gl_FragCoord.xy-c);
   float a=1.-smoothstep(rad-.9*uDpr,rad+.9*uDpr,dist);
   float base=(.16+.26*shape)*(1.-.9*txt);
-  float alpha=a*(base+.62*infl*(1.-.75*txt)+.5*ring);
+  float lift=1.+.9*uDark;
+  float alpha=min(1.,a*(base*lift+.62*infl*(1.-.75*txt)*lift+.5*ring*lift));
   vec3 col=mix(uInk,uAccent,clamp(infl*1.5+ring,0.,1.));
   gl_FragColor=vec4(col*alpha,alpha);
 }`;
@@ -74,7 +75,7 @@ export function initHeroGL(canvas, host) {
   gl.enableVertexAttribArray(loc);
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   const U = (n) => gl.getUniformLocation(prog, n);
-  const u = { res: U("uRes"), dpr: U("uDpr"), time: U("uTime"), mouse: U("uMouse"), power: U("uPower"), click: U("uClick"), ink: U("uInk"), accent: U("uAccent"), dark: U("uDark") };
+  const u = { res: U("uRes"), dpr: U("uDpr"), time: U("uTime"), mouse: U("uMouse"), power: U("uPower"), click: U("uClick"), ink: U("uInk"), accent: U("uAccent"), dark: U("uDark"), portrait: U("uPortrait") };
   gl.enable(gl.BLEND);
   gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
@@ -99,6 +100,7 @@ export function initHeroGL(canvas, host) {
     gl.viewport(0, 0, w, h);
     gl.uniform2f(u.res, w, h);
     gl.uniform1f(u.dpr, dpr);
+    gl.uniform1f(u.portrait, w / h < 0.9 ? 1 : 0);
   };
   const ro = new ResizeObserver(resize);
   ro.observe(canvas);
@@ -119,6 +121,46 @@ export function initHeroGL(canvas, host) {
     const r = canvas.getBoundingClientRect();
     click = { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height, t0: performance.now() };
   });
+
+  // Touch: pointermove is cancelled the moment the finger starts scrolling the page, but a passive
+  // touchmove keeps firing, so the halftone follows the finger WHILE you scroll (no preventDefault).
+  const onTouch = (e) => {
+    const t = e.touches[0];
+    if (!t) return;
+    const r = canvas.getBoundingClientRect();
+    m.tx = (t.clientX - r.left) / r.width;
+    m.ty = (t.clientY - r.top) / r.height;
+    m.tp = 1;
+    m.last = performance.now();
+  };
+  host.addEventListener("touchstart", (e) => {
+    onTouch(e);
+    const t = e.touches[0];
+    if (t) {
+      const r = canvas.getBoundingClientRect();
+      click = { x: (t.clientX - r.left) / r.width, y: (t.clientY - r.top) / r.height, t0: performance.now() };
+    }
+  }, { passive: true });
+  host.addEventListener("touchmove", onTouch, { passive: true });
+  host.addEventListener("touchend", () => (m.tp = 0.35), { passive: true });
+
+  // Scroll nudges the field too: a quick flick sends a ripple through the dots.
+  let lastY = scrollY;
+  let lastRipple = 0;
+  const onScroll = () => {
+    const y = scrollY;
+    const dy = Math.abs(y - lastY);
+    lastY = y;
+    const now = performance.now();
+    if (dy > 38 && now - lastRipple > 700) {
+      const r = canvas.getBoundingClientRect();
+      if (r.bottom > 0 && r.top < innerHeight) {
+        click = { x: 0.5, y: Math.min(0.9, Math.max(0.1, 0.5 - r.top / r.height * 0.5)), t0: now };
+        lastRipple = now;
+      }
+    }
+  };
+  if (matchMedia("(hover:none)").matches) window.addEventListener("scroll", onScroll, { passive: true });
 
   const io = new IntersectionObserver(([en]) => (visible = en.isIntersecting), { threshold: 0 });
   io.observe(canvas);
@@ -161,6 +203,8 @@ export function initHeroGL(canvas, host) {
     },
   };
 }
+
+
 
 
 
