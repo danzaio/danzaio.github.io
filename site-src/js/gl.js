@@ -8,6 +8,7 @@ uniform vec2 uRes;uniform float uDpr;uniform float uTime;
 uniform vec2 uMouse;uniform float uPower;
 uniform vec3 uClick;
 uniform vec3 uInk;uniform vec3 uAccent;uniform float uDark;uniform float uPortrait;
+uniform float uText;uniform float uGain;
 float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
   return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
@@ -20,7 +21,7 @@ void main(){
   float f=n(vec2(uv.x*asp,uv.y)*3.2+vec2(uTime*.06,-uTime*.035));
   f=f*.62+n(vec2(uv.x*asp,uv.y)*8.-vec2(uTime*.05,uTime*.02))*.38;
   float shape=smoothstep(.38,.9,f);
-  float txt=mix(smoothstep(.62,.12,uv.y)*smoothstep(1.,.45,uv.x),smoothstep(.70,.38,uv.y),uPortrait);
+  float txt=mix(smoothstep(.62,.12,uv.y)*smoothstep(1.,.45,uv.x),smoothstep(.70,.38,uv.y),uPortrait)*uText;
   shape*=1.-.85*txt;
   float d=distance(c,uMouse);
   float infl=smoothstep(260.*uDpr,0.,d)*uPower;
@@ -31,7 +32,7 @@ void main(){
   float rad=cell*(.07+.28*shape+.36*infl+.3*ring);
   float dist=length(gl_FragCoord.xy-c);
   float a=1.-smoothstep(rad-.9*uDpr,rad+.9*uDpr,dist);
-  float base=(.16+.26*shape)*(1.-.9*txt);
+  float base=(.16+.26*shape)*(1.-.9*txt)*uGain;
   float lift=1.+.9*uDark;
   float alpha=min(1.,a*(base*lift+.62*infl*(1.-.75*txt)*lift+.5*ring*lift));
   vec3 col=mix(uInk,uAccent,clamp(infl*1.5+ring,0.,1.));
@@ -45,8 +46,11 @@ const hex = (s) => {
   return [(n >> 16) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
 };
 
-// Reactive halftone field behind the hero. Returns null when WebGL is unavailable.
-export function initHeroGL(canvas, host) {
+// Reactive halftone field (hero, and the contact card). Returns null when WebGL is unavailable.
+// opts: ink / accent = CSS custom property names, text = 0..1 strength of the hero's quiet zone under the title,
+// gain = idle dot strength, dark = force the brighter dark-surface mix.
+export function initHeroGL(canvas, host, opts = {}) {
+  const o = { ink: "--ink", accent: "--orange", text: 1, gain: 1, dark: null, ...opts };
   const gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: true, antialias: false, powerPreference: "low-power" });
   if (!gl) return null;
   const sh = (type, src) => {
@@ -76,6 +80,8 @@ export function initHeroGL(canvas, host) {
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   const U = (n) => gl.getUniformLocation(prog, n);
   const u = { res: U("uRes"), dpr: U("uDpr"), time: U("uTime"), mouse: U("uMouse"), power: U("uPower"), click: U("uClick"), ink: U("uInk"), accent: U("uAccent"), dark: U("uDark"), portrait: U("uPortrait") };
+  gl.uniform1f(U("uText"), o.text);
+  gl.uniform1f(U("uGain"), o.gain);
   gl.enable(gl.BLEND);
   gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
@@ -86,9 +92,9 @@ export function initHeroGL(canvas, host) {
   let running = false;
   const css = getComputedStyle(document.documentElement);
   const colors = () => {
-    gl.uniform3fv(u.ink, hex(css.getPropertyValue("--ink")));
-    gl.uniform3fv(u.accent, hex(css.getPropertyValue("--orange")));
-    gl.uniform1f(u.dark, document.documentElement.dataset.theme === "ink" ? 1 : 0);
+    gl.uniform3fv(u.ink, hex(css.getPropertyValue(o.ink)));
+    gl.uniform3fv(u.accent, hex(css.getPropertyValue(o.accent)));
+    gl.uniform1f(u.dark, o.dark ?? (document.documentElement.dataset.theme === "ink" ? 1 : 0));
   };
   const resize = () => {
     const r = canvas.getBoundingClientRect();

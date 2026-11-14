@@ -4,6 +4,8 @@ import { $, $$, data, root, rm, fine, clamp, lerp } from "./util.js";
 import { scroller } from "./scroller.js";
 import { theme } from "./theme.js";
 import { initHeroGL } from "./gl.js";
+import { initLoop } from "./loop.js";
+import { initReel, scramble } from "./reel.js";
 import { initTerminal } from "./terminal.js";
 import { initPalette } from "./palette.js";
 import { loadGitHub, timeAgo } from "./github.js";
@@ -110,7 +112,7 @@ function goto(href) {
   if (href === "#top") return scroller.to(0);
   const el = $(href);
   if (!el) return;
-  scroller.to(el, { offset: href === "#method" ? 0 : -84 });
+  scroller.to(el, { offset: href === "#method" || href === "#loop" ? 0 : -84 });
 }
 document.addEventListener("click", (e) => {
   const a = e.target.closest('a[href^="#"]');
@@ -173,7 +175,8 @@ loadGitHub()
   .then((g) => {
     const ul = $("[data-gh]");
     const c = data.contact;
-    const items = [fmt(c.repos, g.repos), fmt(c.followers, g.followers)];
+    const items = [fmt(c.repos, g.repos)];
+    if (g.followers >= 50) items.push(fmt(c.followers, g.followers)); // a small count reads as a weakness, so it stays out until it helps
     if (g.pushName) items.push(fmt(c.push, g.pushName, timeAgo(g.pushAt)));
     items.forEach((t) => {
       const li = document.createElement("li");
@@ -252,8 +255,9 @@ if (rm) {
           bar.style.transform = `scaleX(${o.v / 100})`;
         },
       })
-      .to(pl, { yPercent: -100, duration: 0.95, ease: "power4.inOut" }, "+=0.12")
-      .add(entrance, "-=0.55");
+      // the lime sheet breaks into the same dot grid as the hero and the dots shrink away
+      .fromTo(pl, { "--pr": "19px" }, { "--pr": "0px", duration: 1.05, ease: "power2.inOut" }, "+=0.12")
+      .add(entrance, "-=0.8");
   })();
 
   /* ----- hero letter play (fine pointers) */
@@ -306,6 +310,43 @@ if (rm) {
       tw.timeScale(ts);
     });
   }
+  initLoop();
+
+  /* ----- hero card: project reel (starts after the entrance so it never competes with it) */
+  gsap.delayedCall(root.classList.contains("intro") ? 3.4 : 1.6, () => initReel($("[data-reel]")));
+
+  /* ----- contact card: the halftone field returns for the close (created only when it gets near) */
+  {
+    const cg = $("[data-contact-gl]");
+    if (cg && (navigator.hardwareConcurrency || 4) > 2) {
+      const io = new IntersectionObserver(
+        ([en]) => {
+          if (!en.isIntersecting) return;
+          io.disconnect();
+          if (!initHeroGL(cg, cg.parentElement, { ink: "--paper-static", accent: "--lime", text: 0, gain: 0.5, dark: 1 })) cg.remove();
+        },
+        { rootMargin: "500px" }
+      );
+      io.observe(cg);
+    }
+  }
+
+  /* ----- screenshots arrive through a growing dot grid (the mask comes off when it is done) */
+  $$(".frame-body img").forEach((img) => {
+    img.classList.add("ht");
+    gsap.fromTo(
+      img,
+      { "--hr": "0px" },
+      { "--hr": "13px", duration: 1.2, ease: "power2.out", scrollTrigger: { trigger: img.closest(".frame"), start: "top 82%", once: true }, onComplete: () => img.classList.remove("ht") }
+    );
+  });
+
+  /* ----- mono labels resolve out of random glyphs once, as they enter */
+  $$(".section-label .lbl, .proj-top span:last-child").forEach((el) => {
+    const text = el.textContent;
+    ScrollTrigger.create({ trigger: el, start: "top 92%", once: true, onEnter: () => scramble(el, text, 0.7) });
+  });
+
   /* ----- scrubbed word reveals + fades */
   $$("[data-scrub]").forEach((el) => {
     const words = splitWords(el);

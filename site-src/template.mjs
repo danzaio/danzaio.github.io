@@ -73,6 +73,7 @@ function header(c) {
 function hero(c) {
   const h = c.hero;
   const p0 = PROJECTS[0];
+  const w0 = c.work.items[0];
   const tiles = h.tiles
     .map(
       (t, i) => `<a class="tile tile-${["paper", "lime", "ink"][i]}" href="${t.href}" data-cursor="${esc(c.ui.view)}">
@@ -97,13 +98,13 @@ function hero(c) {
           <a class="btn btn-ink" href="#work" data-magnetic><span>${esc(h.cta1)}</span>${I.ur}</a>
           <a class="btn btn-line" href="${SITE.github}" target="_blank" rel="noopener" data-magnetic>${I.gh}<span>${esc(h.cta2)}</span></a>
         </div>
-        <a class="hero-scroll" href="#capabilities" aria-label="${esc(c.ui.scroll)}"><span>${esc(c.ui.scroll)}</span>${I.down}</a>
+        <a class="hero-scroll" href="#loop" aria-label="${esc(c.ui.scroll)}"><span>${esc(c.ui.scroll)}</span>${I.down}</a>
       </div>
-      <a class="hero-card card tone-ink" href="${p0.repo}" target="_blank" rel="noopener" data-tilt data-cursor="${esc(c.ui.open)}" data-hero-card>
-        <span class="badge">01 / 04</span>
-        <span class="hero-card-img"><img src="/assets/site/img/${p0.img}" width="${p0.imgW}" height="${p0.imgH}" alt="Oh My Pi terminal coding agent" fetchpriority="high" decoding="async"/></span>
+      <a class="hero-card card tone-ink" href="${p0.repo}" target="_blank" rel="noopener" aria-label="${esc(w0.title + ". " + w0.kicker)}" data-tilt data-cursor="${esc(c.ui.open)}" data-hero-card data-reel>
+        <span class="badge"><b data-reel-n>01</b> / ${pad(PROJECTS.length)}</span>
+        <span class="hero-card-img"><img src="/assets/site/img/${p0.img}" width="${p0.imgW}" height="${p0.imgH}" alt="" fetchpriority="high" decoding="async"/><canvas class="reel-gl" data-reel-gl aria-hidden="true"></canvas></span>
         <span class="arrow-chip" aria-hidden="true">${I.ur}</span>
-        <span class="hero-card-foot"><b>${esc(h.cardLabel.toUpperCase())}</b><span>${esc(h.cardMeta.toUpperCase())}</span></span>
+        <span class="hero-card-foot"><b data-reel-title>${esc(w0.title.toUpperCase())}</b><span data-reel-kicker>${esc(w0.kicker.toUpperCase())}</span><i class="reel-bar" data-reel-bar aria-hidden="true"></i></span>
       </a>
       <div class="tiles" data-tiles>${tiles}</div>
     </div>
@@ -117,6 +118,96 @@ function marquee(c) {
       <div class="marquee-track"><div class="marquee-group">${group}</div><div class="marquee-group">${group}</div><div class="marquee-group">${group}</div></div>
     </div>
   </div>`;
+}
+
+// --- the loop: one idea becomes a product (decorative stage + readable beats) ---
+const CODE = [
+  ['<i>// price-watch.ts</i>'],
+  ['<b>const</b> deal = <b>await</b> feed.watch(sku)'],
+  ['<b>if</b> (deal.drop >= rule.min) {'],
+  ['  <b>await</b> notify(user, deal)'],
+  ['}'],
+  [''],
+  ['<b>export const</b> checkout ='],
+  ['  stripe.session({ mode: <u>"payment"</u> })'],
+  [''],
+  ['<i>// alerts.test.ts</i>'],
+  ['test(<u>"alert fires on a real drop"</u>, () => {'],
+  ['  expect(sent).toBe(<b>true</b>)'],
+  ['})'],
+  [''],
+  ['<em>✓ auth</em>'],
+  ['<em>✓ price feed</em>'],
+  ['<em>✓ alerts</em>'],
+  ['<em>✓ checkout</em>'],
+]
+  .map((l) => `<span>${l[0] || "&nbsp;"}</span>`)
+  .join("");
+
+function loop(c) {
+  const l = c.loop;
+  const total = pad(l.beats.length);
+  const beats = l.beats
+    .map((b, i) => `<li class="beat" data-beat="${i}"><span class="beat-n">${pad(i + 1)} / ${total}</span><h3>${esc(b.t)}</h3><p>${esc(b.d)}</p></li>`)
+    .join("");
+  const rail = l.beats.map((b, i) => `<i style="--i:${i}"></i>`).join("");
+  const [ia, ib = ""] = l.idea.split(l.ideaMark);
+  const idea = `“${esc(ia)}<mark>${esc(l.ideaMark)}</mark>${esc(ib)}”`;
+  const rows = [
+    ["$129", "−32%", 1],
+    ["$48", "−12%", 0],
+    ["$310", "−8%", 0],
+  ]
+    .map(([p, d, hot]) => `<li data-ls-row><i class="th"></i><span class="tx"><i></i><i></i></span><b>${p}</b><em${hot ? ' class="hot"' : ""}>${d}</em></li>`)
+    .join("");
+  const bars = [34, 46, 40, 58, 52, 74, 92].map((h, i) => `<rect x="${6 + i * 16}" y="${100 - h}" width="11" height="${h}" rx="2"${i === 6 ? ' class="hot"' : ""}/>`).join("");
+  const checks = l.checks.map((x) => `<li data-ls-check><b>✓</b>${esc(x)}</li>`).join("");
+  return `<section id="loop" class="loop" aria-labelledby="loop-title">
+    <div class="loop-track" data-loop>
+      <div class="loop-sticky shell">
+        <div class="loop-left">
+          <div class="section-label"><span class="num">${l.num}</span><i class="rule"></i><span class="lbl">${esc(l.label)}</span></div>
+          <h2 id="loop-title" class="loop-title">${esc(l.title)}</h2>
+          <ol class="beats">${beats}</ol>
+          <div class="loop-rail" data-loop-rail aria-hidden="true">${rail}</div>
+        </div>
+        <div class="loop-right">
+          <div class="ls" data-loop-stage data-status="${esc(JSON.stringify(l.status))}" aria-hidden="true">
+            <div class="ls-bar"><i></i><i></i><i></i><span class="ls-file">${esc(l.file)}</span><span class="ls-demo">${esc(l.demo)}</span><span class="ls-status" data-ls-state="3"><b></b><span data-ls-status>${esc(l.status[3])}</span></span></div>
+            <div class="ls-body">
+              <div class="ls-dots" data-ls-dots></div>
+              <div class="ls-note" data-ls-note><span class="ls-k">${esc(l.ideaLabel)}</span><p data-ls-idea>${idea}</p></div>
+              <div class="ls-app is-built" data-ls-app>
+                <div class="la-top">
+                  <span class="la-box la-logo" data-ls-box><i data-ls-fill></i><span class="la-tag" data-ls-tag>${esc(l.tags[0])}</span></span>
+                  <span class="la-box la-nav" data-ls-box><i data-ls-fill></i><i data-ls-fill></i><i data-ls-fill></i></span>
+                  <span class="la-box la-cta" data-ls-box><b data-ls-fill>${esc(l.cta)}</b><span class="la-tag" data-ls-tag>${esc(l.tags[3])}</span></span>
+                </div>
+                <div class="la-mid">
+                  <div class="la-box la-chart" data-ls-box>
+                    <svg viewBox="0 0 120 100" preserveAspectRatio="none"><g data-ls-bars>${bars}</g><path data-ls-trend pathLength="1" d="M8 70 28 58 44 62 60 44 76 48 92 28 112 10"/></svg>
+                    <span class="la-tag" data-ls-tag>${esc(l.tags[1])}</span>
+                  </div>
+                  <div class="la-box la-list" data-ls-box>
+                    <ul>${rows}</ul>
+                    <span class="la-tag" data-ls-tag>${esc(l.tags[2])}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="ls-code" data-ls-code><div class="lc-in" data-ls-codein>${CODE}</div><div class="lc-bar"><i data-ls-build></i></div></div>
+              <div class="ls-phone" data-ls-phone>
+                <i class="lp-notch"></i>
+                <div class="lp-notif" data-ls-notif><span><i></i>${esc(l.notif.app)}</span><strong>${esc(l.notif.title)}</strong><p>${esc(l.notif.body)}</p><em>${esc(l.notif.action)}</em></div>
+                <div class="lp-sk"><i></i><i></i><i></i></div>
+              </div>
+              <ul class="ls-checks">${checks}</ul>
+              <div class="ls-stamp" data-ls-stamp>${esc(l.stamp)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>`;
 }
 
 function services(c) {
@@ -241,6 +332,7 @@ function contact(c) {
   const tick = Array.from({ length: 8 }, () => `<span>${esc(k.ticker)}</span>${I.star}`).join("");
   return `<section id="contact" class="contact shell" aria-labelledby="contact-title">
     <div class="contact-card" data-spot>
+      <canvas class="contact-gl" data-contact-gl aria-hidden="true"></canvas>
       <div class="contact-body">
         <h2 id="contact-title" class="contact-title" data-scrub>${esc(k.title)}</h2>
         <div class="contact-cols">
@@ -293,7 +385,7 @@ export function render(lang) {
     term: c.system.term,
     contact: c.contact.gh,
     github: SITE.github,
-    work: c.work.items.map((t, i) => ({ ...PROJECTS[i], title: t.title })),
+    work: c.work.items.map((t, i) => ({ ...PROJECTS[i], title: t.title, kicker: t.kicker })),
   };
   const ld = {
     "@context": "https://schema.org",
@@ -354,6 +446,7 @@ ${header(c)}
 <main id="main">
 ${hero(c)}
 ${marquee(c)}
+${loop(c)}
 ${services(c)}
 ${work(c)}
 ${system(c)}
