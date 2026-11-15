@@ -2943,7 +2943,7 @@ requestAnimationFrame(()=>{resizeMap();fitOld()});
 if(!store.get('toured',false))setTimeout(()=>startTour(0),650);
 else if(!FRAMED)setTimeout(()=>startGPS(false),600);
 // app offline (só no site; dentro do Claude não há service worker)
-if(!FRAMED&&'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))
+if(!FRAMED&&!window.Capacitor&&'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))
  window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})});
 </script>
 </body>
