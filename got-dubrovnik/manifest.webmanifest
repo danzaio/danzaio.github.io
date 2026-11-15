@@ -1,0 +1,17 @@
+{
+  "name": "Porto Real — Guia Game of Thrones em Dubrovnik",
+  "short_name": "Porto Real",
+  "description": "Locações de Game of Thrones em Dubrovnik com mapa, GPS, bússola e câmera com guia.",
+  "lang": "pt-BR",
+  "start_url": "./#mapa",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f1e6cf",
+  "theme_color": "#8f1d1d",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

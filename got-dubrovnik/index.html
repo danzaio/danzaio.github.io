@@ -4,6 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Porto Real de Verdade — Guia GoT em Dubrovnik</title>
+<meta name="theme-color" content="#8f1d1d">
+<meta name="description" content="Guia interativo das locações de Game of Thrones em Dubrovnik: mapa, GPS, bússola, câmera com guia de enquadramento, roteiros e curiosidades.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Porto Real">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -94,7 +103,7 @@ ul.clean li{margin:4px 0}
 .m-wall{fill:none;stroke:var(--wall);stroke-width:5;stroke-linejoin:round}
 .m-wallo{fill:none;stroke:var(--walls);stroke-width:8;stroke-linejoin:round}
 .m-fort{fill:var(--wall);stroke:var(--walls);stroke-width:2}
-.m-street{fill:none;stroke:var(--road);stroke-width:2.2;opacity:.9;stroke-linecap:round}
+.m-street{fill:none;stroke:var(--road);stroke-width:2;opacity:.55;stroke-linecap:round}
 .m-stradun{fill:none;stroke:var(--wall);stroke-width:4;stroke-linecap:round}
 .m-cable{stroke:var(--label);stroke-width:1.6;stroke-dasharray:5 4;fill:none;opacity:.8}
 .m-island{fill:var(--land);stroke:var(--land2);stroke-width:1.5}
@@ -121,6 +130,9 @@ ul.clean li{margin:4px 0}
 .legend{position:absolute;left:10px;bottom:10px;display:flex;gap:6px;flex-wrap:wrap;z-index:5;max-width:calc(100% - 80px)}
 .legend span{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:3px 8px;opacity:.95}
 .legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+#near{position:absolute;left:10px;right:64px;bottom:10px;z-index:6;display:none;align-items:center;gap:10px;background:var(--paper);border:1px solid var(--gold2);border-radius:14px;box-shadow:var(--shadow);padding:9px 12px;cursor:pointer;max-width:460px}
+.mk text.mkl{display:none;font-family:Inter,sans-serif;font-weight:700;font-size:11.5px;fill:var(--label);paint-order:stroke;stroke:var(--land);stroke-width:3.5px;stroke-linejoin:round;text-anchor:middle;pointer-events:none}
+#map.zoomed .mk text.mkl{display:block}
 .welcome{background:var(--paper);border:1px solid var(--gold2);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px;font-size:13.5px;max-width:420px}
 .welcome b.t{font-family:Cinzel,serif;font-size:15px;display:block;margin-bottom:4px}
 /* sheet */
@@ -178,7 +190,8 @@ select{font:inherit;min-height:44px;width:100%;border-radius:12px;border:1px sol
 #modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:60;display:none;align-items:flex-end;justify-content:center}
 #modal.on{display:flex}
 #modal .box{background:var(--paper);width:100%;max-width:560px;max-height:92%;overflow:auto;border-radius:20px 20px 0 0;padding:16px 14px calc(16px + var(--sab))}
-#toast{position:fixed;left:50%;bottom:calc(var(--tab) + var(--sab) + 14px);transform:translate(-50%,30px);opacity:0;transition:.25s;background:var(--ink);color:var(--paper);padding:10px 14px;border-radius:12px;font-size:13.5px;font-weight:600;z-index:70;max-width:92vw;box-shadow:var(--shadow);pointer-events:none}
+#toast{position:fixed;left:50%;bottom:calc(var(--tab) + var(--sab) + 92px);transform:translate(-50%,30px);opacity:0;transition:.25s;background:var(--ink);color:var(--paper);padding:10px 14px;border-radius:12px;font-size:13.5px;font-weight:600;z-index:70;max-width:92vw;box-shadow:var(--shadow);pointer-events:none;z-index:95}
+#toast.top{bottom:auto;top:calc(var(--sat) + 110px)}
 #toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 /* quiz */
 .qopt{display:block;width:100%;text-align:left;margin:6px 0;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--paper2);font-weight:600;cursor:pointer}
@@ -214,13 +227,47 @@ table.t td:last-child{text-align:right;font-weight:700;white-space:nowrap}
 .shutter:active{background:#fff}
 .camBtn{width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.35);display:grid;place-items:center;color:#fff;cursor:pointer;flex:none;font-size:18px}
 .camThumb{width:52px;height:52px;border-radius:12px;border:2px solid #fff;object-fit:cover;background:#222;cursor:pointer}
-.camGuide{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--sab) + 126px);max-width:94vw;white-space:normal!important;text-align:center;justify-content:center;background:rgba(0,0,0,.6);border-radius:14px;padding:8px 13px;font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px;white-space:nowrap;border:1px solid rgba(255,255,255,.2)}
+.camGuide{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--sab) + 172px);max-width:94vw;white-space:normal!important;text-align:center;justify-content:center;background:rgba(0,0,0,.6);border-radius:14px;padding:8px 13px;font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px;white-space:nowrap;border:1px solid rgba(255,255,255,.2)}
 .camGuide.ok{background:rgba(40,140,70,.9)}
 .camSide{position:absolute;right:12px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px}
 .camSide button{width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.35);color:#fff;font-weight:800;font-size:12px;cursor:pointer}
 .camSide button.on{background:rgba(214,174,69,.9);color:#000}
 .camRot{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);background:rgba(0,0,0,.6);padding:8px 12px;border-radius:12px;font-size:13px;font-weight:700}
+.camLens{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--sab) + 120px);display:flex;gap:8px;background:rgba(0,0,0,.45);padding:5px;border-radius:999px}
+.camLens button{min-width:44px;height:36px;padding:0 10px;border-radius:999px;border:0;background:transparent;color:#fff;font-weight:800;font-size:13px;cursor:pointer}
+.camLens button.on{background:rgba(255,255,255,.92);color:#000}
 #camFlash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .3s}
+/* tutorial */
+#tour{position:fixed;inset:0;z-index:85;display:none}
+#tour.on{display:block}
+#tourSpot{position:absolute;border-radius:14px;box-shadow:0 0 0 200vmax rgba(12,9,6,.68);border:2px solid var(--gold2);transition:all .35s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+#tourSpot.none{left:50%!important;top:45%!important;width:0!important;height:0!important;border-width:0}
+#tourCard{position:absolute;left:12px;right:12px;max-width:430px;margin:0 auto;background:var(--paper);border:1px solid var(--gold2);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.45);padding:16px 16px 14px;animation:tin .3s ease}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+#tourCard h3{font-size:18px;margin:6px 0 6px}
+#tourCard p{margin:0 0 12px;font-size:14.5px;line-height:1.5}
+.tdots{display:flex;gap:5px;align-items:center}
+.tdots i{width:7px;height:7px;border-radius:5px;background:var(--line);transition:.3s}
+.tdots i.on{background:var(--gold2);width:20px}
+.tbar{display:flex;align-items:center;gap:8px}
+.tskip{background:none;border:0;color:var(--muted);font-weight:600;font-size:13px;cursor:pointer;padding:8px 4px;margin-right:auto}
+.tbig{font-size:42px;text-align:center;line-height:1}
+.seg2{display:inline-flex;gap:3px;background:var(--paper2);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg2 button{border:0;background:none;height:30px;min-width:46px;border-radius:999px;font-weight:800;font-size:13px;cursor:pointer;color:var(--ink)}
+.seg2 button.on{background:var(--ink);color:var(--paper)}
+#arLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.arl{position:absolute;left:0;top:0;pointer-events:auto;display:flex;align-items:center;gap:7px;background:rgba(18,14,10,.8);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:4px 12px 4px 4px;font-family:Inter,sans-serif;text-align:left;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.35);will-change:transform;cursor:pointer;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.arl .b{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;flex:none;border:2px solid #fff}
+.arl .tx b{display:block;font-size:13px;line-height:1.15}
+.arl small{display:block;font-size:10.5px;opacity:.85;font-weight:600;line-height:1.2}
+.arl small i{font-style:normal;color:#ffd76a;font-weight:800}
+.arl::after{content:"";position:absolute;left:50%;top:100%;width:2px;height:var(--stem,16px);background:linear-gradient(rgba(255,255,255,.85),rgba(255,255,255,0));transform:translateX(-50%)}
+.arsun{position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;place-items:center;font-size:26px;background:radial-gradient(rgba(255,214,90,.55),rgba(255,214,90,0) 70%);pointer-events:none}
+.artgt{position:absolute;left:0;top:0;flex-direction:column;align-items:center;gap:4px;pointer-events:none}
+.artgt i{width:64px;height:64px;border-radius:50%;border:3px solid #ffd76a;box-shadow:0 0 0 2px rgba(0,0,0,.4),inset 0 0 0 2px rgba(0,0,0,.25)}
+.artgt span{background:rgba(0,0,0,.6);color:#ffd76a;font:800 12px Inter,sans-serif;padding:3px 8px;border-radius:999px}
+.aredge{position:absolute;top:46%;padding:10px 12px;background:rgba(0,0,0,.6);color:#ffd76a;font:800 15px Inter,sans-serif;border-radius:12px;pointer-events:none}
+.aredge.l{left:8px}.aredge.r{right:66px}
 @media (min-width:760px){ .loc{max-width:700px;margin-left:auto;margin-right:auto} #sheet{max-width:620px;margin:0 auto} }
 </style>
 </head>
@@ -243,9 +290,11 @@ table.t td:last-child{text-align:right;font-weight:700;white-space:nowrap}
       <button id="zOut" aria-label="Afastar">－</button>
       <button id="zMe" aria-label="Minha posição" title="Minha posição"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
       <button id="zFit" aria-label="Ver tudo" title="Ver cidade velha"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      <button id="zAR" aria-label="Radar AR" title="Radar AR" style="font-size:13px;font-weight:900;letter-spacing:.04em;background:linear-gradient(180deg,var(--gold2),var(--gold));color:#fff;border-color:transparent">AR</button>
       <button id="zLayer" aria-label="Pontos de foto" title="Pontos de foto"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
     </div>
     <div class="legend" id="legend"></div>
+    <div id="near" role="button"></div>
   </section>
 
   <section class="view" id="v-locais"></section>
@@ -262,6 +311,7 @@ table.t td:last-child{text-align:right;font-weight:700;white-space:nowrap}
   <button data-v="mais"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h16M4 19h10"/></svg>Mais</button>
 </nav>
 
+<div id="tour" role="dialog" aria-modal="true" aria-label="Tutorial"><div id="tourSpot"></div><div id="tourCard"></div></div>
 <div id="scrim"></div>
 <div id="sheet" role="dialog" aria-modal="true"><div class="grab" id="grab"><i></i></div><div id="sheetBody"></div></div>
 <div id="modal"><div class="box" id="modalBox"></div></div>
@@ -269,10 +319,12 @@ table.t td:last-child{text-align:right;font-weight:700;white-space:nowrap}
 <div id="cam" aria-modal="true" role="dialog">
   <video id="camV" playsinline muted autoplay></video>
   <svg id="camOv" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div id="arLayer"></div>
   <div class="camTop"><div style="flex:1;min-width:0"><h3 class="serif" id="camTitle"></h3><div class="camTip" id="camTip"></div></div><button class="camBtn" id="camX" aria-label="Fechar câmera">✕</button></div>
   <div class="camGuide" id="camGuide" style="display:none"></div>
   <div class="camRot" id="camRot" style="display:none">↻ Esta foto fica melhor na horizontal</div>
-  <div class="camSide"><button id="camGrid" class="on" aria-label="Grade">GRADE</button><button id="camGh" class="on" aria-label="Silhueta">GUIA</button><button id="camComp" aria-label="Bússola">🧭</button></div>
+  <div class="camSide"><button id="camAR" aria-label="Radar AR">AR</button><button id="camGrid" class="on" aria-label="Grade">GRADE</button><button id="camGh" class="on" aria-label="Silhueta">GUIA</button><button id="camComp" aria-label="Bússola">🧭</button></div>
+  <div class="camLens" id="camLens" style="display:none"></div>
   <div class="camBot"><img class="camThumb" id="camLast" alt=""><button class="shutter" id="camShot" aria-label="Tirar foto"></button><button class="camBtn" id="camFlip" aria-label="Trocar câmera">⟲</button></div>
   <div id="camFlash"></div>
 </div>
@@ -290,10 +342,10 @@ function dist(a,b){const dLa=(b.lat-a.lat)*toR,dLo=(b.lon-a.lon)*toR;const s=Mat
 function bearing(a,b){const y=Math.sin((b.lon-a.lon)*toR)*Math.cos(b.lat*toR);const x=Math.cos(a.lat*toR)*Math.sin(b.lat*toR)-Math.sin(a.lat*toR)*Math.cos(b.lat*toR)*Math.cos((b.lon-a.lon)*toR);return (Math.atan2(y,x)/toR+360)%360}
 const DIRS=['N','NNE','NE','ENE','L','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'];
 const card=b=>DIRS[Math.round(((b%360)+360)%360/22.5)%16];
-const fmtD=m=>m<1000?(Math.round(m/5)*5)+' m':(m/1000).toFixed(m<10000?1:0).replace('.',',')+' km';
+const fmtD=m=>m<1000?(Math.round(m/5)*5)+' m':m<10000?(m/1000).toFixed(1).replace('.',',')+' km':Math.round(m/1000).toLocaleString('pt-BR')+' km';
 const walk=m=>Math.max(1,Math.round(m*1.3/72));
 const angDiff=(a,b)=>{let d=((a-b)%360+540)%360-180;return d};
-let toastT;function toast(msg,ms=2600){const t=$('#toast');t.innerHTML=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),ms)}
+let toastT;function toast(msg,ms=2600){const t=$('#toast');t.innerHTML=msg;t.classList.toggle('top',typeof CAM!=='undefined'&&CAM.on);t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),ms)}
 const TZ='Europe/Zagreb';
 const fmtT=d=>{try{return new Intl.DateTimeFormat('pt-BR',{timeZone:TZ,hour:'2-digit',minute:'2-digit'}).format(d)}catch(e){return d.toTimeString().slice(0,5)}};
 const zDate=d=>{try{return new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}).format(d)}catch(e){return d.toISOString().slice(0,10)}};
@@ -572,7 +624,8 @@ const QUIZ=[
 ];
 
 /* ============ estado ============ */
-const S={pos:store.get('pos',null),posSrc:store.get('pos',null)?'manual':null,heading:null,headingSrc:null,calib:store.get('calib',null),
+const S={trip:store.get('trip',null),sim:store.get('sim',false),realPos:null,guiding:false,compAcc:null,
+ pos:store.get('pos',null),posSrc:store.get('pos',null)?(store.get('sim',false)?'sim':'manual'):null,heading:null,headingSrc:null,calib:store.get('calib',null),
  visited:new Set(store.get('visited',[])),sel:null,route:null,showPhotos:false,target:store.get('target','jesuit'),placing:false,
  filter:'all',spoil:store.get('nospoil',false),alerted:new Set(),theme:store.get('theme','auto')};
 
@@ -635,7 +688,7 @@ function buildMap(){
  const brk=P([[42.6398,18.1129],[42.6402,18.1137],[42.6405,18.1140]]);
  svg.innerHTML=`<defs><pattern id="waves" width="90" height="60" patternUnits="userSpaceOnUse"><path class="m-waves" d="M5 20q10-8 20 0t20 0M50 48q10-8 20 0t20 0"/></pattern>
  <pattern id="roof" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(-22)"><line class="m-hatch" x1="0" y1="0" x2="0" y2="9"/></pattern></defs>
- <rect class="m-sea" x="-6000" y="-6000" width="12000" height="12000"/><rect x="-6000" y="-6000" width="12000" height="12000" fill="url(#waves)"/>
+ <g id="world"><rect class="m-sea" x="-6000" y="-6000" width="12000" height="12000"/><rect x="-6000" y="-6000" width="12000" height="12000" fill="url(#waves)"/>
  <path class="m-land" d="${land}"/>${contours}<path class="m-island" d="${pathC(lokrum(),true)}"/>${trees}
  <path class="m-fort" d="${pathL(brk,false)}" style="fill:none;stroke-width:3"/>
  ${roadsS}
@@ -647,7 +700,7 @@ function buildMap(){
  ${circ(42.64094,18.10618,13)}${circ(42.6429,18.1085,12)}
  ${fort([[42.64232,18.11205],[42.64222,18.11262],[42.64185,18.11255],[42.6419,18.11205]])}
  ${fort([[42.6398,18.1120],[42.63975,18.1129],[42.6394,18.1127],[42.63945,18.1119]])}
- <g id="gRoute"></g><g id="gLabels"></g><g id="gPhotos"></g><g id="gMarkers"></g><g id="gMe"></g>`;
+ </g><g id="gRoute"></g><g id="gLabels"></g><g id="gPhotos"></g><g id="gMarkers"></g><g id="gMe"></g>`;
  // rótulos (tamanho constante)
  $('#gLabels').innerHTML=LABELS.map(l=>{const p=xy(l.lat,l.lon);return `<g class="cs" data-x="${f1(p[0])}" data-y="${f1(p[1])}"><text class="lbl ${l.c}" font-size="${l.s}" text-anchor="middle">${esc(l.t)}</text></g>`}).join('');
  drawMarkers();drawPhotos();
@@ -656,7 +709,7 @@ function drawMarkers(){
  $('#gMarkers').innerHTML=L.filter(l=>l.id!=='trsteno').map(l=>{const p=xy(l.lat,l.lon);const col=`var(--c-${l.cat})`;const v=S.visited.has(l.id);
   return `<g class="mk cs${S.sel===l.id?' sel':''}" data-id="${l.id}" data-x="${f1(p[0])}" data-y="${f1(p[1])}">
    <circle class="halo" r="20"/><path d="M0 0 C-5-8-14-12-14-23a14 14 0 1 1 28 0c0 11-9 15-14 23z" fill="${col}" stroke="#fff" stroke-width="2.2" transform="translate(0,0)"/>
-   <text y="-23">${l.n}</text>${v?'<circle cx="11" cy="-34" r="7" fill="var(--ok)" stroke="#fff" stroke-width="1.8"/><path d="m7.5-34 2.4 2.4 4.4-4.6" stroke="#fff" stroke-width="2" fill="none"/>':''}</g>`}).join('');
+   <text y="-23">${l.n}</text><text class="mkl" y="15">${esc(l.name.replace(/ \(.*\)/,'').replace('Muralhas — trecho do mar','Muralhas (mar)'))}</text>${v?'<circle cx="11" cy="-34" r="7" fill="var(--ok)" stroke="#fff" stroke-width="1.8"/><path d="m7.5-34 2.4 2.4 4.4-4.6" stroke="#fff" stroke-width="2" fill="none"/>':''}</g>`}).join('');
  refreshCS();
 }
 function drawPhotos(){
@@ -667,13 +720,13 @@ function drawPhotos(){
 }
 function refreshCS(){MAP.cs=$$('.cs',MAP.svg);applyView()}
 function applyView(){const {W,H,s,cx,cy}=MAP;MAP.svg.setAttribute('viewBox',`${f1(cx-W/2/s)} ${f1(cy-H/2/s)} ${f1(W/s)} ${f1(H/s)}`);
- const k=1/s,km=k*Math.max(0.66,Math.min(1,0.5+s*0.35));
+ const k=1/s,km=k*Math.max(0.66,Math.min(1,0.5+s*0.35));MAP.svg.classList.toggle('zoomed',s>2.1);
  for(const g of MAP.cs)g.setAttribute('transform',`translate(${g.dataset.x},${g.dataset.y}) scale(${(g.classList.contains('mk')||g.classList.contains('pm')?km:k).toFixed(4)})`);drawMe(true)}
 function resizeMap(){const r=MAP.svg.getBoundingClientRect();if(r.width<10)return;MAP.W=r.width;MAP.H=r.height;applyView()}
 function fit(pts,pad=50,top=0){if(!pts.length)return;let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;pts.forEach(([x,y])=>{x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)});
  const w=Math.max(80,x1-x0),h=Math.max(80,y1-y0);MAP.s=Math.min((MAP.W-pad*2)/w,(MAP.H-pad*2-top)/h,4);MAP.cx=(x0+x1)/2;MAP.cy=(y0+y1)/2-(top/2)/MAP.s;applyView()}
 function fitOld(){fit(['gradac','lovr','minceta','ploce','walls','oldport'].map(id=>xy(LBY[id].lat,LBY[id].lon)),36)}
-function centerOn(lat,lon,minS){const p=xy(lat,lon);MAP.cx=p[0];MAP.cy=p[1]+ (MAP.H*0.18)/MAP.s;if(minS&&MAP.s<minS)MAP.s=minS;applyView()}
+function centerOn(lat,lon,minS,noOffset){if(minS&&MAP.s<minS)MAP.s=minS;const p=xy(lat,lon);MAP.cx=p[0];MAP.cy=p[1]+(noOffset?0:(MAP.H*0.18)/MAP.s);applyView()}
 function zoomAt(f,px,py){const r=MAP.svg.getBoundingClientRect();px=px??r.left+MAP.W/2;py=py??r.top+MAP.H/2;
  const wx=MAP.cx+(px-r.left-MAP.W/2)/MAP.s,wy=MAP.cy+(py-r.top-MAP.H/2)/MAP.s;MAP.s=Math.max(0.06,Math.min(5,MAP.s*f));
  MAP.cx=wx-(px-r.left-MAP.W/2)/MAP.s;MAP.cy=wy-(py-r.top-MAP.H/2)/MAP.s;applyView()}
@@ -688,13 +741,15 @@ function zoomAt(f,px,py){const r=MAP.svg.getBoundingClientRect();px=px??r.left+M
    if(d0>0){const r=svg.getBoundingClientRect();const wx=MAP.cx+(m0.x-r.left-MAP.W/2)/MAP.s,wy=MAP.cy+(m0.y-r.top-MAP.H/2)/MAP.s;MAP.s=Math.max(0.06,Math.min(5,MAP.s*d1/d0));
     MAP.cx=wx-(m1.x-r.left-MAP.W/2)/MAP.s;MAP.cy=wy-(m1.y-r.top-MAP.H/2)/MAP.s;moved+=99;applyView()}}});
  const up=e=>{if(!pts.has(e.pointerId))return;const single=pts.size===1;pts.delete(e.pointerId);
-  if(single&&moved<9){if(S.placing){const r=svg.getBoundingClientRect();const wx=MAP.cx+(e.clientX-r.left-MAP.W/2)/MAP.s,wy=MAP.cy+(e.clientY-r.top-MAP.H/2)/MAP.s;setManualPos(ll(wx,wy),'no mapa');S.placing=false;renderMapTop();return}
-   if(downMk)openLoc(downMk);else if(downPh)openPhoto(downPh)}};
+  if(single&&moved<9){const r=svg.getBoundingClientRect();const wx=MAP.cx+(e.clientX-r.left-MAP.W/2)/MAP.s,wy=MAP.cy+(e.clientY-r.top-MAP.H/2)/MAP.s;
+   if(S.placing){setManualPos(ll(wx,wy),'no mapa');S.placing=false;renderMapTop();return}
+   if(downMk)openLoc(downMk);else if(downPh)openPhoto(downPh);
+   else if(S.sim){clearTimeout(S.simT);S.simT=setTimeout(()=>setManualPos(ll(wx,wy),'aqui',true),320)}}};
  svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',e=>pts.delete(e.pointerId));
  svg.addEventListener('wheel',e=>{e.preventDefault();zoomAt(Math.exp(-e.deltaY*0.0016),e.clientX,e.clientY)},{passive:false});
- let lastTap=0;svg.addEventListener('pointerup',e=>{const t=Date.now();if(t-lastTap<300&&moved<9&&!downMk)zoomAt(1.8,e.clientX,e.clientY);lastTap=t});
+ let lastTap=0;svg.addEventListener('pointerup',e=>{const t=Date.now();if(t-lastTap<300&&moved<9&&!downMk){clearTimeout(S.simT);zoomAt(1.8,e.clientX,e.clientY)}lastTap=t});
 })();
-$('#zIn').onclick=()=>zoomAt(1.5);$('#zOut').onclick=()=>zoomAt(1/1.5);$('#zFit').onclick=fitOld;
+$('#zAR').onclick=()=>openCam(null,true);$('#zIn').onclick=()=>zoomAt(1.5);$('#zOut').onclick=()=>zoomAt(1/1.5);$('#zFit').onclick=fitOld;
 $('#zMe').onclick=()=>{if(!S.pos){openLocModal();return}
  if(S.posSrc==='gps'){S.follow=!S.follow;$('#zMe').style.background=S.follow?'var(--blue)':'';$('#zMe').style.color=S.follow?'#fff':'';toast(S.follow?'Seguindo você no mapa':'Parei de seguir')}
  centerOn(S.pos.lat,S.pos.lon,1.2)};
@@ -707,32 +762,54 @@ function drawRoute(){const g=$('#gRoute');if(!S.route){g.innerHTML='';renderMapT
 function renderMapTop(){const el=$('#mapTop');let h='';
  if(!store.get('welcomed',false))h+=`<div class="welcome"><b class="t">Bem-vindo a Porto Real</b>Toque nos pinos para ver a cena, a história e como chegar. O botão 📷 mostra onde ficar para cada foto. <div class="row" style="margin-top:8px"><button class="btn sm gold" id="wOk">Entendi</button><button class="btn sm" id="wLoc">${FRAMED?'Definir minha posição':'📡 Ativar GPS'}</button></div></div>`;
  if(S.placing)h+=`<span class="floatchip" style="background:var(--gold2);color:#fff">👆 Toque no mapa onde você está <b id="cancelPlace" style="margin-left:6px">✕</b></span>`;
+ if(S.sim)h+=`<span class="floatchip" id="simChip" style="background:var(--c-excursao);color:#fff">🧪 Modo teste · toque no mapa para andar <b style="margin-left:6px">Sair</b></span>`;
+ else if(S.posSrc==='gps'&&S.pos&&dist(S.pos,{lat:LAT0,lon:LON0})>30000)h+=`<span class="floatchip" id="farChip">✅ GPS ok · você está a ${fmtD(dist(S.pos,{lat:LAT0,lon:LON0}))} · <u>🧪 testar aqui</u></span>`;
  if(S.route){const r=ROUTES.find(x=>x.id===S.route);h+=`<span class="floatchip" id="routeChip">🗺️ ${esc(r.name)} <b style="margin-left:4px">✕</b></span>`}
  const t=LBY.trsteno;h+=`<span class="floatchip" id="trChip">↖ Trsteno · ${S.pos?fmtD(dist(S.pos,t)):'18 km'}</span>`;
  el.innerHTML=h;
  const w=$('#wOk');if(w)w.onclick=()=>{store.set('welcomed',true);renderMapTop()};const wl=$('#wLoc');if(wl)wl.onclick=()=>{store.set('welcomed',true);if(FRAMED)openLocModal();else{startGPS(true);startCompass(true);renderMapTop()}};
  const cp=$('#cancelPlace');if(cp)cp.onclick=()=>{S.placing=false;renderMapTop()};
  const rc=$('#routeChip');if(rc)rc.onclick=()=>{S.route=null;drawRoute()};
+ const sc=$('#simChip');if(sc)sc.onclick=()=>setSim(false);const fc=$('#farChip');if(fc)fc.onclick=()=>{setSim(true,'pile');centerOn(LBY.pile.lat,LBY.pile.lon,1.4,true)};
  $('#trChip').onclick=()=>openLoc('trsteno');
 }
 $('#legend').innerHTML=Object.entries(CATS).map(([k,v])=>`<span><i style="background:var(--c-${k})"></i>${v.split(' ')[0]==='Colado'?'Arredores':v.split(' ')[0]==='Dentro'?'Cidade':v.split(' ')[0]}</span>`).join('');
 
 /* ============ posição e bússola ============ */
-function setManualPos(p,how){S.pos={lat:p.lat,lon:p.lon};S.posSrc='manual';store.set('pos',S.pos);updatePosUI();toast('📍 Posição marcada '+how);}
-function updatePosUI(){const pill=$('#locPill'),t=$('#locTxt');pill.classList.remove('live','manual');
+function setManualPos(p,how,quiet){S.pos={lat:p.lat,lon:p.lon};S.posSrc=S.sim?'sim':'manual';store.set('pos',S.pos);updatePosUI(true);if(!quiet)toast((S.sim?'🧪 Você “está” ':'📍 Posição marcada ')+how);if(S.sim)checkProximity()}
+let lastUI=0,lastUIpos=null;
+function updatePosUI(force){const pill=$('#locPill'),t=$('#locTxt');pill.classList.remove('live','manual');
  if(S.posSrc==='gps'){pill.classList.add('live');t.textContent='GPS'+(S.pos.acc?' ±'+Math.round(S.pos.acc)+' m':'')}
+ else if(S.posSrc==='sim'){pill.classList.add('manual');t.textContent='🧪 Modo teste'}
  else if(S.posSrc==='manual'){pill.classList.add('manual');t.textContent='Posição manual'}else t.textContent='Sem posição';
- drawMe();renderMapTop();if(cur==='locais')renderList();if(cur==='bussola')renderCompass();if(cur==='fotos')renderPhotosLight()}
+ drawMe();if(cur==='bussola')updateCompassDyn();if(typeof CAM!=='undefined'&&CAM.on)camTick();
+ // telas mais pesadas: no máximo a cada 4 s, ou se andou mais de 8 m
+ const now=Date.now(),moved=lastUIpos&&S.pos?dist(lastUIpos,S.pos):1e9;
+ if(!force&&now-lastUI<4000&&moved<8)return;lastUI=now;lastUIpos=S.pos?{lat:S.pos.lat,lon:S.pos.lon}:null;
+ renderMapTop();renderNear();if(cur==='locais')renderList();if(cur==='fotos')renderPhotosLight()}
+function checkProximity(){if(!S.pos)return;for(const l of L){if(S.alerted.has(l.id))continue;if(dist(S.pos,l)<35){S.alerted.add(l.id);
+  toast(`⚔️ Você chegou: <b>${esc(l.name)}</b> — ${esc(l.got)}. <u id="tGo">Ver cena</u>`,6500);setTimeout(()=>{const g=$('#tGo');if(g)g.onclick=()=>openLoc(l.id)},50);
+  try{navigator.vibrate&&navigator.vibrate([60,40,60])}catch(e){}break}}}
+function renderNear(){const el=$('#near');if(!el)return;if(!S.pos){el.style.display='none';$('#legend').style.display='';return}
+ let best=null,bd=1e9;for(const l of L){const d=dist(S.pos,l);if(d<bd){bd=d;best=l}}
+ if(bd>600){el.style.display='none';$('#legend').style.display='';return}
+ const b=bearing(S.pos,best);el.style.display='flex';$('#legend').style.display='none';
+ el.innerHTML=`<span class="badge" style="background:var(--c-${best.cat})">${best.n}</span><div style="flex:1;min-width:0"><div style="font-size:11px;color:var(--muted);font-weight:700">${bd<35?'VOCÊ ESTÁ AQUI':'MAIS PERTO DE VOCÊ'}</div><b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(best.name)}</b><span class="small" style="color:var(--gold);font-style:italic">${esc(best.got)}</span></div><div style="text-align:right;font-weight:800;font-size:13px">${bd<35?'✓':arrowSVG(b,20)+'<br>'+fmtD(bd)}</div>`;
+ el.onclick=()=>openLoc(best.id)}
 function startGPS(fromUser){if(!('geolocation' in navigator)){if(fromUser)gpsFail();return}
  try{navigator.geolocation.getCurrentPosition(onPos,()=>{if(fromUser)gpsFail()},{enableHighAccuracy:true,timeout:9000,maximumAge:20000});
   if(S.watch==null)S.watch=navigator.geolocation.watchPosition(onPos,()=>{},{enableHighAccuracy:true,maximumAge:5000});}catch(e){if(fromUser)gpsFail()}}
 function gpsFail(){toast(FRAMED?'GPS bloqueado dentro do app do Claude. Abra a versão com GPS (toque na posição, no topo) ou marque no mapa.':'Não consegui o GPS. Confira se a localização está liberada para o navegador nos Ajustes do celular.',4800)}
-function onPos(p){const first=S.posSrc!=='gps';S.pos={lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy};S.posSrc='gps';updatePosUI();
- if(S.follow&&cur==='mapa')centerOn(S.pos.lat,S.pos.lon);
- if(CAM.on)camTick();
- if(first){const d=dist(S.pos,{lat:LAT0,lon:LON0});if(d>40000)toast('Você está a '+fmtD(d)+' de Dubrovnik — as distâncias vão ficar enormes até você chegar 😉',4200)}
- // proximidade
- for(const l of L){if(S.alerted.has(l.id))continue;if(dist(S.pos,l)<35){S.alerted.add(l.id);toast(`⚔️ Você chegou: <b>${esc(l.name)}</b> — ${esc(l.got)}. <u id="tGo">Ver cena</u>`,6000);setTimeout(()=>{const g=$('#tGo');if(g)g.onclick=()=>openLoc(l.id)},50);try{navigator.vibrate&&navigator.vibrate([60,40,60])}catch(e){}break}}}
+function onPos(p){const np={lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy};S.realPos=np;
+ if(S.sim){renderMapTop();return}// modo teste ativo: GPS real fica guardado, mas não move você
+ const first=S.posSrc!=='gps';S.pos=np;S.posSrc='gps';updatePosUI(first);
+ if(S.follow&&cur==='mapa')centerOn(S.pos.lat,S.pos.lon,null,true);
+ if(first&&dist(S.pos,{lat:LAT0,lon:LON0})>30000)toast('✅ GPS funcionando! Você está a '+fmtD(dist(S.pos,{lat:LAT0,lon:LON0}))+' de Dubrovnik. Para testar daqui, use o 🧪 Modo teste.',5500);
+ checkProximity()}
+function setSim(on,at){S.sim=on;store.set('sim',on);
+ if(on){const l=LBY[at]||LBY.pile;setManualPos(l,'em '+l.name,true);toast('🧪 Modo teste ligado: toque no mapa para “andar” por Dubrovnik',4500);S.alerted=new Set()}
+ else{if(S.realPos){S.pos=S.realPos;S.posSrc='gps'}else if(S.posSrc==='sim'){S.posSrc=S.pos?'manual':null}updatePosUI(true);toast('Modo teste desligado')}
+ renderMapTop()}
 let compassTimer=null,compassOn=false;
 // direção para onde a câmera traseira aponta (celular em pé) ou o topo do aparelho (deitado)
 function headingFrom(a,b,g){const A=a*toR,B=b*toR,G=g*toR;
@@ -742,7 +819,7 @@ async function startCompass(silent){
  if(compassOn&&S.headingSrc==='live')return true;
  try{if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){const r=await DeviceOrientationEvent.requestPermission();if(r!=='granted')throw 0}}catch(e){if(!silent)compassFail();return false}
  compassOn=true;let got=false;
- const h=e=>{if(e.beta!=null)S.tilt={b:e.beta,g:e.gamma};let hd=null,so=0;try{so=(screen.orientation&&screen.orientation.angle)||window.orientation||0}catch(_){ }
+ const h=e=>{if(e.beta!=null)S.tilt={b:e.beta,g:e.gamma};if(typeof e.webkitCompassAccuracy==='number')S.compAcc=e.webkitCompassAccuracy;let hd=null,so=0;try{so=(screen.orientation&&screen.orientation.angle)||window.orientation||0}catch(_){ }
   if(typeof e.webkitCompassHeading==='number'&&!isNaN(e.webkitCompassHeading)){hd=(e.webkitCompassHeading+so+360)%360}
   else if((e.absolute||e.type==='deviceorientationabsolute')&&e.alpha!=null){const r=headingFrom(e.alpha,e.beta||0,e.gamma||0);hd=r.cam?r.h:(r.h+so+360)%360}
   if(hd==null)return;got=true;
@@ -762,12 +839,14 @@ function openLocModal(){
  <button class="btn sm" id="mPlace" style="margin-top:8px">👆 Marcar no mapa (sem GPS)</button>`}
  <h3 style="font-size:14px;margin:14px 0 6px">Ou: estou em…</h3><select id="mSel"><option value="">Escolha um local</option>${opts}</select>
  ${S.pos?'<button class="btn sm" id="mClear" style="margin-top:10px">Apagar posição</button>':''}
+ <div class="sep"></div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><b>🧪 Modo teste</b><div class="small muted">Finge que você já está em Dubrovnik: toque no mapa para “andar”. Distâncias, avisos de chegada, bússola e câmera funcionam como se fosse lá.</div></div><button class="btn sm ${S.sim?'gold':''}" id="mSim">${S.sim?'Ligado ✓':'Ligar'}</button></div>
  <button class="btn" style="width:100%;margin-top:12px" data-close>Fechar</button>`);
+ $('#mSim').onclick=()=>{const on=!S.sim;closeModal();go('mapa');setSim(on,'pile');if(on)setTimeout(()=>centerOn(LBY.pile.lat,LBY.pile.lon,1.4,true),80)};
  $('#mPlace').onclick=()=>{closeModal();S.placing=true;go('mapa');renderMapTop();};
  $('#mGps').onclick=()=>{startGPS(true);if(!FRAMED)startCompass(true);closeModal()};
  const mc=$('#mComp');if(mc)mc.onclick=()=>{startCompass(false).then(ok=>{if(ok)toast('🧭 Bússola ligada')});closeModal()};
  $('#mSel').onchange=e=>{const l=LBY[e.target.value];if(l){setManualPos(l,'em '+l.name);closeModal()}};
- const c=$('#mClear');if(c)c.onclick=()=>{S.pos=null;S.posSrc=null;store.set('pos',null);updatePosUI();closeModal()};
+ const c=$('#mClear');if(c)c.onclick=()=>{S.pos=null;S.posSrc=null;store.set('pos',null);if(S.sim){S.sim=false;store.set('sim',false)}updatePosUI(true);closeModal()};
 }
 $('#locPill').onclick=openLocModal;
 
@@ -779,9 +858,14 @@ const SUN=(()=>{const dayMs=864e5,J1970=2440588,J2000=2451545,e=toR*23.4397;
   const dec=Math.asin(Math.sin(e)*Math.sin(Lm)),ra=Math.atan2(Math.sin(Lm)*Math.cos(e),Math.cos(Lm));const H=toR*(280.16+360.9856235*d)-lw-ra;
   const az=Math.atan2(Math.sin(H),Math.cos(H)*Math.sin(phi)-Math.tan(dec)*Math.cos(phi));const alt=Math.asin(Math.sin(phi)*Math.sin(dec)+Math.cos(phi)*Math.cos(dec)*Math.cos(H));
   return {az:(az/toR+180+360)%360,alt:alt/toR}}})();
-function sunDay(){const now=new Date(),today=zDate(now);const out={};let prev=null;
- for(let t=now.getTime()-26*36e5;t<now.getTime()+26*36e5;t+=120000){const d=new Date(t);const a=SUN(d,LAT0,LON0).alt;
-  if(prev!=null&&zDate(d)===today){if(prev<-0.83&&a>=-0.83)out.rise=d;if(prev>=-0.83&&a<-0.83)out.set=d;if(prev<6&&a>=6)out.gEndAM=d;if(prev>=6&&a<6)out.gStartPM=d}prev=a}return out}
+// data planejada da viagem (padrão: hoje)
+const tripDS=()=>{const t=zDate(new Date());return S.trip&&S.trip>=t?S.trip:t};
+const isToday=ds=>ds===zDate(new Date());
+const dayBase=ds=>new Date(ds+'T10:30:00Z').getTime();
+const fmtDay=ds=>{try{return new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'short',timeZone:TZ}).format(new Date(dayBase(ds)))}catch(e){return ds}};
+function sunDay(ds){ds=ds||tripDS();const base=dayBase(ds);const out={};let prev=null;
+ for(let t=base-14*36e5;t<base+14*36e5;t+=120000){const d=new Date(t);const a=SUN(d,LAT0,LON0).alt;
+  if(prev!=null&&zDate(d)===ds){if(prev<-0.83&&a>=-0.83)out.rise=d;if(prev>=-0.83&&a<-0.83)out.set=d;if(prev<6&&a>=6)out.gEndAM=d;if(prev>=6&&a<6)out.gStartPM=d}prev=a}return out}
 function lightFor(dir,date){const s=SUN(date||new Date(),LAT0,LON0);if(s.alt<-6)return {k:'night',t:'Noite',d:'Só luz artificial — ótimo para fotos noturnas da muralha iluminada.',s};
  if(s.alt<-0.83)return {k:'blue',t:'Hora azul',d:'Céu azul profundo e luzes acesas: segure o celular firme.',s};
  if(dir==null)return {k:'ok',t:s.alt<6?'Hora dourada':'Dia',d:'Local coberto ou sem direção fixa.',s};
@@ -790,8 +874,8 @@ function lightFor(dir,date){const s=SUN(date||new Date(),LAT0,LON0);if(s.alt<-6)
  else if(diff<120){k='side';t='Luz lateral';d='Sol de lado: textura e relevo bonitos na pedra.'}
  else{k='front';t='Luz a favor';d='Sol nas suas costas: cores fortes e céu azul.'}
  if(s.alt<6)t+=' · hora dourada';return {k,t,d,s}}
-function bestWindow(dir){if(dir==null)return null;const now=new Date(),today=zDate(now);let best=null,curW=null;
- for(let t=now.getTime()-24*36e5;t<now.getTime()+24*36e5;t+=600000){const d=new Date(t);if(zDate(d)!==today){if(curW){best=(!best||curW.n>best.n)?curW:best;curW=null}continue}
+function bestWindow(dir,ds){if(dir==null)return null;ds=ds||tripDS();const base=dayBase(ds);let best=null,curW=null;
+ for(let t=base-13*36e5;t<base+13*36e5;t+=600000){const d=new Date(t);if(zDate(d)!==ds){if(curW){best=(!best||curW.n>best.n)?curW:best;curW=null}continue}
   const s=SUN(d,LAT0,LON0);const ok=s.alt>2&&s.alt<38&&Math.abs(angDiff(s.az,dir))>=95;
   if(ok){if(!curW)curW={a:d,b:d,n:0};curW.b=d;curW.n++}else if(curW){best=(!best||curW.n>best.n)?curW:best;curW=null}}
  if(curW)best=(!best||curW.n>best.n)?curW:best;return best}
@@ -827,6 +911,7 @@ function openLoc(id){const l=LBY[id];if(!l)return;S.sel=id;drawMarkers();
   <button onclick="setTarget('${id}')">${IC.comp}Bússola</button>
   <button class="${v?'on':''}" onclick="toggleVisit('${id}')">${IC.check}${v?'Visitado':'Visitei'}</button>
  </div>
+ ${id==='jesuit'?'<button class="btn sm red" style="width:100%;margin-top:6px" onclick="shameBell()">🔔 Tocar o sino da septã: “Vergonha!”</button>':''}
  <h3 class="serif" style="font-size:15px;margin:14px 0 4px">Na série</h3>
  ${l.scenes.map(s=>`<div class="scene"><span class="ep ${s[0]?'':'n'}">${epTag(s)}</span><div class="spoil" onclick="this.classList.add('rev')">${s[0]?`<em>“${esc(s[2])}”</em><br>`:''}${esc(s[3])}</div></div>`).join('')}
  <h3 class="serif" style="font-size:15px;margin:14px 0 4px">Na vida real</h3><p style="margin:0">${esc(l.real)}</p>
@@ -837,6 +922,11 @@ function openLoc(id){const l=LBY[id];if(!l)return;S.sel=id;drawMarkers();
  <div class="row"><button class="btn sm" onclick="copyCoords(${l.lat},${l.lon})">${IC.copy.replace('<svg','<svg width="16" height="16"')} ${l.lat.toFixed(5)}, ${l.lon.toFixed(5)}</button>
  <button class="btn sm" onclick="setManualPos(LBY['${id}'],'em ${esc(l.name).replace(/'/g,'')}')">${IC.pin.replace('<svg','<svg width="16" height="16"')} Estou aqui</button>
  ${cur!=='mapa'?`<button class="btn sm" onclick="closeSheet();go('mapa');setTimeout(()=>openLoc('${id}'),60)">${IC.map.replace('<svg','<svg width="16" height="16"')} Ver no mapa</button>`:''}</div>`)}
+// sino sintetizado (sem áudio externo) + “Vergonha!” na voz do aparelho
+let actx=null;function shameBell(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.resume)actx.resume();const t=actx.currentTime;
+ for(let k=0;k<2;k++)[1,2.76,5.40,8.93].forEach((m,i)=>{const o=actx.createOscillator(),g=actx.createGain(),t0=t+k*1.1;o.type='sine';o.frequency.value=470*m;
+  g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(0.32/(i+1),t0+0.008);g.gain.exponentialRampToValueAtTime(0.0001,t0+2.2/(1+i*0.7));o.connect(g);g.connect(actx.destination);o.start(t0);o.stop(t0+2.4)})}catch(e){}
+ setTimeout(()=>{try{const u=new SpeechSynthesisUtterance('Vergonha!');u.lang='pt-BR';u.rate=0.75;u.pitch=0.6;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}},420);toast('🔔 Vergonha! Vergonha!',1800)}
 function copyCoords(a,b){const s=a.toFixed(6)+', '+b.toFixed(6);try{navigator.clipboard.writeText(s).then(()=>toast('Coordenadas copiadas'),()=>toast(s))}catch(e){toast(s)}}
 function toggleVisit(id){if(S.visited.has(id))S.visited.delete(id);else{S.visited.add(id);toast('✓ '+LBY[id].name+' conquistado! ('+S.visited.size+'/'+L.length+')')}store.set('visited',[...S.visited]);drawMarkers();if(cur==='locais')renderList();openLoc(id)}
 function setTarget(id){S.target=id;store.set('target',id);closeSheet();go('bussola')}
@@ -882,7 +972,8 @@ function updateCompassDyn(){const info=$('#cInfo');if(!info)return;const t=LBY[S
  $('#cTgtRing').innerHTML=`<g transform="rotate(${b.toFixed(1)}) translate(0,-140)"><circle r="6" fill="var(--crimson)"/></g>`;
  let turn='';if(H.src!=='none'){const r=angDiff(b,H.h);turn=Math.abs(r)<12?'⬆ Siga em frente':r>0?`↻ Vire ${Math.round(r)}° à direita`:`↺ Vire ${Math.round(-r)}° à esquerda`}
  const srcTxt=H.src==='live'?'Bússola ao vivo':H.src==='calib'?`Calibrado por ${esc(S.calib.by)} — se girar o corpo, recalibre`:'Sem sensor: o N está para cima. Gire o mapa mental ou calibre.';
- info.innerHTML=`<div class="cbig">${fmtD(d)}</div><div class="csub">${esc(t.name)} · rumo ${Math.round(b)}° (${card(b)}) · 🚶 ~${walk(d)} min</div>${turn?`<div class="turn">${turn}</div>`:''}<div class="csub" style="margin-top:6px">${srcTxt}${sun.alt>-2?' · ☀ no anel = posição do sol agora':''}</div>`}
+ const accTxt=H.src==='live'&&(S.compAcc>25||S.compAcc<0)?'<div class="hint" style="margin-top:8px">🧭 Bússola imprecisa: mova o celular desenhando um “8” no ar e afaste-se de metais.</div>':'';
+ info.innerHTML=`<div class="cbig">${fmtD(d)}</div><div class="csub">${esc(t.name)} · rumo ${Math.round(b)}° (${card(b)}) · 🚶 ~${walk(d)} min</div>${turn?`<div class="turn">${turn}</div>`:''}<div class="csub" style="margin-top:6px">${srcTxt}${sun.alt>-2?' · ☀ no anel = posição do sol agora':''}</div>${accTxt}`}
 function openCalib(){if(!S.pos){openLocModal();return}const sun=SUN(new Date(),LAT0,LON0);
  const marks=['lovr','minceta','bokar','srd','lokrum','reitor','ploce','pile'].map(id=>LBY[id]);
  modal(`<h2 style="font-size:19px">Calibrar a bússola</h2><p class="small muted">Aponte o <b>topo do celular</b> para algo que você está vendo e toque nele abaixo. Funciona sem sensor nenhum — só precisa da sua posição.</p>
@@ -907,28 +998,71 @@ function sketch(k,ghost){const g='<g stroke="var(--line)" stroke-width=".8"><lin
  if(ghost)return s.replace(/<rect x="0" y="(70|0)" width="80" height="(30|34)"[^>]*\/>/g,'');
  return `<svg viewBox="0 0 80 100" width="96" height="120" preserveAspectRatio="none">${s}${g}</svg>`}
 function lightBox(p){const L1=lightFor(p.dir);const ic=L1.k==='night'||L1.k==='blue'?IC.moon:IC.sun;
- const bw=bestWindow(p.dir);const bwt=p.dir==null?'':bw?`Hoje, luz a favor ~${fmtT(bw.a)}–${fmtT(new Date(bw.b.getTime()+600000))}`:'Hoje o sol não fica às suas costas nesse ângulo — aposte em contraluz/silhueta ou dia nublado.';
+ const ds=tripDS(),dia=isToday(ds)?'Hoje':'Em '+fmtDay(ds);const bw=bestWindow(p.dir,ds);const bwt=p.dir==null?'':bw?`${dia}, luz a favor ~${fmtT(bw.a)}–${fmtT(new Date(bw.b.getTime()+600000))}`:`${dia} o sol não fica às suas costas nesse ângulo — aposte em contraluz/silhueta ou dia nublado.`;
  return `<div class="light">${ic}<div><b>${L1.t}</b>${p.dir!=null?` · câmera para ${Math.round(p.dir)}° (${card(p.dir)})`:''}<br><span class="muted">${L1.d}</span>${bwt?`<br><span style="color:var(--gold);font-weight:600">${bwt}</span>`:''}</div></div>`}
 function photoCard(p,full){const l=LBY[p.loc];const st=p.stand?{lat:p.stand[0],lon:p.stand[1]}:l;const d=S.pos?dist(S.pos,st):null;
  return `<div class="card" id="pc-${p.id}"><div class="ph"><div class="vf">${sketch(p.sk)}</div><div style="min-width:0"><h2 style="font-size:16px">${esc(p.title)}</h2><div class="alias" style="font-size:13px">${esc(l.name)} · ${esc(l.got)}</div>
- <div class="chips" style="margin-top:6px"><span class="chip">${esc(p.lens)}</span><span class="chip">${esc(p.orient)}</span>${d!=null?`<span class="chip">${fmtD(d)}</span>`:''}${p.dir!=null?`<span class="chip">${arrowSVG(p.dir,13,'var(--gold)')} ${card(p.dir)}</span>`:''}</div></div></div>
+ <div class="chips" style="margin-top:6px"><span class="chip g" id="done-${p.id}" style="display:none;background:var(--ok)">✓ Feita</span><span class="chip">${esc(p.lens)}</span><span class="chip">${esc(p.orient)}</span>${d!=null?`<span class="chip">${fmtD(d)}</span>`:''}${p.dir!=null?`<span class="chip">${arrowSVG(p.dir,13,'var(--gold)')} ${card(p.dir)}</span>`:''}</div></div></div>
  <div class="ltb" data-ph="${p.id}">${lightBox(p)}</div>
+ ${full&&p.stand&&p.dir!=null?`<div class="planner"><h3 class="serif" style="font-size:15px;margin:14px 0 4px">Planejador da foto</h3><div class="small muted">Arraste o horário e veja de onde vem o sol. O cone dourado é o que a lente enxerga.</div>
+  <svg id="plSvg" viewBox="0 0 340 220" style="width:100%;height:auto;border-radius:12px;border:1px solid var(--line);margin-top:8px;background:var(--sea);display:block"></svg>
+  <div style="display:flex;align-items:center;gap:8px;margin-top:8px"><div class="seg2" id="plLens">${['0,5×','1×','2×'].map((t,i)=>`<button data-l="${i}" class="${i===1?'on':''}">${t}</button>`).join('')}</div><span class="small muted" id="plDate" style="margin-left:auto"></span></div>
+  <input type="range" id="plT" style="width:100%;margin-top:10px;accent-color:var(--gold2)"><div id="plLbl" style="font-weight:700;font-size:14px"></div></div>`:''}
  <div class="kv" style="margin-top:10px"><b>Onde ficar</b><span>${esc(p.where)}</span><b>Enquadrar</b><span>${esc(p.how)}</span><b>Melhor luz</b><span>${esc(p.best)}</span><b>Recrie</b><span>${esc(p.recreate)}</span></div>
  <div class="row" style="margin-top:12px"><button class="btn gold sm" onclick="openCam('${p.id}')">${IC.cam.replace('<svg','<svg width="18" height="18"')} Câmera com guia</button><button class="btn sm" onclick="takePhoto('${p.id}',false)">${IC.img.replace('<svg','<svg width="18" height="18"')} Da galeria</button>
  <a class="btn sm" href="${gmaps(st.lat,st.lon)}" target="_blank" rel="noopener">${IC.nav.replace('<svg','<svg width="16" height="16"')} Ir até o ponto</a>${full?'':`<button class="btn sm" onclick="showPhotoOnMap('${p.id}')">${IC.map.replace('<svg','<svg width="16" height="16"')} Mapa</button>`}</div>
  <div class="thumbs" id="th-${p.id}"></div></div>`}
-function openPhoto(id){const p=PH.find(x=>x.id===id);if(!p)return;openSheet(`<div class="shead"><span class="badge" style="background:var(--gold)">📷</span><div style="flex:1"><h2>Estúdio de foto</h2><div class="small muted">Toque em Câmera para fotografar, ou importe da galeria.</div></div><button class="iconbtn" onclick="closeSheet()">✕</button></div>${photoCard(p,true)}`);fillThumbs(p.id)}
+function openPhoto(id){const p=PH.find(x=>x.id===id);if(!p)return;openSheet(`<div class="shead"><span class="badge" style="background:var(--gold)">📷</span><div style="flex:1"><h2>Estúdio de foto</h2><div class="small muted">Toque em Câmera para fotografar, ou importe da galeria.</div></div><button class="iconbtn" onclick="closeSheet()">✕</button></div>${photoCard(p,true)}`);fillThumbs(p.id);initPlanner(p)}
+/* --- planejador: mini-mapa com cone da lente e sol por horário --- */
+const FOV=[104,66,36];
+function initPlanner(p){const r=$('#plT');if(!r)return;const ds=tripDS(),sd=sunDay(ds),base=dayBase(ds);
+ const t0=sd.rise?sd.rise.getTime():base-5*36e5,t1=sd.set?sd.set.getTime():base+5*36e5;r.min=t0-40*60000;r.max=t1+50*60000;r.step=5*60000;
+ const bw=bestWindow(p.dir,ds);let init=bw?(bw.a.getTime()+bw.b.getTime())/2:(sd.gStartPM?sd.gStartPM.getTime():base);
+ if(isToday(ds)&&Date.now()>t0&&Date.now()<t1)init=Date.now();r.value=init;let lens=Math.max(0,['0,5','1×','2×'].findIndex(x=>p.lens.startsWith(x)));if(lens<0)lens=1;
+ $$('#plLens button').forEach(b=>b.classList.toggle('on',+b.dataset.l===lens));
+ const draw=()=>plannerDraw(p,new Date(+r.value),lens);r.oninput=draw;
+ $$('#plLens button').forEach(b=>b.onclick=()=>{lens=+b.dataset.l;$$('#plLens button').forEach(x=>x.classList.toggle('on',x===b));draw()});
+ $('#plDate').textContent='📅 '+(isToday(ds)?'hoje':fmtDay(ds));draw()}
+function plannerDraw(p,date,li){const svg=$('#plSvg');if(!svg)return;const A=xy(p.stand[0],p.stand[1]),B=xy(p.tgt[0],p.tgt[1]);
+ const dAB=Math.hypot(B[0]-A[0],B[1]-A[1]),span=Math.max(240,Math.min(1600,dAB*2.4)),w=span,h=span*220/340,k=w/340;
+ const cx=(A[0]+B[0])/2,cy=(A[1]+B[1])/2;svg.setAttribute('viewBox',`${f1(cx-w/2)} ${f1(cy-h/2)} ${f1(w)} ${f1(h)}`);
+ const s=SUN(date,LAT0,LON0),Lq=lightFor(p.dir,date),half=FOV[li]/2,R=Math.max(dAB*1.25,span*0.32);
+ const pt=a=>[A[0]+Math.sin(a*toR)*R,A[1]-Math.cos(a*toR)*R],P1=pt(p.dir-half),P2=pt(p.dir+half);
+ const up=s.alt>-0.83,sr=span*0.36,S2=[A[0]+Math.sin(s.az*toR)*sr,A[1]-Math.cos(s.az*toR)*sr];
+ const col={front:'#2f8a46',side:'#b8860b',back:'#b3261e',blue:'#3b5ba5',night:'#3b4a6b',ok:'#b8860b'}[Lq.k];
+ svg.innerHTML=`<use href="#world"/>
+  <path d="M${f1(A[0])},${f1(A[1])}L${f1(P1[0])},${f1(P1[1])}A${f1(R)} ${f1(R)} 0 0 1 ${f1(P2[0])},${f1(P2[1])}Z" fill="#d6ae45" fill-opacity=".32" stroke="#a8801f" stroke-width="${f1(1.6*k)}"/>
+  ${up?`<line x1="${f1(A[0])}" y1="${f1(A[1])}" x2="${f1(S2[0])}" y2="${f1(S2[1])}" stroke="#e0a21b" stroke-width="${f1(2.6*k)}" stroke-dasharray="${f1(7*k)} ${f1(5*k)}"/><circle cx="${f1(S2[0])}" cy="${f1(S2[1])}" r="${f1(10*k)}" fill="#f3c44a" stroke="#e0a21b" stroke-width="${f1(2.2*k)}"/>`:''}
+  <circle cx="${f1(B[0])}" cy="${f1(B[1])}" r="${f1(8*k)}" fill="none" stroke="#8f1d1d" stroke-width="${f1(2.4*k)}"/><circle cx="${f1(B[0])}" cy="${f1(B[1])}" r="${f1(2.4*k)}" fill="#8f1d1d"/>
+  <circle cx="${f1(A[0])}" cy="${f1(A[1])}" r="${f1(8*k)}" fill="#1f6fd1" stroke="#fff" stroke-width="${f1(2.5*k)}"/>
+  <text x="${f1(A[0])}" y="${f1(A[1]+20*k)}" font-size="${f1(11*k)}" font-weight="800" text-anchor="middle" fill="#1b1b1b" stroke="#fff" stroke-width="${f1(3*k)}" paint-order="stroke" font-family="Inter,sans-serif">você aqui</text>
+  <text x="${f1(B[0])}" y="${f1(B[1]-14*k)}" font-size="${f1(11*k)}" font-weight="800" text-anchor="middle" fill="#8f1d1d" stroke="#fff" stroke-width="${f1(3*k)}" paint-order="stroke" font-family="Inter,sans-serif">alvo</text>`;
+ $('#plLbl').innerHTML=`<span style="color:${col}">${fmtT(date)} · ${esc(Lq.t)}</span> <span class="muted" style="font-weight:600">${up?`· sol ${Math.round(s.alt)}° de altura, vindo de ${card(s.az)}`:'· sol abaixo do horizonte'}</span>`}
 function showPhotoOnMap(id){const p=PH.find(x=>x.id===id);S.showPhotos=true;drawPhotos();$('#zLayer').style.background='var(--gold2)';closeSheet();go('mapa');if(p.stand)setTimeout(()=>centerOn(p.stand[0],p.stand[1],2),80)}
-function renderFotos(){const el=$('#v-fotos');const sd=sunDay();const now=new Date();const s=SUN(now,LAT0,LON0);
+function renderFotos(){const el=$('#v-fotos');const ds=tripDS();const sd=sunDay(ds);const now=new Date();const s=SUN(now,LAT0,LON0);
  const m=zMonth();const low=[11,12,1,2,3].includes(m);
  el.innerHTML=`<div class="wrap"><div class="card"><div class="sunbar">${s.alt>-0.83?IC.sun:IC.moon}<div style="flex:1"><div class="big">${fmtT(now)} <span class="small muted" style="font-weight:600">em Dubrovnik</span></div>
  <div class="small">${s.alt>-0.83?`Sol a ${Math.round(s.az)}° (${card(s.az)}), ${Math.round(s.alt)}° de altura`:'Sol abaixo do horizonte'}</div></div></div>
- <div class="grid2 small" style="margin-top:10px"><div>🌅 Nascer: <b>${sd.rise?fmtT(sd.rise):'—'}</b></div><div>🌇 Pôr: <b>${sd.set?fmtT(sd.set):'—'}</b></div><div>✨ Dourada manhã: <b>${sd.rise&&sd.gEndAM?fmtT(sd.rise)+'–'+fmtT(sd.gEndAM):'—'}</b></div><div>✨ Dourada tarde: <b>${sd.gStartPM&&sd.set?fmtT(sd.gStartPM)+'–'+fmtT(sd.set):'—'}</b></div></div>
+ <div style="display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap"><label for="tripD" class="small"><b>📅 Data da sua visita</b></label><input type="date" id="tripD" value="${ds}" min="${zDate(now)}" style="font:inherit;min-height:38px;border-radius:10px;border:1px solid var(--line);background:var(--paper2);color:var(--ink);padding:0 8px">${S.trip&&!isToday(ds)?'<button class="btn sm" id="tripReset">Hoje</button>':''}</div>
+ <div class="small muted" style="margin-top:4px">${isToday(ds)?'Horários de hoje':'Horários e melhores luzes calculados para '+fmtDay(ds)}:</div>
+ <div class="grid2 small" style="margin-top:6px"><div>🌅 Nascer: <b>${sd.rise?fmtT(sd.rise):'—'}</b></div><div>🌇 Pôr: <b>${sd.set?fmtT(sd.set):'—'}</b></div><div>✨ Dourada manhã: <b>${sd.rise&&sd.gEndAM?fmtT(sd.rise)+'–'+fmtT(sd.gEndAM):'—'}</b></div><div>✨ Dourada tarde: <b>${sd.gStartPM&&sd.set?fmtT(sd.gStartPM)+'–'+fmtT(sd.set):'—'}</b></div></div>
  <div class="small muted" style="margin-top:8px">A luz de cada foto é calculada para agora e para hoje (estimativa: ignora prédios e morros). ${low?'Baixa temporada: ruas vazias, mas Lokrum e o teleférico podem estar fechados ou com horário reduzido.':''}</div></div>
+ <div class="card" style="background:linear-gradient(135deg,var(--paper),var(--paper2))"><div style="display:flex;gap:12px;align-items:center"><div style="font-size:34px">📡</div><div style="flex:1"><h2 style="font-size:16px;margin:0">Radar AR</h2><div class="small muted">Aponte a câmera ao redor: as locações aparecem flutuando na direção certa, com distância. Toque numa etiqueta para ver a cena.</div></div></div><button class="btn gold" style="width:100%;margin-top:10px" onclick="openCam(null,true)">Abrir Radar AR</button></div>
+ <div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><h2 style="font-size:16px">🎯 Missões de foto</h2><b id="misCount">0/${PH.length}</b></div><div class="prog" style="margin-top:8px"><i id="misBar" style="width:0%"></i></div><div class="small muted" style="margin-top:6px">Cada cena abaixo é uma missão: fotografe pelo app para completar.</div></div>
  <div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="font-size:16px">Seu álbum de Porto Real</h2><span class="chip" id="albCount">…</span></div><div class="album" id="album" style="margin-top:8px"></div>
+ ${!FRAMED&&navigator.canShare?'<button class="btn sm gold" id="shareAll" style="margin-top:10px">📤 Salvar todas no celular</button>':''}
  <div class="hint" style="margin-top:10px">As fotos ficam guardadas só neste aparelho e podem sumir se o app limpar os dados. Fotos tiradas pelo botão <b>Câmera</b> podem não ir para o rolo do celular: toque numa foto do álbum e use <b>Salvar postal</b>, ou fotografe com a câmera normal e importe pela galeria.</div></div>
  ${PH.map(p=>photoCard(p,false)).join('')}</div>`;
- PH.forEach(p=>fillThumbs(p.id));renderAlbum()}
+ PH.forEach(p=>fillThumbs(p.id));renderAlbum();const sa=$('#shareAll');if(sa)sa.onclick=shareAll;
+ const td=$('#tripD');if(td)td.onchange=()=>{S.trip=td.value||null;store.set('trip',S.trip);renderFotos();toast('📅 Luz calculada para '+fmtDay(tripDS()))};
+ const tr=$('#tripReset');if(tr)tr.onclick=()=>{S.trip=null;store.set('trip',null);renderFotos()};updateMissions()}
+async function updateMissions(){const all=await DB.all();const done=new Set(all.map(o=>o.ph));const n=PH.filter(p=>done.has(p.id)).length;
+ const c=$('#misCount');if(c){c.textContent=n+'/'+PH.length;$('#misBar').style.width=Math.round(n/PH.length*100)+'%'}
+ PH.forEach(p=>{const ch=$('#done-'+p.id);if(ch)ch.style.display=done.has(p.id)?'':'none'})}
+async function shareAll(){const all=(await DB.all()).sort((a,b)=>a.ts-b.ts);if(!all.length){toast('Ainda não há fotos no álbum');return}
+ const files=all.map((o,i)=>new File([o.blob],`porto-real-${String(i+1).padStart(2,'0')}-${o.loc}.jpg`,{type:'image/jpeg'}));
+ try{if(navigator.canShare&&navigator.canShare({files})){await navigator.share({files,title:'Porto Real · Dubrovnik'});return}}catch(e){if(e&&e.name==='AbortError')return}
+ toast('Este navegador não salva várias de uma vez — abra cada foto e toque em Salvar.',4000)}
 function renderPhotosLight(){$$('.ltb').forEach(b=>{const p=PH.find(x=>x.id===b.dataset.ph);if(p)b.innerHTML=lightBox(p)})}
 setInterval(()=>{if(cur==='fotos')renderPhotosLight();if(cur==='bussola')updateCompassDyn()},60000);
 
@@ -942,23 +1076,47 @@ const DB={mem:[],db:null,ok:true,
  async del(id){try{await this.tx('readwrite',s=>s.delete(id))}catch(e){}this.mem=this.mem.filter(x=>x.id!==id)}};
 let pendingPh=null;
 function takePhoto(id,cam){pendingPh=id;const inp=cam?$('#fCam'):$('#fGal');inp.value='';inp.click()}
-/* --- câmera ao vivo com guia de enquadramento --- */
-const CAM={on:false,stream:null,ph:null,facing:'environment',grid:true,ghost:true,frame:null};
-async function openCam(id){const p=PH.find(x=>x.id===id);if(!p)return;
- if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){takePhoto(id,true);return}
- CAM.ph=p;
- try{await camStart()}catch(e){toast(FRAMED?'No app do Claude a câmera ao vivo é bloqueada — abrindo a câmera do sistema. Na versão com GPS o guia de enquadramento funciona.':'Não consegui abrir a câmera ao vivo — usando a câmera do sistema.',4200);takePhoto(id,true);return}
- CAM.on=true;$('#cam').classList.add('on');closeSheet();
- $('#camTitle').textContent=p.title;$('#camTip').innerHTML=`${esc(p.how)}<br><b>Lente:</b> ${esc(p.lens)} · <b>${esc(p.orient)}</b> · <b>Onde ficar:</b> ${esc(p.where)}`;
- camOverlay();camTick();camLastThumb();
- if(!FRAMED&&p.dir!=null)startCompass(true);
- window.addEventListener('resize',camOverlay)}
+/* --- câmera ao vivo: guia de enquadramento + Radar AR --- */
+const CAM={on:false,stream:null,ph:null,facing:'environment',grid:true,ghost:true,frame:null,ar:false,lensF:1,lastTick:0};
+const ALT={gradac:30,lovr:42,pilebay:2,pile:10,minceta:45,walls:14,bokar:16,stradun:5,rupe:15,jesuit:16,bosk:20,reitor:8,domst:8,domsteps:10,ploce:9,oldport:2,lokrum:20,belvedere:40,srd:405,trsteno:60};
+async function openCam(id,ar){const p=id?PH.find(x=>x.id===id):null;if(id&&!p)return;
+ if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){if(p)takePhoto(id,true);else toast('Este navegador não abre a câmera ao vivo.');return}
+ CAM.ph=p;CAM.ar=!!ar||!p;CAM.lensF=1;CAM.deviceId=null;CAM.facing='environment';
+ try{await camStart()}catch(e){if(p){toast(FRAMED?'No app do Claude a câmera ao vivo é bloqueada — abrindo a câmera do sistema. No site o guia de enquadramento e o AR funcionam.':'Não consegui abrir a câmera ao vivo — usando a câmera do sistema.',4500);takePhoto(id,true)}else toast(FRAMED?'O Radar AR precisa do site (no app do Claude a câmera é bloqueada). Veja Mais → Ajuda.':'Não consegui abrir a câmera. Confira a permissão de câmera do navegador.',4500);return}
+ CAM.on=true;$('#cam').classList.add('on');closeSheet();keepAwake(true);
+ if(p){$('#camTitle').textContent=p.title;$('#camTip').innerHTML=`${esc(p.how)}<br><b>Lente:</b> ${esc(p.lens)} · <b>${esc(p.orient)}</b> · <b>Onde ficar:</b> ${esc(p.where)}`}
+ else{$('#camTitle').textContent='Radar AR de Porto Real';$('#camTip').innerHTML='Gire devagar com o celular em pé: as locações aparecem na direção real, com a distância. Toque numa etiqueta para ver a cena. ☀ = onde está o sol.'}
+ $('#camGrid').style.display=p?'':'none';$('#camGh').style.display=p?'':'none';
+ arBuild();camOverlay();camTick();camLastThumb();
+ if(!FRAMED)startCompass(true);
+ window.addEventListener('resize',camOverlay);requestAnimationFrame(camLoop)}
 async function camStart(){camStopTracks();const v=$('#camV');
- const st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:CAM.facing},width:{ideal:3840},height:{ideal:2160}},audio:false});
- CAM.stream=st;v.srcObject=st;try{await v.play()}catch(e){}v.style.transform=CAM.facing==='user'?'scaleX(-1)':''}
+ const base={width:{ideal:3840},height:{ideal:2160}};
+ const vc=CAM.deviceId?Object.assign({deviceId:{exact:CAM.deviceId}},base):Object.assign({facingMode:{ideal:CAM.facing}},base);
+ const st=await navigator.mediaDevices.getUserMedia({video:vc,audio:false});
+ CAM.stream=st;v.srcObject=st;try{await v.play()}catch(e){}v.style.transform=CAM.facing==='user'?'scaleX(-1)':'';camLensUI()}
+// lentes (iPhone: 0,5× / 1× / tele por dispositivo) ou zoom (Android: capacidade zoom)
+async function camLensUI(){const el=$('#camLens');let btns=[];
+ try{const tr=CAM.stream.getVideoTracks()[0];const cap=tr.getCapabilities?tr.getCapabilities():{};const set=tr.getSettings?tr.getSettings():{};
+  if(CAM.facing==='environment'){const ds=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput'&&d.label);
+   const back=ds.filter(d=>!/front|frontal|user|facetime|selfie/i.test(d.label));
+   const uw=back.find(d=>/ultra/i.test(d.label)),tele=back.find(d=>/tele/i.test(d.label)),wide=back.find(d=>!/ultra|tele|dual|triple|dupla|tripla|desk|lidar|true ?depth/i.test(d.label));
+   if(uw&&wide){btns.push({t:'0,5×',dev:uw.deviceId,f:0.5});btns.push({t:'1×',dev:wide.deviceId,f:1});if(tele)btns.push({t:'Tele',dev:tele.deviceId,f:3})}}
+  if(!btns.length&&cap.zoom&&cap.zoom.max>1){const z=cap.zoom;if(z.min<1)btns.push({t:(Math.round(z.min*10)/10).toString().replace('.',',')+'×',zoom:z.min,f:z.min});[1,2,3,5].filter(x=>x>=z.min&&x<=z.max).forEach(x=>btns.push({t:x+'×',zoom:x,f:x}))}
+  const curDev=set.deviceId||CAM.deviceId,curZoom=set.zoom;
+  el.innerHTML=btns.map((b,i)=>`<button data-i="${i}" class="${(b.dev&&b.dev===curDev)||(b.zoom!=null&&curZoom!=null&&Math.abs(b.zoom-curZoom)<0.05)?'on':''}">${b.t}</button>`).join('');
+  $$('button',el).forEach(x=>x.onclick=async()=>{const b=btns[+x.dataset.i];
+   if(b.dev){const old=CAM.deviceId;CAM.deviceId=b.dev;try{await camStart();CAM.lensF=b.f}catch(e){CAM.deviceId=old;toast('Essa lente não abriu aqui');try{await camStart()}catch(_){ }}}
+   else{try{await tr.applyConstraints({advanced:[{zoom:b.zoom}]});CAM.lensF=b.f;$$('button',el).forEach(y=>y.classList.toggle('on',y===x))}catch(e){toast('Zoom indisponível')}}});
+ }catch(e){btns=[];el.innerHTML=''}
+ el.style.display=btns.length?'flex':'none'}
 function camStopTracks(){if(CAM.stream){CAM.stream.getTracks().forEach(t=>t.stop());CAM.stream=null}}
-function closeCam(){camStopTracks();CAM.on=false;$('#cam').classList.remove('on');window.removeEventListener('resize',camOverlay)}
-function camOverlay(){const W=innerWidth,H=innerHeight,p=CAM.ph;if(!p)return;const svg=$('#camOv');svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+function closeCam(){if(S.headingSrc==='drag'){S.headingSrc=null;S.heading=null;drawMe()}camStopTracks();CAM.on=false;$('#cam').classList.remove('on');window.removeEventListener('resize',camOverlay);if(!S.guiding)keepAwake(false)}
+// mantém a tela acesa durante a câmera e o modo guiado
+let wakeL=null;async function keepAwake(on){try{if(on){if(!wakeL&&navigator.wakeLock){wakeL=await navigator.wakeLock.request('screen');wakeL.addEventListener('release',()=>{wakeL=null})}}else if(wakeL){await wakeL.release();wakeL=null}}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&(CAM.on||S.guiding))keepAwake(true)});
+function camOverlay(){const W=innerWidth,H=innerHeight,p=CAM.ph;const svg=$('#camOv');svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+ if(!p){CAM.frame=null;svg.innerHTML=`<g id="camLevel" transform="translate(${W/2},${H/2})"></g>`;$('#camRot').style.display='none';$('#camAR').classList.toggle('on',CAM.ar);camTick();return}
  const vert=p.orient.startsWith('Vertical'),portrait=H>=W;let fw=W,fh=H;
  if(vert!==portrait){if(portrait){fw=W*0.94;fh=fw*2/3}else{fh=H*0.9;fw=fh*0.8}}
  const fx=(W-fw)/2,fy=(H-fh)/2;CAM.frame={fx,fy,fw,fh};let s='';
@@ -967,19 +1125,55 @@ function camOverlay(){const W=innerWidth,H=innerHeight,p=CAM.ph;if(!p)return;con
  if(CAM.ghost)s+=`<g id="camGhost" opacity=".8" transform="translate(${fx},${fy}) scale(${fw/80},${fh/100})">${sketch(p.sk,true)}</g>`;
  s+=`<g id="camLevel" transform="translate(${W/2},${H/2})"></g>`;svg.innerHTML=s;
  $('#camRot').style.display=vert===portrait?'none':'block';$('#camRot').textContent=vert?'↻ Esta foto fica melhor na vertical':'↻ Esta foto fica melhor na horizontal';
- $('#camGrid').classList.toggle('on',CAM.grid);$('#camGh').classList.toggle('on',CAM.ghost);$('#camComp').classList.toggle('on',S.headingSrc==='live');camTick()}
+ $('#camGrid').classList.toggle('on',CAM.grid);$('#camGh').classList.toggle('on',CAM.ghost);$('#camAR').classList.toggle('on',CAM.ar);camTick()}
+const headOK=()=>(S.headingSrc==='live'||S.headingSrc==='drag')&&S.heading!=null;
 function camTick(){if(!CAM.on)return;const p=CAM.ph,g=$('#camGuide');let html='',ok=false;
- if(p.dir!=null){if(S.headingSrc==='live'&&S.heading!=null){const r=angDiff(p.dir,S.heading);ok=Math.abs(r)<8;
+ if(!p){if(!S.pos)html='📍 Ligue o GPS ou o 🧪 Modo teste para o AR saber onde você está';else if(!headOK())html=FRAMED?'Arraste o dedo para os lados para girar (sem bússola aqui)':'🧭 Toque na bússola ao lado para ativar o AR — ou arraste para os lados'}
+ else if(p.dir!=null){if(headOK()){const r=angDiff(p.dir,S.heading);ok=Math.abs(r)<8;
    html=ok?`✓ Direção certa · ${card(p.dir)}`:`${r>0?'↻':'↺'} Gire ${Math.round(Math.abs(r))}° para a ${r>0?'direita':'esquerda'}`}
   else html=`🧭 Aponte a câmera para ${card(p.dir)} (${Math.round(p.dir)}°)`}
- if(p.stand&&S.posSrc==='gps'){const st={lat:p.stand[0],lon:p.stand[1]};const d=dist(S.pos,st);if(d>15){html+=`${html?' · ':''}📍 ponto ideal a ${fmtD(d)} (${card(bearing(S.pos,st))})`;ok=false}}
+ if(p&&p.stand&&(S.posSrc==='gps'||S.posSrc==='sim')){const st={lat:p.stand[0],lon:p.stand[1]};const d=dist(S.pos,st);if(d>15){html+=`${html?' · ':''}📍 ponto ideal a ${fmtD(d)} (${card(bearing(S.pos,st))})`;ok=false}}
  g.style.display=html?'flex':'none';g.innerHTML=html;g.classList.toggle('ok',ok);$('#camComp').classList.toggle('on',S.headingSrc==='live');
- const lv=$('#camLevel');if(!lv)return;if(!S.tilt){lv.innerHTML='';return}
- let so=0;try{so=(screen.orientation&&screen.orientation.angle)||0}catch(e){}
- const b=S.tilt.b*toR,gm=(S.tilt.g||0)*toR,ux=-Math.cos(b)*Math.sin(gm),uy=Math.sin(b),uz=Math.cos(b)*Math.cos(gm);
- if(Math.abs(uz)>0.85){lv.innerHTML='';return}let roll=Math.atan2(-ux,uy)/toR+so;roll=((roll+540)%360)-180;
- const lvl=Math.abs(roll)<1.5,c=lvl?'#4ade80':'#fff',rt=`rotate(${(-roll).toFixed(1)})`;
+ const lv=$('#camLevel');if(!lv)return;const o=devAngles();if(!o){lv.innerHTML='';return}
+ const roll=o.roll,lvl=Math.abs(roll)<1.5,c=lvl?'#4ade80':'#fff',rt=`rotate(${(-roll).toFixed(1)})`;
  lv.innerHTML=`<line x1="-110" y1="0" x2="110" y2="0" stroke="rgba(255,255,255,.28)" stroke-width="1"/><g transform="${rt}"><line x1="-80" y1="0" x2="-22" y2="0" stroke="${c}" stroke-width="3" stroke-linecap="round"/><line x1="22" y1="0" x2="80" y2="0" stroke="${c}" stroke-width="3" stroke-linecap="round"/></g>${lvl?'<text y="22" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="800" font-family="Inter,sans-serif">NIVELADO</text>':''}`}
+// inclinação (pitch) e giro (roll) da câmera a partir dos sensores
+function devAngles(){if(!S.tilt)return null;let so=0;try{so=(screen.orientation&&screen.orientation.angle)||0}catch(e){}
+ const b=S.tilt.b*toR,gm=(S.tilt.g||0)*toR,ux=-Math.cos(b)*Math.sin(gm),uy=Math.sin(b),uz=Math.cos(b)*Math.cos(gm);
+ if(Math.abs(uz)>0.85)return null;let roll=Math.atan2(-ux,uy)/toR+so;roll=((roll+540)%360)-180;return {roll,pitch:Math.asin(Math.max(-1,Math.min(1,-uz)))/toR}}
+/* Radar AR: etiquetas das locações projetadas na imagem da câmera */
+function arBuild(){const el=$('#arLayer');
+ el.innerHTML=L.map(l=>`<button class="arl" data-id="${l.id}" style="display:none"><span class="b" style="background:var(--c-${l.cat})">${l.n}</span><span class="tx"><b>${esc(l.got.split(' · ')[0])}</b><small>${esc(l.name)} · <i></i></small></span></button>`).join('')
+  +'<div class="arsun" id="arSun" style="display:none">☀</div><div class="artgt" id="arTgt" style="display:none"><i></i><span>🎯 enquadre aqui</span></div><div class="aredge" id="arEdge" style="display:none"></div>';
+ $$('.arl',el).forEach(b=>b.onclick=e=>{e.stopPropagation();closeCam();openLoc(b.dataset.id)})}
+function camLoop(t){if(!CAM.on)return;arFrame();if(!t||t-CAM.lastTick>160){CAM.lastTick=t||0;camTick()}requestAnimationFrame(camLoop)}
+function arFrame(){const el=$('#arLayer');if(!el)return;const W=innerWidth,H=innerHeight,v=$('#camV');const tgtEl=$('#arTgt'),edge=$('#arEdge'),sunEl=$('#arSun');
+ const showLabels=CAM.ar&&S.pos&&headOK();
+ let f;if(v.videoWidth){const vw=v.videoWidth,vh=v.videoHeight,sc=Math.max(W/vw,H/vh);f=(Math.max(vw,vh)/2)/Math.tan(33*toR)*sc}else f=W/(2*Math.tan(24*toR));f*=CAM.lensF||1;
+ const o=devAngles()||{roll:0,pitch:0},cr=Math.cos(-o.roll*toR),sr=Math.sin(-o.roll*toR);
+ const proj=(bear,elev)=>{const dl=angDiff(bear,S.heading);if(Math.abs(dl)>75)return null;const x=f*Math.tan(dl*toR),y=-f*Math.tan(Math.max(-80,Math.min(80,elev-o.pitch))*toR);return [W/2+x*cr-y*sr,H/2+x*sr+y*cr]};
+ const labels=$$('.arl',el);
+ if(!showLabels){labels.forEach(b=>b.style.display='none');sunEl.style.display='none'}
+ else{const myAlt=(S.posSrc==='gps'&&S.pos.alt!=null)?S.pos.alt:8;const items=[];
+  for(const b of labels){const l=LBY[b.dataset.id],d=dist(S.pos,l);if(d<12||(CAM.ph&&d>2500&&l.id!==CAM.ph.loc)){b.style.display='none';continue}
+   const e=Math.atan2((ALT[l.id]||10)-myAlt,Math.max(d,1))/toR,pp=proj(bearing(S.pos,l),e);if(!pp||pp[0]<-90||pp[0]>W+90){b.style.display='none';continue}items.push({b,d,pp})}
+  items.sort((a,b)=>a.d-b.d);const placed=[],top=150,bot=H-235;
+  for(const it of items){const b=it.b;b.style.display='flex';if(!b._w)b._w=b.offsetWidth||150;const w=b._w,h=40;let x=it.pp[0],y=Math.max(top+h,Math.min(bot,it.pp[1]-6)),stem=Math.max(10,Math.min(120,it.pp[1]-y+14));
+   for(let k=0;k<7;k++){if(!placed.some(q=>Math.abs(q.x-x)<(q.w+w)/2+6&&Math.abs(q.y-y)<h))break;y-=h;stem+=h}
+   if(y<top){b.style.display='none';continue}placed.push({x,y,w});
+   b.style.transform=`translate(${x.toFixed(0)}px,${y.toFixed(0)}px) translate(-50%,-100%)`;b.style.setProperty('--stem',stem.toFixed(0)+'px');b.style.opacity=it.d>3000?0.78:1;
+   const i=b.querySelector('i');const dt=fmtD(it.d);if(i.textContent!==dt)i.textContent=dt}
+  const sun=SUN(new Date(),LAT0,LON0),sp=sun.alt>-3?proj(sun.az,sun.alt):null;
+  if(sp&&sp[0]>-20&&sp[0]<W+20&&sp[1]>60&&sp[1]<H-140){sunEl.style.display='grid';sunEl.style.transform=`translate(${sp[0].toFixed(0)}px,${sp[1].toFixed(0)}px) translate(-50%,-50%)`}else sunEl.style.display='none'}
+ // alvo da foto: mira na direção ideal (horizonte)
+ const p=CAM.ph;if(p&&p.dir!=null&&headOK()){const tp=proj(p.dir,0);
+  if(tp&&tp[0]>20&&tp[0]<W-20){tgtEl.style.display='flex';tgtEl.style.transform=`translate(${tp[0].toFixed(0)}px,${Math.max(170,Math.min(H-250,tp[1])).toFixed(0)}px) translate(-50%,-50%)`;edge.style.display='none'}
+  else{tgtEl.style.display='none';const r=angDiff(p.dir,S.heading);edge.style.display='flex';edge.className='aredge '+(r>0?'r':'l');edge.textContent=r>0?'🎯 ▶':'◀ 🎯'}}
+ else{tgtEl.style.display='none';edge.style.display='none'}}
+// sem bússola (ou dentro do Claude): arrastar para os lados gira a visão
+(()=>{let x0=null;const c=$('#cam');c.addEventListener('pointerdown',e=>{if(e.target.closest('button,img'))return;if(S.headingSrc==='live')return;x0=e.clientX;if(S.heading==null)S.heading=0;if(S.headingSrc!=='live')S.headingSrc='drag'});
+ c.addEventListener('pointermove',e=>{if(x0==null)return;const dx=e.clientX-x0;x0=e.clientX;S.heading=((S.heading-dx*0.25)%360+360)%360});
+ const up=()=>{x0=null};c.addEventListener('pointerup',up);c.addEventListener('pointercancel',up)})();
 async function camShot(){const v=$('#camV');if(!v.videoWidth){toast('A câmera ainda está abrindo…');return}const p=CAM.ph;
  const vw=v.videoWidth,vh=v.videoHeight,W=innerWidth,H=innerHeight,sc=Math.max(W/vw,H/vh),ox=(W-vw*sc)/2,oy=(H-vh*sc)/2,F=CAM.frame||{fx:0,fy:0,fw:W,fh:H};
  const sx=Math.max(0,(F.fx-ox)/sc),sy=Math.max(0,(F.fy-oy)/sc),sw=Math.min(vw-sx,F.fw/sc),sh=Math.min(vh-sy,F.fh/sc);
@@ -987,15 +1181,17 @@ async function camShot(){const v=$('#camV');if(!v.videoWidth){toast('A câmera a
  if(CAM.facing==='user'){x.translate(c.width,0);x.scale(-1,1)}x.drawImage(v,sx,sy,sw,sh,0,0,c.width,c.height);
  const f=$('#camFlash');f.style.transition='none';f.style.opacity='.9';requestAnimationFrame(()=>{f.style.transition='';f.style.opacity='0'});try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}
  const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.92));if(!blob)return;
- const o={id:'f'+Date.now().toString(36),ph:p.id,loc:p.loc,ts:Date.now(),blob};await DB.put(o);
- if(!S.visited.has(o.loc)){S.visited.add(o.loc);store.set('visited',[...S.visited]);drawMarkers()}
- camLastThumb(o);fillThumbs(p.id);renderAlbum();toast('📸 No álbum! Toque na miniatura para salvar no celular ou fazer o postal',2800)}
-async function camLastThumb(o){const im=$('#camLast');if(!o){const all=(await DB.all()).filter(x=>x.ph===(CAM.ph&&CAM.ph.id)).sort((a,b)=>b.ts-a.ts);o=all[0]}
+ let loc=p?p.loc:null;if(!loc){let bd=1e9;for(const l of L){const d=S.pos?dist(S.pos,l):1e9;if(d<bd){bd=d;loc=l.id}}if(!loc)loc='pile'}
+ const o={id:'f'+Date.now().toString(36),ph:p?p.id:'ar',loc,ts:Date.now(),blob};await DB.put(o);
+ if(p&&!S.visited.has(o.loc)){S.visited.add(o.loc);store.set('visited',[...S.visited]);drawMarkers()}
+ camLastThumb(o);if(p)fillThumbs(p.id);renderAlbum();toast(p?'📸 Missão cumprida! Toque na miniatura para salvar no celular ou fazer o postal':'📸 Guardada no álbum',2800)}
+async function camLastThumb(o){const im=$('#camLast');if(!o){const all=(await DB.all()).filter(x=>x.ph===(CAM.ph?CAM.ph.id:'ar')).sort((a,b)=>b.ts-a.ts);o=all[0]}
  if(o){im.src=urlOf(o);im.dataset.f=o.id;im.style.visibility='visible'}else{im.removeAttribute('src');im.style.visibility='hidden'}}
 $('#camX').onclick=closeCam;$('#camShot').onclick=camShot;
-$('#camFlip').onclick=async()=>{CAM.facing=CAM.facing==='environment'?'user':'environment';try{await camStart()}catch(e){toast('Não deu para trocar de câmera')}};
+$('#camFlip').onclick=async()=>{CAM.facing=CAM.facing==='environment'?'user':'environment';CAM.deviceId=null;CAM.lensF=1;try{await camStart()}catch(e){toast('Não deu para trocar de câmera')}};
 $('#camGrid').onclick=()=>{CAM.grid=!CAM.grid;camOverlay()};$('#camGh').onclick=()=>{CAM.ghost=!CAM.ghost;camOverlay()};
-$('#camComp').onclick=()=>startCompass(false).then(ok=>{if(ok){toast('🧭 Bússola ligada: siga a seta no topo');camTick()}});
+$('#camAR').onclick=()=>{CAM.ar=!CAM.ar;$('#camAR').classList.toggle('on',CAM.ar);if(CAM.ar&&!headOK())toast('Ative a 🧭 bússola (ou arraste para os lados) para as etiquetas aparecerem')};
+$('#camComp').onclick=()=>startCompass(false).then(ok=>{if(ok){toast('🧭 Bússola ligada');camTick()}});
 $('#camLast').onclick=()=>{const id=$('#camLast').dataset.f;if(id){closeCam();viewFoto(id)}};
 async function onFile(e){const file=e.target.files&&e.target.files[0];if(!file||!pendingPh)return;toast('Guardando foto…');
  try{const blob=await shrink(file,1800);const o={id:'f'+Date.now().toString(36),ph:pendingPh,loc:PH.find(p=>p.id===pendingPh).loc,ts:Date.now(),blob};await DB.put(o);
@@ -1005,7 +1201,7 @@ $('#fCam').onchange=onFile;$('#fGal').onchange=onFile;
 function shrink(file,max){return new Promise((res,rej)=>{const url=URL.createObjectURL(file);const im=new Image();im.onload=()=>{let w=im.naturalWidth,h=im.naturalHeight;const k=Math.min(1,max/Math.max(w,h));w=Math.round(w*k);h=Math.round(h*k);
  const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);URL.revokeObjectURL(url);c.toBlob(b=>b?res(b):rej(),'image/jpeg',0.86)};im.onerror=()=>{URL.revokeObjectURL(url);rej()};im.src=url})}
 const urls=new Map();const urlOf=o=>{if(!urls.has(o.id))urls.set(o.id,URL.createObjectURL(o.blob));return urls.get(o.id)};
-async function fillThumbs(phId){const el=$('#th-'+phId);if(!el)return;const all=(await DB.all()).filter(o=>o.ph===phId).sort((a,b)=>b.ts-a.ts);
+async function fillThumbs(phId){updateMissions();const el=$('#th-'+phId);if(!el)return;const all=(await DB.all()).filter(o=>o.ph===phId).sort((a,b)=>b.ts-a.ts);
  el.innerHTML=all.slice(0,8).map(o=>`<img src="${urlOf(o)}" alt="" data-f="${o.id}">`).join('');$$('img',el).forEach(i=>i.onclick=()=>viewFoto(i.dataset.f))}
 async function renderAlbum(){const el=$('#album');if(!el)return;const all=(await DB.all()).sort((a,b)=>b.ts-a.ts);$('#albCount').textContent=all.length+' foto'+(all.length===1?'':'s');
  el.innerHTML=all.length?all.map(o=>`<img src="${urlOf(o)}" alt="" data-f="${o.id}">`).join(''):'<div class="small muted" style="grid-column:1/-1">Nenhuma foto ainda. Escolha uma cena abaixo e toque em Câmera.</div>';
@@ -1065,14 +1261,19 @@ function renderMais(){const el=$('#v-mais');const m=zMonth();const low=[11,12,1,
  <li>Croácia usa <b>euro</b>; a água da torneira e das fontes é potável.</li></ul></div>
  <div class="card"><h2>Curiosidades de bastidor</h2>${CUR.map(c=>`<div class="cur"><span class="ic">${c[0]}</span><div class="small">${esc(c[1])}</div></div>`).join('')}</div>
  <div class="card" id="quizCard"></div>
- <div class="card"><h2>Ajustes</h2><div class="row" style="margin-top:8px"><button class="btn sm" id="spBtn">${S.spoil?'🙈 Modo sem spoilers: ligado':'👀 Modo sem spoilers: desligado'}</button><button class="btn sm" id="rsBtn">Zerar conquistas</button></div></div>
- <div class="card" id="ajuda"><h2>Ajuda: GPS e bússola</h2><ul class="clean small">
- <li><b>Dentro do app do Claude</b>, a página roda numa janela protegida que bloqueia localização e sensores de movimento. Por isso o guia usa posição manual, calibração por marco ou pelo sol, e botões que abrem o <b>Google Maps / Apple Maps</b> com GPS real.</li>
- <li><b>Versão com GPS, bússola e câmera ao vivo:</b> <a href="${HOSTED_URL}" target="_blank" rel="noopener">${HOSTED_URL}</a> — abra no Safari/Chrome. O ponto azul segue você, o guia avisa quando você chega numa locação, a seta gira com o celular e a câmera mostra a grade, a silhueta da cena e o nível. Dica: “Adicionar à Tela de Início” para abrir como app.</li>
- <li>No iPhone, a bússola ao vivo pede permissão de “Movimento e orientação” ao tocar em <b>Bússola ao vivo</b>.</li>
- <li>Sem internet no passeio? Abra o guia uma vez com Wi-Fi antes de sair; os dados já ficam na página.</li></ul>
- <p class="small muted">Fontes: Turismo de Dubrovnik, site de fãs King’s Landing Dubrovnik, guias locais e imprensa croata (2026). Os detalhes de cenas seguem o consenso desses guias.</p></div>
+ <div class="card"><h2>Ajustes</h2><div class="row" style="margin-top:8px"><button class="btn sm gold" id="tourBtn">🎓 Ver o tutorial de novo</button><button class="btn sm" id="simBtn">${S.sim?'🧪 Modo teste: ligado':'🧪 Modo teste: desligado'}</button><button class="btn sm" id="spBtn">${S.spoil?'🙈 Sem spoilers: ligado':'👀 Sem spoilers: desligado'}</button><button class="btn sm" id="rsBtn">Zerar conquistas</button></div></div>
+ <div class="card" id="ajuda"><h2>Ajuda rápida</h2><ul class="clean small">
+ ${FRAMED?`<li><b>Você está na versão dentro do app do Claude</b>, que bloqueia GPS, bússola e câmera ao vivo. Para tudo funcionar, abra o site: <a href="${HOSTED_URL}" target="_blank" rel="noopener">${HOSTED_URL}</a></li>`:''}
+ <li><b>GPS:</b> toque no botão de posição no topo → Ativar GPS. Verde = funcionando. Se negou sem querer: iPhone → Ajustes → Privacidade → Serviços de Localização → Sites do Safari → “Ao Usar”; Android → cadeado ao lado do endereço → Localização.</li>
+ <li><b>Bússola:</b> aba Bússola → “Bússola ao vivo”. No iPhone ele pede “Movimento e orientação”. Se a seta ficar maluca, desenhe um “8” no ar com o celular.</li>
+ <li><b>Ainda em casa?</b> Ligue o <b>🧪 Modo teste</b> e toque no mapa para “andar” por Dubrovnik.</li>
+ <li><b>Câmera com guia:</b> siga a grade, a silhueta da cena e a seta “gire X°”. Quando aparecer “NIVELADO” em verde, a foto fica reta.</li>
+ <li><b>Sem internet:</b> abra o site uma vez com Wi-Fi e use “Adicionar à Tela de Início” — ele passa a abrir como app, inclusive offline.</li>
+ <li><b>Fotos:</b> ficam guardadas só neste celular. Use “Salvar todas no celular” de vez em quando.</li></ul>
+ <p class="small muted">Fontes: Turismo de Dubrovnik, site de fãs King’s Landing Dubrovnik, guias locais e imprensa croata (2026). Os detalhes de cenas seguem o consenso desses guias. · v3</p></div>
  </div>`;
+ $('#tourBtn').onclick=()=>{go('mapa');setTimeout(()=>startTour(0),120)};
+ $('#simBtn').onclick=()=>{const on=!S.sim;go('mapa');setSim(on,'pile');if(on)setTimeout(()=>centerOn(LBY.pile.lat,LBY.pile.lon,1.4,true),80)};
  $('#spBtn').onclick=()=>{S.spoil=!S.spoil;store.set('nospoil',S.spoil);document.body.classList.toggle('nospoil',S.spoil);renderMais()};
  $('#rsBtn').onclick=()=>{S.visited=new Set();store.set('visited',[]);drawMarkers();toast('Conquistas zeradas')};
  renderQuiz()}
@@ -1090,13 +1291,14 @@ function guide(rid,i){const r=ROUTES.find(x=>x.id===rid);const id=r.stops[i];con
  ${d!=null&&!here?`<div class="light" style="margin-top:0">${arrowSVG(b,30)}<div><b>${fmtD(d)} · ${card(b)}</b> ${S.pos?'de você':'da parada anterior'}<br><span class="muted">~${walk(d)} min a pé</span></div></div>`:here?'<div class="light" style="margin-top:0">✅ <b>Você está aqui.</b></div>':''}
  <div class="quick" style="grid-template-columns:repeat(3,1fr)"><a href="${gmaps(l.lat,l.lon)}" target="_blank" rel="noopener">${IC.nav}Ir com Google</a><a href="${amaps(l.lat,l.lon,l.name)}" target="_blank" rel="noopener">${IC.apple}Ir com Apple</a><button onclick="setTarget('${id}')">${IC.comp}Bússola</button></div>
  ${sc?`<div class="scene" style="border:0"><span class="ep ${sc[0]?'':'n'}">${epTag(sc)}</span><div class="spoil" onclick="this.classList.add('rev')">${sc[0]?`<em>“${esc(sc[2])}”</em><br>`:''}${esc(sc[3])}</div></div>`:''}
+ ${rid==='vergonha'?'<button class="btn sm red" style="width:100%;margin-top:6px" onclick="shameBell()">🔔 Tocar o sino: “Vergonha!”</button>':''}
  ${l.curios[0]?`<div class="hint" style="margin-top:6px">💡 ${esc(l.curios[0])}</div>`:''}
  ${PH.some(p=>p.loc===id)?`<div class="row" style="margin-top:10px">${PH.filter(p=>p.loc===id).map(p=>`<button class="btn sm" onclick="openPhoto('${p.id}')">📷 ${esc(p.title)}</button>`).join('')}</div>`:''}
  <div class="grid2" style="margin-top:14px">${i>0?`<button class="btn" onclick="guide('${rid}',${i-1})">← Anterior</button>`:'<span></span>'}
  <button class="btn gold" onclick="guideArrive('${rid}',${i})">${nx?'Cheguei ✓ Próxima →':'Cheguei ✓ Fim!'}</button></div>
  <button class="btn sm" style="margin-top:8px;width:100%" onclick="openLoc('${id}')">Ver tudo sobre este lugar</button>`)}
 function guideArrive(rid,i){const r=ROUTES.find(x=>x.id===rid);const id=r.stops[i];if(!S.visited.has(id)){S.visited.add(id);store.set('visited',[...S.visited]);drawMarkers()}
- if(S.posSrc!=='gps'){S.pos={lat:LBY[id].lat,lon:LBY[id].lon};S.posSrc='manual';store.set('pos',S.pos);updatePosUI()}
+ if(S.posSrc!=='gps')setManualPos(LBY[id],'em '+LBY[id].name,true);
  if(r.stops[i+1])guide(rid,i+1);else{closeSheet();toast(`🏆 Roteiro “${esc(r.name)}” completo!`,4000)}}
 function renderQuiz(){const el=$('#quizCard');if(!el)return;if(!quizState){el.innerHTML=`<h2>Quiz de Porto Real</h2><p class="small muted" style="margin-top:0">${QUIZ.length} perguntas sobre as locações. Bom para a fila das muralhas.</p><button class="btn gold" id="qStart">⚔️ Começar</button>`;$('#qStart').onclick=()=>{quizState={i:0,ok:0,done:false};renderQuiz()};return}
  const q=QUIZ[quizState.i];if(quizState.i>=QUIZ.length||!q){const sc=quizState.ok;const title=sc>=9?'Mão do Rei 👑':sc>=6?'Meistre de Vilavelha 📜':sc>=3?'Escudeiro ⚔️':'Fazendeiro do Alcance 🌾';
@@ -1107,6 +1309,43 @@ function renderQuiz(){const el=$('#quizCard');if(!el)return;if(!quizState){el.in
   $('#qExp').innerHTML=`${i===q[2]?'✅ Isso!':'❌ Quase.'} ${esc(q[3])}<div style="margin-top:8px"><button class="btn sm gold" id="qNext">Próxima →</button></div>`;
   $('#qNext').onclick=()=>{quizState.i++;quizState.ans=null;renderQuiz()}})}
 
+/* ============ tutorial guiado ============ */
+const TOUR=[
+ {c:1,icon:'👑',t:'Bem-vindo a Porto Real!',p:'Este app é o seu guia das locações de <b>Game of Thrones</b> em Dubrovnik — a Porto Real de verdade. Em 1 minuto eu te mostro como usar.',next:'Começar o tour'},
+ {sel:'#locPill',t:'📍 Sua localização',p:()=>FRAMED?'Aqui você marca onde está. <b>Dentro do app do Claude o GPS é bloqueado</b> — para ter GPS ao vivo, abra o site no Safari ou Chrome (o link está aqui dentro).':'Toque aqui para <b>ligar o GPS</b>. Quando ficar <b style="color:#2fb35a">verde</b>, o ponto azul te segue no mapa e o app avisa quando você chega numa locação. Ainda em casa? Aqui também tem o <b>🧪 Modo teste</b>.'},
+ {sel:()=>$('#gMarkers .mk[data-id="jesuit"]'),pad:12,before:()=>{closeSheet();fitOld()},t:'🗺️ Os pinos',p:'Cada pino numerado é uma locação. A cor diz o tipo: <b style="color:var(--c-cidade)">cidade velha</b>, <b style="color:var(--c-muralhas)">muralhas</b>, <b style="color:var(--c-arredores)">arredores</b> e <b style="color:var(--c-excursao)">excursões</b>. <b>Toque num pino</b> para ver a cena, a história e como chegar.'},
+ {sel:'#zMe',t:'🎯 Onde estou',p:'Centraliza o mapa em você. Com o GPS ligado, toque de novo e o mapa <b>passa a te seguir</b> enquanto você anda.'},
+ {sel:'#zAR',t:'📡 Radar AR',p:'Abre a câmera em <b>realidade aumentada</b>: aponte o celular e as locações aparecem flutuando na direção certa, com a distância. Toque numa etiqueta para ver a cena.'},
+ {sel:'#zLayer',t:'📷 Pontos de foto',p:'Mostra no mapa <b>onde ficar</b> para cada foto clássica. O leque dourado aponta para onde virar a câmera.'},
+ {sel:'#tabs [data-v="locais"]',t:'📋 Locais',p:'As 20 locações numa lista, da mais perto para a mais longe, com seta e minutos a pé. Marque <b>“Visitei”</b> e acompanhe sua conquista.'},
+ {sel:'#tabs [data-v="bussola"]',t:'🧭 Bússola',p:'Escolha um destino e siga a <b>seta vermelha</b>. Toque em “Bússola ao vivo” para a seta girar junto com o celular.'},
+ {sel:'#tabs [data-v="fotos"]',t:'📸 Fotos',p:'15 <b>missões de foto</b>: onde ficar, lente, uma pose para recriar a cena e um <b>planejador</b> que mostra a luz em qualquer horário do dia da sua visita. <b>“Câmera com guia”</b> abre a câmera com grade, silhueta, nível e mira 🎯.'},
+ {sel:'#tabs [data-v="mais"]',t:'⚔️ Roteiros e mais',p:'Roteiros com <b>modo guiado</b> parada por parada (comece pela Caminhada da Vergonha — tem até o sino 🔔), ingressos de 2026, regras da cidade, curiosidades e quiz.'},
+ {c:1,icon:'🏰',t:'Pronto para a conquista!',p:()=>FRAMED?'Lembre: aqui dentro do Claude o GPS e a câmera ao vivo ficam bloqueados. Para a experiência completa, abra o site.':'Dica de ouro: toque em <b>Compartilhar → “Adicionar à Tela de Início”</b>. O guia vira app e funciona até <b>sem internet</b>.',last:true}
+];
+let tourI=0;
+function startTour(i){store.set('welcomed',true);renderMapTop();closeSheet();closeModal();tourI=i||0;$('#tour').classList.add('on');showTour()}
+function endTour(){$('#tour').classList.remove('on');store.set('toured',true)}
+function showTour(){const st=TOUR[tourI];if(!st){endTour();return}if(st.before)st.before();
+ requestAnimationFrame(()=>requestAnimationFrame(()=>placeTour(st)))}
+function placeTour(st){const spot=$('#tourSpot'),cardEl=$('#tourCard'),W=innerWidth,H=innerHeight;
+ const el=st.sel?(typeof st.sel==='function'?st.sel():$(st.sel)):null;let r=el&&el.getBoundingClientRect();if(r&&(r.width===0||r.bottom<0||r.top>H))r=null;
+ const p=typeof st.p==='function'?st.p():st.p;const dots=TOUR.map((_,i)=>`<i class="${i===tourI?'on':''}"></i>`).join('');
+ let btns;if(st.last){btns=FRAMED?`<a class="btn gold" href="${HOSTED_URL}" target="_blank" rel="noopener">📡 Abrir o site</a><button class="btn" id="tDone">Começar</button>`
+   :`<button class="btn gold" id="tGps">📡 Ativar GPS</button><button class="btn" id="tSim">🧪 Testar em casa</button><button class="btn" id="tDone">Começar</button>`}
+ else btns=`${tourI>0?'<button class="btn sm" id="tBack">Voltar</button>':''}<button class="btn gold sm" id="tNext">${st.next||'Próximo →'}</button>`;
+ cardEl.innerHTML=`${st.icon?`<div class="tbig">${st.icon}</div>`:''}<div class="tdots" style="justify-content:${st.c?'center':'flex-start'};margin-top:${st.icon?'10px':'0'}">${dots}</div><h3 class="serif" style="text-align:${st.c?'center':'left'}">${st.t}</h3><p style="text-align:${st.c?'center':'left'}">${p}</p>
+  <div class="tbar" style="${st.last?'flex-wrap:wrap;justify-content:center':''}">${st.last?'':'<button class="tskip" id="tSkip">Pular tutorial</button>'}${btns}</div>`;
+ cardEl.style.animation='none';void cardEl.offsetWidth;cardEl.style.animation='';
+ if(r){const pad=st.pad||6;spot.classList.remove('none');Object.assign(spot.style,{left:(r.left-pad)+'px',top:(r.top-pad)+'px',width:(r.width+pad*2)+'px',height:(r.height+pad*2)+'px'});
+  const below=r.top+r.height/2<H*0.5;cardEl.style.top=below?(r.bottom+pad+14)+'px':'auto';cardEl.style.bottom=below?'auto':(H-r.top+pad+14)+'px'}
+ else{spot.classList.add('none');cardEl.style.bottom='auto';cardEl.style.top='0';const ch=cardEl.offsetHeight;cardEl.style.top=Math.max(20,(H-ch)/2)+'px'}
+ const q=s=>$(s,cardEl);
+ if(q('#tNext'))q('#tNext').onclick=()=>{tourI++;showTour()};if(q('#tBack'))q('#tBack').onclick=()=>{tourI--;showTour()};if(q('#tSkip'))q('#tSkip').onclick=endTour;
+ if(q('#tDone'))q('#tDone').onclick=endTour;if(q('#tGps'))q('#tGps').onclick=()=>{endTour();startGPS(true);startCompass(true)};
+ if(q('#tSim'))q('#tSim').onclick=()=>{endTour();setSim(true,'pile');setTimeout(()=>centerOn(LBY.pile.lat,LBY.pile.lon,1.4,true),60)}}
+window.addEventListener('resize',()=>{if($('#tour').classList.contains('on'))placeTour(TOUR[tourI])});
+
 /* ============ início ============ */
 buildMap();
 window.addEventListener('resize',()=>{if(cur==='mapa')resizeMap()});
@@ -1114,8 +1353,12 @@ updatePosUI();
 const initV=(location.hash||'').slice(1);
 go(VIEWS.includes(initV)?initV:'mapa');
 requestAnimationFrame(()=>{resizeMap();fitOld()});
-// tenta GPS em silêncio (funciona quando o guia é aberto fora da janela protegida)
-setTimeout(()=>startGPS(false),600);
+// primeira visita: tutorial (o GPS é pedido no fim dele). Depois: GPS liga sozinho.
+if(!store.get('toured',false))setTimeout(()=>startTour(0),650);
+else if(!FRAMED)setTimeout(()=>startGPS(false),600);
+// app offline (só no site; dentro do Claude não há service worker)
+if(!FRAMED&&'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))
+ window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})});
 </script>
 </body>
 </html>
