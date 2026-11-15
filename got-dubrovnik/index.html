@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Porto Real de Verdade — Guia GoT em Dubrovnik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --hdr:54px; --tab:62px;
+  --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+  --bg:#f1e6cf; --paper:#fbf6ea; --paper2:#f3e9d4; --ink:#2a2018; --muted:#6f604f; --line:#dbc9a4;
+  --gold:#94700f; --gold2:#c99a2e; --crimson:#8f1d1d; --ok:#2f6b3a; --blue:#1f6fd1;
+  --sea:#a9c2c5; --sea2:#97b1b5; --land:#eadcb9; --land2:#d8c597; --old:#c97a53; --old2:#a65a39;
+  --wall:#f6efdc; --walls:#6a4e31; --road:#fbf5e6; --label:#3b2d20; --sealabel:#4f6e73;
+  --c-cidade:#8f1d1d; --c-muralhas:#94700f; --c-arredores:#2c5f6e; --c-excursao:#5b3f7a;
+  --shadow:0 8px 28px rgba(45,28,10,.20);
+}
+:root.dark{
+  --bg:#101215; --paper:#1a1d22; --paper2:#23272e; --ink:#efe6d2; --muted:#a79e8e; --line:#323840;
+  --gold:#d8b04a; --gold2:#ecc65c; --crimson:#d9554a; --ok:#63b673; --blue:#5aa2ff;
+  --sea:#0e2330; --sea2:#123344; --land:#2a2924; --land2:#3a382f; --old:#7a3b27; --old2:#5c2b1b;
+  --wall:#d9ccab; --walls:#cbbd9c; --road:#4a463d; --label:#eadfc7; --sealabel:#6e97a3;
+  --c-cidade:#d9554a; --c-muralhas:#d8b04a; --c-arredores:#4fa3b8; --c-excursao:#a98bd6;
+  --shadow:0 8px 28px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.45;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+button{font:inherit;color:inherit}
+a{color:var(--gold)}
+.serif{font-family:Cinzel,"Times New Roman",serif}
+h1,h2,h3{font-family:Cinzel,"Times New Roman",serif;margin:0;letter-spacing:.02em}
+/* header */
+.top{position:fixed;top:0;left:0;right:0;height:calc(var(--hdr) + var(--sat));padding:var(--sat) 12px 0;display:flex;align-items:center;gap:10px;background:var(--paper);border-bottom:2px solid var(--gold2);z-index:30}
+.brand{display:flex;align-items:center;gap:9px;min-width:0;flex:1}
+.brand svg{flex:none}
+.brand b{display:block;font-family:Cinzel,serif;font-weight:900;font-size:17px;letter-spacing:.08em;line-height:1.05;white-space:nowrap}
+.brand small{display:block;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 11px;border-radius:999px;border:1px solid var(--line);background:var(--paper2);font-size:12.5px;font-weight:600;white-space:nowrap;cursor:pointer}
+.pill .dot{width:9px;height:9px;border-radius:50%;background:#b9a98b}
+.pill.live .dot{background:#2fb35a;box-shadow:0 0 0 3px rgba(47,179,90,.25)}
+.pill.manual .dot{background:var(--gold2)}
+.iconbtn{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--paper2);display:grid;place-items:center;cursor:pointer;flex:none}
+/* main */
+main{position:fixed;left:0;right:0;top:calc(var(--hdr) + var(--sat));bottom:calc(var(--tab) + var(--sab))}
+.view{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;padding-bottom:24px}
+.view.active{display:block}
+#v-mapa{overflow:hidden;padding:0}
+/* tabs */
+.tabs{position:fixed;left:0;right:0;bottom:0;height:calc(var(--tab) + var(--sab));padding-bottom:var(--sab);display:grid;grid-template-columns:repeat(5,1fr);background:var(--paper);border-top:1px solid var(--line);z-index:30}
+.tabs button{background:none;border:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer}
+.tabs button svg{width:24px;height:24px}
+.tabs button.on{color:var(--gold)}
+.tabs button.on svg{filter:drop-shadow(0 0 6px rgba(201,154,46,.35))}
+/* generic */
+.wrap{max-width:720px;margin:0 auto;padding:6px 12px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px;margin:12px 0;box-shadow:0 1px 0 rgba(0,0,0,.03)}
+.card h2{font-size:18px;margin-bottom:6px}
+.card h3{font-size:15px;margin:12px 0 6px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.chip{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;border-radius:999px;font-size:12px;font-weight:600;background:var(--paper2);border:1px solid var(--line);white-space:nowrap}
+.chip.s{background:var(--crimson);color:#fff;border-color:transparent}
+.chip.g{background:var(--gold);color:#fff;border-color:transparent}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.btn{min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--paper2);font-weight:600;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;text-decoration:none;color:var(--ink)}
+.btn.gold{background:linear-gradient(180deg,var(--gold2),var(--gold));color:#fff;border-color:transparent}
+.btn.red{background:var(--crimson);color:#fff;border-color:transparent}
+.btn.sm{min-height:36px;padding:0 11px;font-size:13px;border-radius:10px}
+.btn:active{transform:scale(.98)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sep{height:1px;background:var(--line);margin:12px 0}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:13.5px}
+.kv b{color:var(--muted);font-weight:600}
+ul.clean{margin:6px 0;padding-left:18px}
+ul.clean li{margin:4px 0}
+.seg{display:flex;gap:6px;overflow-x:auto;padding:10px 12px;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg button{flex:none;height:34px;padding:0 13px;border-radius:999px;border:1px solid var(--line);background:var(--paper);font-weight:600;font-size:13px;cursor:pointer}
+.seg button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.hint{font-size:13px;color:var(--muted);background:var(--paper2);border:1px dashed var(--line);border-radius:12px;padding:10px 12px}
+.badge{display:inline-grid;place-items:center;min-width:28px;height:28px;padding:0 6px;border-radius:50%;color:#fff;font-weight:800;font-size:13px;font-family:Inter,sans-serif}
+/* map */
+#map{width:100%;height:100%;display:block;touch-action:none;background:var(--sea);user-select:none;-webkit-user-select:none}
+.m-sea{fill:var(--sea)} .m-waves{stroke:var(--sea2);fill:none;stroke-width:1.2;opacity:.8}
+.m-land{fill:var(--land);stroke:var(--land2);stroke-width:1.5}
+.m-contour{fill:none;stroke:var(--land2);stroke-width:1.2;opacity:.9}
+.m-road{fill:none;stroke:var(--road);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.m-roadc{fill:none;stroke:var(--land2);stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.m-old{fill:var(--old)} .m-hatch{stroke:var(--old2);stroke-width:1;opacity:.55}
+.m-wall{fill:none;stroke:var(--wall);stroke-width:5;stroke-linejoin:round}
+.m-wallo{fill:none;stroke:var(--walls);stroke-width:8;stroke-linejoin:round}
+.m-fort{fill:var(--wall);stroke:var(--walls);stroke-width:2}
+.m-street{fill:none;stroke:var(--road);stroke-width:2.2;opacity:.9;stroke-linecap:round}
+.m-stradun{fill:none;stroke:var(--wall);stroke-width:4;stroke-linecap:round}
+.m-cable{stroke:var(--label);stroke-width:1.6;stroke-dasharray:5 4;fill:none;opacity:.8}
+.m-island{fill:var(--land);stroke:var(--land2);stroke-width:1.5}
+.m-tree{fill:#7d9a5a;opacity:.35}
+:root.dark .m-tree{fill:#56703c;opacity:.35}
+.m-route{fill:none;stroke:var(--crimson);stroke-width:4;stroke-dasharray:9 7;stroke-linecap:round;opacity:.9}
+.lbl{font-family:Cinzel,serif;font-weight:700;fill:var(--label);paint-order:stroke;stroke:var(--land);stroke-width:3px;stroke-linejoin:round}
+.lbl.sea{fill:var(--sealabel);stroke:var(--sea);letter-spacing:.25em;font-weight:600}
+.mk{cursor:pointer}
+.mk .ring{fill:var(--paper);stroke:#fff;stroke-width:2.5}
+.mk text{font-family:Inter,sans-serif;font-weight:800;font-size:13px;fill:#fff;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.mk.sel .halo{opacity:1}
+.mk .halo{opacity:0;fill:none;stroke:var(--gold2);stroke-width:4}
+.pm circle{fill:#1f1a14;stroke:#fff;stroke-width:2}
+.pm path{fill:#fff}
+.me-acc{fill:var(--blue);opacity:.14;stroke:var(--blue);stroke-width:1;stroke-opacity:.4}
+.me-dot{fill:var(--blue);stroke:#fff;stroke-width:3}
+.me-cone{fill:var(--blue);opacity:.25}
+.mapctl{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:8px;z-index:5}
+.mapctl button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--paper);box-shadow:var(--shadow);display:grid;place-items:center;cursor:pointer;font-weight:800;font-size:20px}
+.maptop{position:absolute;left:10px;top:10px;right:64px;display:flex;flex-direction:column;gap:8px;z-index:5;pointer-events:none}
+.maptop>*{pointer-events:auto}
+.floatchip{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;height:34px;padding:0 12px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);font-size:12.5px;font-weight:700;cursor:pointer}
+.legend{position:absolute;left:10px;bottom:10px;display:flex;gap:6px;flex-wrap:wrap;z-index:5;max-width:calc(100% - 80px)}
+.legend span{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:3px 8px;opacity:.95}
+.legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.welcome{background:var(--paper);border:1px solid var(--gold2);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px;font-size:13.5px;max-width:420px}
+.welcome b.t{font-family:Cinzel,serif;font-size:15px;display:block;margin-bottom:4px}
+/* sheet */
+#scrim{position:fixed;inset:0;background:rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s;z-index:39}
+#scrim.on{opacity:1;pointer-events:auto}
+#sheet{position:fixed;left:0;right:0;bottom:0;max-height:86%;background:var(--paper);border-radius:20px 20px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.25);transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);z-index:40;display:flex;flex-direction:column;padding-bottom:var(--sab)}
+#sheet.open{transform:translateY(0)}
+#sheet .grab{padding:8px 0 4px;display:grid;place-items:center;cursor:grab;touch-action:none}
+#sheet .grab i{width:44px;height:5px;border-radius:5px;background:var(--line)}
+#sheetBody{overflow-y:auto;padding:0 14px 18px;-webkit-overflow-scrolling:touch}
+.shead{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
+.shead h2{font-size:20px;line-height:1.15}
+.alias{font-style:italic;color:var(--gold);font-weight:600;font-size:14px;margin-top:2px}
+.scene{display:flex;gap:9px;padding:9px 0;border-top:1px solid var(--line)}
+.scene:first-of-type{border-top:0}
+.scene .ep{flex:none;font-weight:800;font-size:12px;background:var(--crimson);color:#fff;border-radius:8px;padding:3px 6px;height:max-content;font-family:Inter,sans-serif}
+.scene .ep.n{background:var(--muted)}
+.scene em{color:var(--muted);font-size:12.5px;font-style:normal}
+body.nospoil .spoil{filter:blur(6px);cursor:pointer}
+body.nospoil .spoil.rev{filter:none}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0 4px}
+.quick a,.quick button{min-height:58px;border-radius:13px;border:1px solid var(--line);background:var(--paper2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11.5px;font-weight:700;text-decoration:none;color:var(--ink);cursor:pointer;padding:4px}
+.quick .on{background:var(--ok);color:#fff;border-color:transparent}
+.quick svg{width:22px;height:22px}
+/* list */
+.loc{display:flex;gap:11px;align-items:center;padding:12px;margin:8px 12px;background:var(--paper);border:1px solid var(--line);border-radius:15px;cursor:pointer}
+.loc .info{flex:1;min-width:0}
+.loc .nm{font-weight:700;font-size:15px;line-height:1.2}
+.loc .al{font-size:12.5px;color:var(--gold);font-style:italic;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.loc .meta{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap}
+.loc .dist{flex:none;text-align:right;font-size:12px;font-weight:700;color:var(--muted)}
+.loc .dist svg{display:block;margin:0 0 3px auto}
+.loc.done{opacity:.72}
+.loc.done .nm::after{content:" ✓";color:var(--ok)}
+.prog{height:10px;border-radius:10px;background:var(--paper2);border:1px solid var(--line);overflow:hidden}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--gold2),var(--crimson));border-radius:10px;transition:width .4s}
+/* compass */
+.cwrap{display:grid;place-items:center;padding:6px 0}
+#compass{width:min(86vw,330px);height:min(86vw,330px)}
+.cbig{font-family:Cinzel,serif;font-weight:900;font-size:34px;line-height:1;text-align:center}
+.csub{text-align:center;color:var(--muted);font-size:13px;margin-top:4px}
+.turn{font-weight:800;font-size:18px;text-align:center;margin-top:8px;color:var(--crimson)}
+select{font:inherit;min-height:44px;width:100%;border-radius:12px;border:1px solid var(--line);background:var(--paper2);color:var(--ink);padding:0 10px}
+/* photos */
+.ph{display:grid;grid-template-columns:96px 1fr;gap:12px}
+.vf{width:96px;height:120px;border-radius:10px;background:var(--paper2);border:1px solid var(--line);overflow:hidden}
+.light{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:12px;background:var(--paper2);border:1px solid var(--line);margin-top:8px;font-size:13px}
+.light svg{flex:none}
+.thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.thumbs img,.album img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:9px;display:block;cursor:pointer;background:var(--paper2)}
+.album{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.sunbar{display:flex;gap:10px;align-items:center}
+.sunbar .big{font-weight:800;font-size:22px}
+/* modal */
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:60;display:none;align-items:flex-end;justify-content:center}
+#modal.on{display:flex}
+#modal .box{background:var(--paper);width:100%;max-width:560px;max-height:92%;overflow:auto;border-radius:20px 20px 0 0;padding:16px 14px calc(16px + var(--sab))}
+#toast{position:fixed;left:50%;bottom:calc(var(--tab) + var(--sab) + 14px);transform:translate(-50%,30px);opacity:0;transition:.25s;background:var(--ink);color:var(--paper);padding:10px 14px;border-radius:12px;font-size:13.5px;font-weight:600;z-index:70;max-width:92vw;box-shadow:var(--shadow);pointer-events:none}
+#toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+/* quiz */
+.qopt{display:block;width:100%;text-align:left;margin:6px 0;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--paper2);font-weight:600;cursor:pointer}
+.qopt.right{background:var(--ok);color:#fff;border-color:transparent}
+.qopt.wrong{background:var(--crimson);color:#fff;border-color:transparent}
+.cur{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.cur:first-child{border-top:0}
+.cur .ic{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--paper2);border:1px solid var(--line);font-size:18px}
+details{border-top:1px solid var(--line);padding:8px 0}
+details:first-of-type{border-top:0}
+summary{font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;min-height:36px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"＋";color:var(--gold);font-weight:800}
+details[open] summary::after{content:"－"}
+table.t{width:100%;border-collapse:collapse;font-size:13.5px}
+table.t td{padding:7px 4px;border-top:1px solid var(--line);vertical-align:top}
+table.t td:last-child{text-align:right;font-weight:700;white-space:nowrap}
+.stop{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line);align-items:flex-start;cursor:pointer}
+.stop:first-child{border-top:0}
+.leg{font-size:12px;color:var(--muted);padding:2px 0 2px 38px}
+/* câmera ao vivo */
+#cam{position:fixed;inset:0;z-index:90;background:#000;display:none;color:#fff;touch-action:none}
+#cam.on{display:block}
+#cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#camOv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#camGhost *{fill:none!important;stroke:#fff!important;stroke-width:.7!important;vector-effect:non-scaling-stroke}
+#camGhost .pp *{fill:#ffcc33!important;stroke:#000!important;stroke-width:.4!important}
+.camTop{position:absolute;left:0;right:0;top:0;padding:calc(var(--sat) + 10px) 12px 26px;background:linear-gradient(rgba(0,0,0,.78),rgba(0,0,0,0));display:flex;gap:10px;align-items:flex-start}
+.camTop h3{font-size:16px;margin:0 0 3px;color:#fff}
+.camTip{font-size:12.5px;opacity:.92;line-height:1.35;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.camBot{position:absolute;left:0;right:0;bottom:0;padding:24px 22px calc(var(--sab) + 20px);background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.8));display:flex;align-items:center;justify-content:space-between}
+.shutter{width:78px;height:78px;border-radius:50%;border:5px solid #fff;background:rgba(255,255,255,.22);cursor:pointer}
+.shutter:active{background:#fff}
+.camBtn{width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.35);display:grid;place-items:center;color:#fff;cursor:pointer;flex:none;font-size:18px}
+.camThumb{width:52px;height:52px;border-radius:12px;border:2px solid #fff;object-fit:cover;background:#222;cursor:pointer}
+.camGuide{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--sab) + 126px);max-width:94vw;white-space:normal!important;text-align:center;justify-content:center;background:rgba(0,0,0,.6);border-radius:14px;padding:8px 13px;font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px;white-space:nowrap;border:1px solid rgba(255,255,255,.2)}
+.camGuide.ok{background:rgba(40,140,70,.9)}
+.camSide{position:absolute;right:12px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px}
+.camSide button{width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.35);color:#fff;font-weight:800;font-size:12px;cursor:pointer}
+.camSide button.on{background:rgba(214,174,69,.9);color:#000}
+.camRot{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);background:rgba(0,0,0,.6);padding:8px 12px;border-radius:12px;font-size:13px;font-weight:700}
+#camFlash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .3s}
+@media (min-width:760px){ .loc{max-width:700px;margin-left:auto;margin-right:auto} #sheet{max-width:620px;margin:0 auto} }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="var(--crimson)"/><path d="M9 27h22l2-13-6 5-7-9-7 9-6-5z" fill="var(--gold2)" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/><rect x="9" y="28" width="22" height="3" rx="1" fill="var(--gold2)"/></svg>
+    <div style="min-width:0"><b>PORTO REAL</b><small>Dubrovnik · guia Game of Thrones</small></div>
+  </div>
+  <button class="pill" id="locPill" aria-label="Localização"><span class="dot"></span><span id="locTxt">Sem posição</span></button>
+  <button class="iconbtn" id="themeBtn" aria-label="Tema"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+</header>
+
+<main>
+  <section class="view" id="v-mapa">
+    <svg id="map" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="maptop" id="mapTop"></div>
+    <div class="mapctl">
+      <button id="zIn" aria-label="Aproximar">＋</button>
+      <button id="zOut" aria-label="Afastar">－</button>
+      <button id="zMe" aria-label="Minha posição" title="Minha posição"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+      <button id="zFit" aria-label="Ver tudo" title="Ver cidade velha"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      <button id="zLayer" aria-label="Pontos de foto" title="Pontos de foto"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
+    </div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section class="view" id="v-locais"></section>
+  <section class="view" id="v-bussola"></section>
+  <section class="view" id="v-fotos"></section>
+  <section class="view" id="v-mais"></section>
+</main>
+
+<nav class="tabs" id="tabs">
+  <button data-v="mapa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>Mapa</button>
+  <button data-v="locais"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Locais</button>
+  <button data-v="bussola"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z" fill="currentColor"/></svg>Bússola</button>
+  <button data-v="fotos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8h4l2-3h6l2 3h4v12H3z"/><circle cx="12" cy="13.5" r="3.5"/></svg>Fotos</button>
+  <button data-v="mais"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h16M4 19h10"/></svg>Mais</button>
+</nav>
+
+<div id="scrim"></div>
+<div id="sheet" role="dialog" aria-modal="true"><div class="grab" id="grab"><i></i></div><div id="sheetBody"></div></div>
+<div id="modal"><div class="box" id="modalBox"></div></div>
+<div id="toast"></div>
+<div id="cam" aria-modal="true" role="dialog">
+  <video id="camV" playsinline muted autoplay></video>
+  <svg id="camOv" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div class="camTop"><div style="flex:1;min-width:0"><h3 class="serif" id="camTitle"></h3><div class="camTip" id="camTip"></div></div><button class="camBtn" id="camX" aria-label="Fechar câmera">✕</button></div>
+  <div class="camGuide" id="camGuide" style="display:none"></div>
+  <div class="camRot" id="camRot" style="display:none">↻ Esta foto fica melhor na horizontal</div>
+  <div class="camSide"><button id="camGrid" class="on" aria-label="Grade">GRADE</button><button id="camGh" class="on" aria-label="Silhueta">GUIA</button><button id="camComp" aria-label="Bússola">🧭</button></div>
+  <div class="camBot"><img class="camThumb" id="camLast" alt=""><button class="shutter" id="camShot" aria-label="Tirar foto"></button><button class="camBtn" id="camFlip" aria-label="Trocar câmera">⟲</button></div>
+  <div id="camFlash"></div>
+</div>
+<input type="file" id="fCam" accept="image/*" capture="environment" hidden>
+<input type="file" id="fGal" accept="image/*" hidden>
+
+<script>
+'use strict';
+/* ============ utilidades ============ */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const store={get(k,d){try{const v=localStorage.getItem('pr_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('pr_'+k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const toR=Math.PI/180, RE=6371000;
+function dist(a,b){const dLa=(b.lat-a.lat)*toR,dLo=(b.lon-a.lon)*toR;const s=Math.sin(dLa/2)**2+Math.cos(a.lat*toR)*Math.cos(b.lat*toR)*Math.sin(dLo/2)**2;return 2*RE*Math.asin(Math.sqrt(s))}
+function bearing(a,b){const y=Math.sin((b.lon-a.lon)*toR)*Math.cos(b.lat*toR);const x=Math.cos(a.lat*toR)*Math.sin(b.lat*toR)-Math.sin(a.lat*toR)*Math.cos(b.lat*toR)*Math.cos((b.lon-a.lon)*toR);return (Math.atan2(y,x)/toR+360)%360}
+const DIRS=['N','NNE','NE','ENE','L','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'];
+const card=b=>DIRS[Math.round(((b%360)+360)%360/22.5)%16];
+const fmtD=m=>m<1000?(Math.round(m/5)*5)+' m':(m/1000).toFixed(m<10000?1:0).replace('.',',')+' km';
+const walk=m=>Math.max(1,Math.round(m*1.3/72));
+const angDiff=(a,b)=>{let d=((a-b)%360+540)%360-180;return d};
+let toastT;function toast(msg,ms=2600){const t=$('#toast');t.innerHTML=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),ms)}
+const TZ='Europe/Zagreb';
+const fmtT=d=>{try{return new Intl.DateTimeFormat('pt-BR',{timeZone:TZ,hour:'2-digit',minute:'2-digit'}).format(d)}catch(e){return d.toTimeString().slice(0,5)}};
+const zDate=d=>{try{return new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}).format(d)}catch(e){return d.toISOString().slice(0,10)}};
+const zMonth=()=>+zDate(new Date()).slice(5,7);
+// dentro do app do Claude a página roda num iframe protegido (sem GPS/câmera/sensores)
+const FRAMED=(()=>{try{return window.self!==window.top}catch(e){return true}})();
+const HOSTED_URL='https://danzaio.github.io/got-dubrovnik/';
+
+/* ============ ícones ============ */
+const IC={
+ nav:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="m3 11 18-8-8 18-2-8z"/></svg>',
+ apple:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><path d="M9.5 9.5h5"/></svg>',
+ comp:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z" fill="currentColor"/></svg>',
+ cam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8h4l2-3h6l2 3h4v12H3z"/><circle cx="12" cy="13.5" r="3.5"/></svg>',
+ check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+ pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+ map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>',
+ copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>',
+ img:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 17-5-5-9 8"/></svg>',
+ sun:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#e0a21b" stroke-width="2"><circle cx="12" cy="12" r="4.5" fill="#f3c44a"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>',
+ moon:'<svg width="26" height="26" viewBox="0 0 24 24" fill="#7f93b8"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>'
+};
+const arrowSVG=(deg,size=22,color='var(--crimson)')=>`<svg width="${size}" height="${size}" viewBox="0 0 24 24" style="transform:rotate(${deg}deg)"><path d="M12 2 19 21 12 17 5 21z" fill="${color}"/></svg>`;
+
+/* ============ DADOS: locações ============ */
+const CATS={cidade:'Dentro dos muros',muralhas:'Muralhas e fortes',arredores:'Colado à cidade velha',excursao:'Excursões'};
+const L=[
+{id:'gradac',n:1,cat:'arredores',name:'Parque Gradac',hr:'Park Gradac',got:'Banquete do Casamento Púrpura',lat:42.64200,lon:18.10192,
+ scenes:[[4,2,'The Lion and the Rose','O banquete do casamento de Joffrey e Margaery. Joffrey é envenenado, morre nos braços de Cersei e Tyrion acaba preso.'],
+         [4,3,'Breaker of Chains','A fuga de Sansa com Ser Dontos começa aqui, segue pelas ruelas da cidade velha e termina no litoral de Trsteno.']],
+ real:'Maior e mais antigo parque público de Dubrovnik (aberto em 1898), no alto das falésias sobre a praia Danče, cheio de pinheiros e com vista para o Lovrijenac e a cidade velha.',
+ curios:['A cerimônia do casamento foi gravada num set em Belfast; só a festa foi feita em Gradac.','Para montar o set, a produção fechou o estacionamento ao lado — e o trânsito da cidade travou por alguns dias.','Em 2026 o parque reabriu após a primeira reforma completa em quase 130 anos, com um caminho novo para pedestres.'],
+ tips:['Grátis e aberto o tempo todo.','10–15 min de subida desde o Portão de Pile; leve água no verão.','Os gramados do banquete não têm placa — o mirante da entrada, perto do laguinho, é o ponto do set.']},
+{id:'lovr',n:2,cat:'muralhas',name:'Forte Lovrijenac',hr:'Tvrđava Lovrijenac',got:'A Fortaleza Vermelha',lat:42.640731,lon:18.104412,
+ scenes:[[2,1,'The North Remembers','Torneio do dia do nome de Joffrey: Ser Dontos chega bêbado, Joffrey manda executá-lo e Sansa o salva sugerindo que ele vire bobo da corte.'],
+         [2,1,'The North Remembers','“Poder é poder”: Cersei manda os guardas encostarem a espada no pescoço de Mindinho para provar quem manda.']],
+ real:'Fortaleza sobre um rochedo de 37 m, do lado de fora da muralha oeste. Apelidada de “Gibraltar de Dubrovnik”, vigiava as entradas por mar e por terra.',
+ curios:['Sobre o portão está o lema “Non bene pro toto libertas venditur auro”: a liberdade não se vende nem por todo o ouro do mundo.','Conta a história que navios venezianos chegaram cheios de material para erguer um forte ali — e foram mandados de volta para Veneza.','É o palco clássico do Hamlet no Festival de Verão de Dubrovnik e já recebeu o Red Bull Cliff Diving.'],
+ tips:['Ingresso avulso €15 (2026), ou incluído no ingresso das muralhas (€40).','Horário: jun–set 8h–19h30; nov–mar 8h–15h.','Subida curta e íngreme; reserve 30–45 min. Fotos melhores antes das 9h30 ou depois das 17h.']},
+{id:'pilebay',n:3,cat:'arredores',name:'Baía de Pile e Píer Oeste',hr:'Uvala Pile · Kolorina',got:'Porto de Porto Real · Baía da Água Negra',lat:42.64095,lon:18.10535,
+ scenes:[[2,1,'The North Remembers','Os Mantos Dourados descem as escadas do porto oeste na caçada aos bastardos de Robert.'],
+         [2,6,'The Old Gods and the New','A corte se despede de Myrcella no cais quando ela parte para Dorne.'],
+         [3,1,'Valar Dohaeris','Shae observa Sansa conversando com Mindinho sobre um plano de fuga.'],
+         [6,1,'The Red Woman','Cersei espera na margem o navio que traz o corpo de Myrcella.'],
+         [8,6,'The Iron Throne','Jon se despede de Sansa, Arya e Bran (segundo o site de fãs King’s Landing Dubrovnik).']],
+ real:'Pequena baía entre o Lovrijenac e o Forte Bokar, logo fora do Portão de Pile. No verão, os caiaques saem daqui.',
+ curios:['Na cena do massacre, crianças da cidade nadavam ali perto — a direção gostou e as deixou no quadro.','A produção precisou compensar as empresas de caiaque pelas horas paradas.','Em várias tomadas a Fortaleza Vermelha foi “aumentada” em computação gráfica; na vida real você vê o porto.'],
+ tips:['Grátis. Uns 5 min a pé do Lovrijenac e do Portão de Pile.']},
+{id:'pile',n:4,cat:'cidade',name:'Portão de Pile',hr:'Gradska vrata Pile',got:'Portão de Porto Real',lat:42.64178,lon:18.10710,
+ scenes:[[2,6,'The Old Gods and the New','O motim de Porto Real: a multidão faminta cerca a comitiva, Joffrey leva esterco no rosto e manda matar todos — e a cidade explode.'],
+         [3,10,'Mhysa','Jaime, enfim livre, volta a Porto Real.']],
+ real:'Entrada principal da cidade velha; ganhou a forma atual em 1537. A ponte levadiça era erguida toda noite e a chave entregue ao reitor. Sobre o arco, a estátua de São Brás (Sveti Vlaho), o padroeiro.',
+ curios:['As temporadas 2 e 3 usaram os quatro cantos do portão em cenas diferentes.'],
+ tips:['Gargalo entre 10h e 16h, quando chegam os cruzeiros.','Logo depois do portão fica a entrada principal das muralhas.']},
+{id:'minceta',n:5,cat:'muralhas',name:'Torre Minčeta',hr:'Tvrđava Minčeta',got:'Casa dos Imortais (Qarth)',lat:42.6429,lon:18.1085,
+ scenes:[[2,10,'Valar Morghulis','Daenerys, Jorah e Kovarro chegam à Casa dos Imortais e dão a volta na torre procurando a entrada para resgatar os dragões roubados.']],
+ real:'Ponto mais alto das muralhas. Nasceu quadrada em 1319 e virou a torre redonda atual no século XV, com Michelozzo e Juraj Dalmatinac. O nome vem da família Menčetić, dona do terreno.',
+ curios:['Em fevereiro de 2018 a equipe voltou à Minčeta para gravar a 8ª temporada.'],
+ tips:['Fica no circuito das muralhas (ingresso €40). Suba as escadas internas: a vista dos telhados é a melhor da cidade.']},
+{id:'walls',n:6,cat:'muralhas',name:'Muralhas — trecho do mar',hr:'Gradske zidine',got:'Muralhas de Porto Real',lat:42.63912,lon:18.11030,
+ scenes:[[3,1,'Valar Dohaeris','Tyrion, Bronn e Pod andam pela muralha enquanto operários consertam os estragos da Água Negra.'],
+         [4,7,'Mockingbird','A Montanha testa a espada em prisioneiros, e Cersei agradece ao seu campeão.'],
+         [5,3,'High Sparrow','Tommen sugere que Cersei volte para Rochedo Casterly; ela recusa.'],
+         [8,1,'Winterfell','Qyburn conta a Cersei que a Muralha caiu enquanto a Frota de Ferro entra na baía.'],
+         [8,6,'The Iron Throne','Jon é solto e deixa Porto Real rumo à Patrulha.']],
+ real:'Cerca de 1,94 km de muralhas contínuas, com até 25 m de altura e uma coleção de fortes e torres. Patrimônio da UNESCO desde 1979.',
+ curios:['O circuito é feito no sentido anti-horário: Pile → Minčeta → porto → mar → Bokar.'],
+ tips:['€40 adulto · €15 (7–18 anos) · grátis até 7 (2026). Inclui o Lovrijenac.','Uma volta só, sem reentrada. 1h30–2h com paradas.','Abre todo dia exceto 25/12; horário muda com a estação (inverno ~9h–15h; verão ~8h–19h30).','Entradas: Pile, Forte São João e Forte São Lucas. Quase sem sombra: água e chapéu.']},
+{id:'bokar',n:7,cat:'muralhas',name:'Forte Bokar',hr:'Tvrđava Bokar',got:'Onde Tyrion planeja a Água Negra',lat:42.64094,lon:18.10618,
+ scenes:[[2,8,'The Prince of Winterfell','Tyrion e Varys olham o mar e discutem a defesa contra a frota de Stannis.'],
+         [7,1,'Dragonstone','No mesmo ponto, Cersei conta a Jaime que quer se aliar a Euron Greyjoy.'],
+         [8,5,'The Bells','Daenerys pousa com Drogon sobre o Bokar e decide queimar a cidade, mesmo com os sinos da rendição tocando.']],
+ real:'Forte redondo começado em 1461 pelo florentino Michelozzo, citado como o forte casamatado mais antigo preservado da Europa. Parte dele se apoia numa rocha solta, com um arco por onde o mar passa por baixo.',
+ curios:['Na cena da 2ª temporada, o Lovrijenac ao fundo ganhou reforço digital — da vida real a vista é mais modesta.'],
+ tips:['Só se chega pelas muralhas. Olhe para o Lovrijenac do outro lado da baía.']},
+{id:'stradun',n:8,cat:'cidade',name:'Stradun (Placa)',hr:'Stradun',got:'Ruas de Porto Real',lat:42.64135,lon:18.10890,
+ scenes:[[5,10,'Mother’s Mercy','Trecho da Caminhada da Vergonha — bares, cafés e restaurantes tiveram de fechar para a gravação.'],
+         [8,5,'The Bells','Arya e o Cão de Caça entram na cidade misturados aos refugiados (cenas na cidade velha).']],
+ real:'A rua principal, de calcário polido pelo tempo, vai do Portão de Pile (fonte de Onofrio) até a torre do relógio e o Palácio Sponza.',
+ curios:['Dubrovnik também virou a cidade-cassino de Canto Bight em Star Wars: Os Últimos Jedi e foi cenário de Robin Hood (2018).'],
+ tips:['Às 7–8h a rua fica quase vazia — melhor hora para foto.']},
+{id:'rupe',n:9,cat:'cidade',name:'Museu Etnográfico Rupe',hr:'Etnografski muzej Rupe',got:'Onde Oberyn encontra Tyrion',lat:42.6403,lon:18.1074,
+ scenes:[[4,1,'Two Swords','Tyrion conversa com Oberyn, que chegou para vingar a irmã Elia e os sobrinhos (gravado ao lado do Rupe). Muitos guias chamam o prédio de “bordel do Mindinho”, mas isso não é consenso.']],
+ real:'Celeiro público de 1590 com 15 poços cavados na rocha, de 10–11 m de profundidade, onde o grão ficava a cerca de 17 °C — a reserva da república contra cercos e fome.',
+ curios:['“Rupe” significa “buracos” em croata — os próprios silos.'],
+ tips:['Incluído no bilhete de 10 museus (€20) e no Dubrovnik Pass.','Inverno: 9h–16h, fecha às terças.']},
+{id:'jesuit',n:10,cat:'cidade',name:'Escadaria Jesuíta',hr:'Skalini od Jezuita',got:'Degraus do Grande Septo de Baelor',lat:42.63964,lon:18.10938,
+ scenes:[[5,10,'Mother’s Mercy','Começa aqui a Caminhada da Vergonha: Cersei desce os degraus enquanto a septã toca o sino e repete “Vergonha!”.'],
+         [5,1,'The Wars to Come','O povo se reúne nos degraus do Septo no velório de Tywin.']],
+ real:'Escadaria barroca desenhada por Pietro Passalacqua (1735–1738), inspirada na Escadaria Espanhola de Roma. Sobe da praça Gundulić até a igreja de Santo Inácio e o antigo colégio jesuíta.',
+ curios:['O corpo nu na cena é da dublê Rebecca Van Cleave, escolhida entre mais de mil candidatas. Lena Headey caminhou ao lado com uma túnica bege e teve o rosto aplicado digitalmente.','A sequência levou 3 dias para ser filmada, e o trajeto foi cercado com tapumes para garantir privacidade.','Uma igreja local tentou barrar a gravação; a HBO queria a igreja de São Nicolau, que recusou.','Depois das muralhas, é a atração mais visitada da cidade — e passou pela primeira grande restauração desde 1735.'],
+ tips:['Grátis, aberto o tempo todo. Chegue cedo para pegar sem gente.','Degraus irregulares: cuidado ao recuar para a foto.']},
+{id:'bosk',n:11,cat:'cidade',name:'Beco da fuga de Sansa',hr:'Poljana Ruđera Boškovića',got:'Rota de fuga no motim',lat:42.63968,lon:18.10913,
+ scenes:[[2,6,'The Old Gods and the New','Durante o motim, Sansa foge por esta ruela estreita com teto em arco.']],
+ real:'Pracinha no alto da Escadaria Jesuíta, diante do antigo Collegium Ragusinum.',
+ curios:[],
+ tips:['Suba a Escadaria Jesuíta e vire à esquerda.']},
+{id:'reitor',n:12,cat:'cidade',name:'Palácio do Reitor',hr:'Knežev dvor',got:'Mansão do Rei das Especiarias (Qarth)',lat:42.64028,lon:18.11083,
+ scenes:[[2,6,'The Old Gods and the New','Xaro leva Daenerys ao Rei das Especiarias, a quem ela pede navios para cruzar o Mar Estreito (cena no átrio).']],
+ real:'Sede do governo da República de Ragusa. O reitor era eleito por apenas um mês e, nesse período, morava no palácio longe da família. Gótico-renascentista; museu de história desde 1872.',
+ curios:[],
+ tips:['€15 (2026) ou bilhete combinado de 10 museus (€20).']},
+{id:'domst',n:13,cat:'cidade',name:'Rua São Domingos',hr:'Ulica Svetog Dominika',got:'Mercado de Porto Real',lat:42.64135,lon:18.11105,
+ scenes:[[2,1,'The North Remembers','Um corte liga o porto oeste a esta rua na caçada aos bastardos de Robert.'],
+         [5,10,'Mother’s Mercy','A Caminhada da Vergonha passa por aqui a caminho do portão.'],
+         [0,0,'Várias','Cenário recorrente do mercado de Porto Real e da pregação do Alto Pardal.']],
+ real:'Rua de pedra que liga o fim do Stradun (atrás do Sponza) ao Portão de Ploče, passando pelo mosteiro dominicano.',
+ curios:[],
+ tips:['Ao meio-dia em julho e agosto fica entupida e perde o clima.']},
+{id:'domsteps',n:14,cat:'cidade',name:'Degraus do Mosteiro Dominicano',hr:'Dominikanski samostan',got:'O sermão contra os Lannister',lat:42.64170,lon:18.11130,
+ scenes:[[2,5,'The Ghost of Harrenhal','Tyrion e Bronn passam por um pregador que inflama o povo contra Joffrey — e põe a culpa em Tyrion —, falando do “fruto do incesto”.']],
+ real:'Mosteiro dos séculos XIV–XVI, construído colado à muralha para reforçar o lado nordeste. Claustro com laranjeiras e museu com uma obra de Ticiano.',
+ curios:['Durante a ocupação napoleônica, o mosteiro chegou a servir de estábulo.'],
+ tips:['Os degraus são grátis; igreja e museu são pagos (confira na porta).']},
+{id:'ploce',n:15,cat:'cidade',name:'Portão de Ploče',hr:'Vrata od Ploča',got:'Portão da Fortaleza Vermelha',lat:42.64180,lon:18.11200,
+ scenes:[[5,10,'Mother’s Mercy','Fim da Caminhada da Vergonha: Cersei atravessa o portão e entra na Fortaleza Vermelha, onde a Montanha a espera.'],
+         [2,5,'The Ghost of Harrenhal','Tyrion e Lancel conversam numa carruagem que passa pelo portão.']],
+ real:'Entrada leste da cidade, com ponte de pedra até o Forte Revelin. Por aqui chegavam as caravanas de mercadores vindas do Oriente.',
+ curios:[],
+ tips:['Para o ângulo da série, olhe para trás de dentro do portão.']},
+{id:'oldport',n:16,cat:'arredores',name:'Porto Velho',hr:'Stara luka',got:'Barcos para Qarth',lat:42.64050,lon:18.11180,
+ scenes:[[0,0,'Apoio','Daqui saem os barcos para a ilha de Lokrum (Qarth).']],
+ real:'O antigo porto da república, entre o Forte São João e o Revelin.',
+ curios:[],
+ tips:['Barcos para Lokrum a cada ~30 min no pico da temporada. Confira o horário no dia: mau tempo cancela saídas.']},
+{id:'lokrum',n:17,cat:'excursao',name:'Ilha de Lokrum',hr:'Otok Lokrum',got:'Qarth',lat:42.62486,lon:18.12106,
+ scenes:[[2,5,'The Ghost of Harrenhal','Na festa no jardim de Xaro Xhoan Daxos, o bruxo Pyat Pree convida Daenerys à Casa dos Imortais (jardim botânico e mosteiro beneditino).']],
+ real:'Reserva natural a uns 600 m do Porto Velho: pavões soltos, um lago salgado chamado “Mar Morto”, o Forte Royal (96 m) e um mosteiro beneditino fundado em 1023.',
+ curios:['Lenda local: monges expulsos teriam amaldiçoado quem tomasse a ilha — a “maldição de Lokrum”.','No mosteiro há uma exposição sobre a série com uma réplica do Trono de Ferro para foto, incluída no ingresso.'],
+ tips:['€30 adulto · €10 estudante · €5 (7–18 anos) — barco + entrada (2026).','Travessia de ~15 min. Temporada ~abril a outubro; no inverno fica fechada ou abre só em datas especiais.','Leve comida e água; reserve 3–5 h. A fila do trono é menor antes do meio-dia.']},
+{id:'belvedere',n:18,cat:'excursao',name:'Hotel Belvedere (abandonado)',hr:'Hotel Belvedere',got:'Arena do julgamento por combate',lat:42.6339,lon:18.1308,
+ scenes:[[4,8,'The Mountain and the Viper','Oberyn enfrenta a Montanha no julgamento por combate de Tyrion — e perde da forma mais brutal da série.']],
+ real:'Hotel de luxo aberto em 1985 que funcionou só seis temporadas e foi destruído no cerco de 1991. Comprado em 2014 (cerca de €12,2 mi) pelo bilionário russo Viktor Vekselberg, nunca foi reconstruído — em 2026 segue em ruínas.',
+ curios:['Para a cena, a arena ganhou o brasão dos Baratheon, que moradores depois cobriram com o escudo do time Hajduk Split.'],
+ tips:['Propriedade privada, entrada proibida e estrutura perigosa. Veja de fora: das escadas que sobem da entrada de carros dá para ver a arena.','Cerca de 3 km a leste da cidade velha (~30 min a pé).']},
+{id:'srd',n:19,cat:'excursao',name:'Monte Srđ (teleférico)',hr:'Srđ · Žičara',got:'A vista de Porto Real inteira',lat:42.6490,lon:18.1105,
+ scenes:[[0,0,'Mirante','Não é locação principal — é de onde se vê a “Porto Real” inteira. Alguns tours dizem que trechos da Estrada do Rei passaram por aqui, mas isso não é confirmado.']],
+ real:'Morro de 412 m atrás da cidade. O teleférico de 778 m sobe em cerca de 4 min; inaugurado em 1969, foi destruído na guerra e reaberto em 2010. No topo, o Forte Imperial (napoleônico) abriga o Museu da Guerra da Pátria.',
+ curios:['No cerco de 1991–92 o Forte Imperial foi a primeira linha de defesa da cidade.'],
+ tips:['€27–30 ida e volta (2026), não incluso no Dubrovnik Pass.','Fechado em janeiro e fevereiro; para com vento forte.','Chegue 30–45 min antes do pôr do sol.']},
+{id:'trsteno',n:20,cat:'excursao',name:'Arboreto de Trsteno',hr:'Arboretum Trsteno',got:'Jardins da Fortaleza Vermelha',lat:42.7126,lon:17.9765,
+ scenes:[[3,2,'Dark Wings, Dark Words','Sansa conta a Olenna e Margaery que Joffrey é um monstro.'],
+         [3,4,'And Now His Watch Is Ended','Varys e Olenna conversam sobre Mindinho e Sansa.'],
+         [3,7,'The Bear and the Maiden Fair','Sansa e Margaery falam do noivado com Tyrion.'],
+         [3,10,'Mhysa','Tyrion e Sansa passeiam pelos jardins.'],
+         [4,1,'Two Swords','Dontos dá a Sansa o colar de ametistas.'],
+         [4,4,'Oathkeeper','Olenna e Margaery; Olenna insinua seu papel na morte de Joffrey.'],
+         [4,5,'First of His Name','Oberyn e Cersei falam dos filhos.']],
+ real:'Jardim renascentista da família Gučetić-Gozze, registrado desde 1492: fonte de Netuno, aqueduto e uma pérgula de frente para o mar.',
+ curios:['É apontado como o arboreto mais antigo da costa adriática croata.'],
+ tips:['€10 adulto · €7 crianças e estudantes (2026). Não entra no Dubrovnik Pass.','~18 km a noroeste; ônibus de linha leva 20–30 min. Vá de manhã: os primeiros 90 minutos são vazios.']}
+];
+const LBY=Object.fromEntries(L.map(l=>[l.id,l]));
+
+/* ============ DADOS: pontos de foto ============ */
+// sk: tipo de esboço do visor; dir calculada de stand -> tgt
+const PH=[
+{id:'p-torneio',loc:'lovr',title:'O torneio de Joffrey',stand:[42.64075,18.10452],tgt:[42.64094,18.10618],sk:'fort',lens:'1× ou 2×',orient:'Horizontal',
+ where:'No terraço mais alto do Lovrijenac, encostado no parapeito leste.',
+ how:'Muralha e Forte Bokar no terço direito, mar na faixa de baixo. O 2× “aproxima” as muralhas e dá o ar de cidade fortificada da série.',
+ best:'Fim da tarde: o sol do oeste fica às suas costas e acende a pedra das muralhas.',
+ recreate:'Peça para alguém posar no parapeito como Joffrey assistindo ao torneio — pose de rei entediado.'},
+{id:'p-redkeep',loc:'pilebay',title:'A Fortaleza Vermelha vista do porto',stand:[42.64090,18.10530],tgt:[42.640731,18.104412],sk:'fort',lens:'1×',orient:'Vertical',
+ where:'No Píer Oeste, no meio da Baía de Pile.',
+ how:'Rochedo e forte ocupando dois terços do quadro; deixe a linha d’água no terço de baixo. É o ângulo das cenas de cais.',
+ best:'Manhã: o sol nasce do seu lado e ilumina a face do rochedo.',
+ recreate:'Cena de Cersei esperando o navio: pessoa de costas, olhando o mar, à esquerda do quadro.'},
+{id:'p-bokar',loc:'bokar',title:'Tyrion e Varys no Bokar',stand:[42.64094,18.10618],tgt:[42.640731,18.104412],sk:'fort',lens:'0,5× ou 1×',orient:'Horizontal',
+ where:'Em cima do Forte Bokar, no trecho das muralhas perto de Pile.',
+ how:'Duas pessoas no parapeito, no terço esquerdo, olhando para o mar; o Lovrijenac fecha o quadro à direita.',
+ best:'Manhã ou céu encoberto (à tarde o sol fica de frente).',
+ recreate:'Dupla planejando a defesa contra Stannis: um aponta o mar, o outro cruza os braços.'},
+{id:'p-purple',loc:'gradac',title:'Casamento Púrpura com vista',stand:[42.64192,18.10212],tgt:[42.640731,18.104412],sk:'panorama',lens:'2×',orient:'Horizontal',
+ where:'No mirante da entrada do Parque Gradac, perto do laguinho.',
+ how:'Use o 2× para comprimir Lovrijenac + cidade velha no mesmo plano. Galhos de pinheiro no topo do quadro emolduram a foto.',
+ best:'Tarde: luz lateral desenha o relevo do forte.',
+ recreate:'Brinde com uma taça (de água, que seja) — e finja engasgar com a torta de pombo.'},
+{id:'p-pile',loc:'pile',title:'O portão do motim',stand:[42.64190,18.10688],tgt:[42.64178,18.10710],sk:'gate',lens:'0,5×',orient:'Vertical',
+ where:'Na ponte de pedra, do lado de fora do Portão de Pile.',
+ how:'Arco centralizado e São Brás no topo. Agache um pouco para as linhas da ponte levarem o olhar ao portão.',
+ best:'Cedo (antes das 9h), quando a ponte está vazia.',
+ recreate:'Fuja do motim: corra em direção à câmera olhando para trás.'},
+{id:'p-roofs',loc:'minceta',title:'Os telhados de Porto Real',stand:[42.64290,18.10850],tgt:[42.64050,18.11120],sk:'panorama',lens:'1× (ou panorâmica)',orient:'Horizontal',
+ where:'No topo da Torre Minčeta, no circuito das muralhas.',
+ how:'Horizonte no terço de cima; telhados laranja enchendo o resto. Lokrum aparece ao fundo à esquerda.',
+ best:'Fim da tarde: telhados em luz quente e Lokrum recortada.',
+ recreate:'Daenerys procurando os dragões: braços abertos, de costas para a câmera.'},
+{id:'p-stradun',loc:'stradun',title:'Stradun vazio',stand:[42.64163,18.10755],tgt:[42.64105,18.11040],sk:'street',lens:'1×',orient:'Vertical',
+ where:'Logo depois do Portão de Pile, ao lado da fonte de Onofrio.',
+ how:'Ponto de fuga no terço superior, torre do relógio no fim da rua. O calcário polido reflete o céu.',
+ best:'Ao amanhecer: o sol nasce no fim da rua e faz o chão brilhar (contraluz dourada).',
+ recreate:'Caminhe pelo meio da rua como uma rainha atravessando a cidade.'},
+{id:'p-shame1',loc:'jesuit',title:'Vergonha! — ângulo clássico',stand:[42.63992,18.10946],tgt:[42.63950,18.10935],sk:'stairs',lens:'0,5×',orient:'Vertical',
+ where:'Nos primeiros degraus, do lado da praça Gundulić, olhando para cima.',
+ how:'Câmera baixa, simetria no centro, a curva dos degraus enchendo o quadro. A pessoa no meio da escada, no terço de cima.',
+ best:'De manhã cedo, antes das 9h, sem multidão.',
+ recreate:'Alguém desce devagar, de cabeça erguida, enquanto outro “toca o sino” e diz “Vergonha!”. Mas de roupa: andar de roupa de banho na cidade velha dá multa.'},
+{id:'p-shame2',loc:'jesuit',title:'O olhar de Cersei',stand:[42.63952,18.10935],tgt:[42.64000,18.10955],sk:'stairs',lens:'0,5×',orient:'Vertical',
+ where:'No alto da escadaria, olhando para baixo, para a praça.',
+ how:'É o contra-plano da abertura da cena: degraus em primeiro plano levando à praça e aos telhados.',
+ best:'Manhã ou fim da tarde (luz suave).',
+ recreate:'Retrato por cima do ombro de quem vai começar a descer.'},
+{id:'p-market',loc:'domst',title:'Mercado de Porto Real',stand:[42.64125,18.11080],tgt:[42.64180,18.11200],sk:'street',lens:'1×',orient:'Vertical',
+ where:'Na Rua São Domingos, de costas para o Sponza, olhando para o Portão de Ploče.',
+ how:'A rua estreita forma um corredor; deixe o portão no fim, no terço de cima.',
+ best:'Cedo, antes das lojas abrirem os toldos.',
+ recreate:'Pose de vendedor do mercado “anunciando” mercadorias.'},
+{id:'p-ploce',loc:'ploce',title:'A entrada na Fortaleza Vermelha',stand:[42.64166,18.11172],tgt:[42.64205,18.11235],sk:'gate',lens:'0,5×',orient:'Vertical',
+ where:'Dentro do Portão de Ploče, olhando para fora em direção à ponte do Revelin.',
+ how:'O arco escuro emoldura a luz de fora — exponha para o lado claro e deixe a pessoa em silhueta.',
+ best:'Meio da manhã, com a luz entrando pelo portão.',
+ recreate:'O fim da caminhada: alguém atravessa o arco, exausto, rumo à luz.'},
+{id:'p-arena',loc:'belvedere',title:'A arena da Víbora',stand:null,tgt:null,sk:'arena',lens:'1× ou 2×',orient:'Horizontal',
+ where:'Nas escadas que sobem da entrada de carros do Hotel Belvedere — sem entrar no prédio.',
+ how:'Use o 2× para isolar a arena semicircular por cima do portão.',
+ best:'Tarde, com o sol vindo do oeste.',
+ recreate:'Não entre: é proibido e perigoso. A foto de fora já basta para a coleção.'},
+{id:'p-throne',loc:'lokrum',title:'No Trono de Ferro',stand:null,tgt:null,sk:'throne',lens:'0,5× ou 1×',orient:'Vertical',
+ where:'Na exposição dentro do mosteiro beneditino de Lokrum.',
+ how:'Câmera na altura do peito de quem está sentado; deixe espaço acima da cabeça.',
+ best:'Antes do meio-dia: a fila é menor.',
+ recreate:'Postura de rei/rainha: queixo erguido, mão no braço do trono.'},
+{id:'p-olenna',loc:'trsteno',title:'A pérgula da Rainha dos Espinhos',stand:null,tgt:null,sk:'garden',lens:'1×',orient:'Horizontal',
+ where:'Na pérgula com vista para o mar, perto da casa de veraneio dos Gozze.',
+ how:'Colunas da pérgula criando profundidade; mar no fundo, no terço de cima.',
+ best:'Manhã, quando o jardim está vazio.',
+ recreate:'Duas pessoas tramando em voz baixa, como Olenna e Sansa.'},
+{id:'p-srd',loc:'srd',title:'Porto Real inteira',stand:[42.64880,18.11040],tgt:[42.64070,18.10990],sk:'panorama',lens:'1× e 2×',orient:'Horizontal',
+ where:'No terraço da estação superior do teleférico, no Monte Srđ.',
+ how:'Cidade velha no centro, Lokrum à esquerda. Faça uma no 1× e outra no 2× só da cidade murada.',
+ best:'Pôr do sol e, logo depois, a “hora azul”, quando as luzes da cidade acendem.',
+ recreate:'Silhueta contra o céu, olhando o reino de cima.'}
+];
+PH.forEach(p=>{if(p.stand&&p.tgt){p.dir=bearing({lat:p.stand[0],lon:p.stand[1]},{lat:p.tgt[0],lon:p.tgt[1]})}});
+
+/* ============ DADOS: roteiros ============ */
+const ROUTES=[
+ {id:'dia',name:'Porto Real em 1 dia (a pé)',time:'6–8 h com muralhas',stops:['gradac','lovr','pilebay','pile','minceta','walls','bokar','stradun','rupe','jesuit','bosk','reitor','domst','domsteps','ploce','oldport'],
+  desc:'Começa no alto de Gradac, desce ao Lovrijenac e à baía, entra pelo Portão de Pile, dá a volta nas muralhas e termina cruzando a cidade até o Porto Velho.'},
+ {id:'vergonha',name:'A Caminhada da Vergonha',time:'20–30 min',stops:['jesuit','stradun','domst','ploce'],
+  desc:'O trajeto de Cersei em “Mother’s Mercy”: Escadaria Jesuíta → rua Od Margarite → Stradun → Rua São Domingos → Portão de Ploče. Na série há cortes e “teletransportes”, então a ordem real é aproximada.'},
+ {id:'qarth',name:'Qarth e a Casa dos Imortais',time:'meio dia',stops:['minceta','reitor','oldport','lokrum'],
+  desc:'Os cenários de Daenerys: a Minčeta, o átrio do Palácio do Reitor e o barco para Lokrum.'},
+ {id:'arena',name:'Arena e pôr do sol',time:'3–4 h',stops:['ploce','belvedere','srd'],
+  desc:'Caminhada pela costa até o Belvedere (só de fora) e volta para subir o Srđ no fim da tarde.'}
+];
+
+/* ============ curiosidades e quiz ============ */
+const CUR=[
+ ['🏰','Na 1ª temporada, Porto Real era Malta. A produção se mudou para Dubrovnik a partir da 2ª temporada, em parte para cortar custos.'],
+ ['🎬','A série filmou em Dubrovnik de 2011 a 2018, da 2ª à 8ª temporada. Segundo o turismo local, Benioff e Weiss escolheram a cidade porque ela batia com a descrição de Porto Real nos livros.'],
+ ['🔔','A Caminhada da Vergonha usou a dublê Rebecca Van Cleave (escolhida entre mais de mil candidatas); Lena Headey andou ao lado de túnica bege. Três dias de gravação, com tapumes ao longo do trajeto.'],
+ ['⛪','A HBO queria filmar a Caminhada diante da igreja de São Nicolau, mas a igreja não autorizou — por isso a cena usa quatro lugares diferentes.'],
+ ['🔥','Em “The Bells”, Porto Real queima num set em Belfast: não dá para incendiar um Patrimônio da UNESCO.'],
+ ['🕵️','Na 8ª temporada a produção gravou em Dubrovnik pelo menos uma cena falsa de Jon e Cersei só para despistar caçadores de spoiler.'],
+ ['💍','No Casamento Púrpura, a cerimônia foi no estúdio (o Septo de Baelor em Belfast); só o banquete foi ao ar livre, em Gradac.'],
+ ['🏊','Na cena dos Mantos Dourados no porto oeste, crianças locais que nadavam por ali foram mantidas no quadro.'],
+ ['⚽','No Belvedere, o brasão dos Baratheon pintado para a luta foi coberto por moradores com o escudo do Hajduk Split.'],
+ ['🏨','O Belvedere funcionou só seis temporadas, de 1985 a 1991. Comprado em 2014 por um bilionário russo, segue em ruínas em 2026.'],
+ ['🐉','A série derivada House of the Dragon não filmou em Dubrovnik — foi para Espanha, Portugal e Reino Unido.'],
+ ['🛏️','Lenda de mochileiro: o City Walls Hostel tem uma placa dizendo que Peter Dinklage dormiu no sofá depois de uma noitada. Ninguém confirma — mas a história circula.'],
+ ['💶','Um levantamento citado pela imprensa croata estimou que visitantes atraídos pela série gastaram €126 milhões em Dubrovnik entre 2012 e 2015.'],
+ ['🌌','Dubrovnik também foi a cidade-cassino de Canto Bight em Star Wars: Os Últimos Jedi e cenário de Robin Hood (2018).']
+];
+const QUIZ=[
+ ['Qual lugar de Dubrovnik faz a Fortaleza Vermelha por fora?',['Torre Minčeta','Forte Lovrijenac','Palácio do Reitor','Forte Revelin'],1,'O Lovrijenac, sobre um rochedo de 37 m, aparece no torneio de Joffrey.'],
+ ['Onde começa a Caminhada da Vergonha?',['Portão de Pile','Stradun','Escadaria Jesuíta','Porto Velho'],2,'Ela começa nos degraus que fazem o Grande Septo de Baelor.'],
+ ['Qual cidade a ilha de Lokrum interpretou?',['Meereen','Braavos','Qarth','Vilavelha'],2,'A festa no jardim de Xaro foi gravada em Lokrum.'],
+ ['Onde foi gravado o banquete do Casamento Púrpura?',['Arboreto de Trsteno','Parque Gradac','Forte Bokar','Lokrum'],1,'O banquete foi no Parque Gradac; a cerimônia, em estúdio.'],
+ ['Onde Oberyn enfrentou a Montanha?',['Hotel Belvedere','Forte Imperial','Revelin','Minčeta'],0,'O átrio-anfiteatro do hotel abandonado virou arena.'],
+ ['Qual torre virou a Casa dos Imortais?',['Bokar','São João','Minčeta','Revelin'],2,'A Minčeta é o ponto mais alto das muralhas.'],
+ ['A partir de qual temporada Dubrovnik virou Porto Real?',['1ª','2ª','3ª','4ª'],1,'Na 1ª, Porto Real era Malta.'],
+ ['Quantos dias levou a gravação da Caminhada da Vergonha?',['1','3','7','12'],1,'Foram três dias, com tapumes ao longo do trajeto.'],
+ ['O que diz o lema do Lovrijenac?',['O inverno está chegando','A liberdade não se vende nem por todo o ouro','Ouça-me rugir','Valar morghulis'],1,'“Non bene pro toto libertas venditur auro.”'],
+ ['Onde ficam os “jardins da Fortaleza Vermelha” de Olenna Tyrell?',['Parque Gradac','Arboreto de Trsteno','Lokrum','Srđ'],1,'O arboreto renascentista fica a ~18 km da cidade.']
+];
+
+/* ============ estado ============ */
+const S={pos:store.get('pos',null),posSrc:store.get('pos',null)?'manual':null,heading:null,headingSrc:null,calib:store.get('calib',null),
+ visited:new Set(store.get('visited',[])),sel:null,route:null,showPhotos:false,target:store.get('target','jesuit'),placing:false,
+ filter:'all',spoil:store.get('nospoil',false),alerted:new Set(),theme:store.get('theme','auto')};
+
+/* ============ tema ============ */
+function applyTheme(){const r=document.documentElement;const sysDark=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches;
+ const dark=S.theme==='dark'||(S.theme==='auto'&&sysDark);r.classList.toggle('dark',dark)}
+$('#themeBtn').onclick=()=>{S.theme=S.theme==='auto'?'light':S.theme==='light'?'dark':'auto';store.set('theme',S.theme);applyTheme();toast('Tema: '+({auto:'automático',light:'claro (melhor no sol)',dark:'escuro'}[S.theme]))};
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme)}catch(e){}
+applyTheme();
+document.body.classList.toggle('nospoil',S.spoil);
+
+/* ============ MAPA ============ */
+const LAT0=42.6400,LON0=18.1100,MX=82020,MY=111087;
+const xy=(lat,lon)=>[(lon-LON0)*MX,(LAT0-lat)*MY];
+const ll=(x,y)=>({lat:LAT0-y/MY,lon:x/MX+LON0});
+const f1=v=>v.toFixed(1);
+function curve(p,closed){const n=p.length,g=i=>closed?p[(i+n)%n]:p[Math.max(0,Math.min(n-1,i))];let d='';
+ for(let i=0;i<(closed?n:n-1);i++){const a=g(i-1),b=g(i),c=g(i+1),e=g(i+2);
+  d+=`C${f1(b[0]+(c[0]-a[0])/6)},${f1(b[1]+(c[1]-a[1])/6)} ${f1(c[0]-(e[0]-b[0])/6)},${f1(c[1]-(e[1]-b[1])/6)} ${f1(c[0])},${f1(c[1])}`}return d}
+const pathC=(p,closed)=>`M${f1(p[0][0])},${f1(p[0][1])}`+curve(p,closed)+(closed?'Z':'');
+const pathL=(p,closed)=>'M'+p.map(q=>f1(q[0])+','+f1(q[1])).join('L')+(closed?'Z':'');
+const P=a=>a.map(q=>xy(q[0],q[1]));
+const COAST=P([[42.6455,18.0880],[42.6446,18.0915],[42.6434,18.0955],[42.6423,18.0980],[42.6415,18.0996],[42.6412,18.1010],[42.6414,18.1022],[42.6411,18.1032],[42.6407,18.1037],[42.64035,18.10405],[42.64012,18.10445],[42.6403,18.1049],[42.6407,18.1052],[42.64102,18.10545],[42.6409,18.1058],[42.64058,18.10612],[42.6401,18.1065],[42.6396,18.1071],[42.6392,18.1080],[42.6389,18.1092],[42.6389,18.1103],[42.6391,18.1114],[42.6393,18.1122],[42.6396,18.1128],[42.6400,18.1124],[42.6404,18.1121],[42.6408,18.11205],[42.6412,18.1123],[42.6415,18.1129],[42.6414,18.1138],[42.6415,18.1150],[42.6413,18.1162],[42.6405,18.1185],[42.6395,18.1210],[42.6384,18.1236],[42.6371,18.1262],[42.6355,18.1284],[42.6340,18.1298],[42.6331,18.1312],[42.6322,18.1336],[42.6311,18.1372],[42.6302,18.1420],[42.6298,18.1470]]);
+const WALL=P([[42.6429,18.1085],[42.64265,18.10965],[42.6424,18.1106],[42.64215,18.11155],[42.6419,18.1119],[42.6415,18.11225],[42.64105,18.1120],[42.6405,18.11185],[42.6400,18.11195],[42.6396,18.11225],[42.63925,18.1113],[42.6391,18.1101],[42.63915,18.1089],[42.6394,18.1079],[42.6399,18.1070],[42.64075,18.10635],[42.6413,18.1066],[42.64178,18.1071],[42.6424,18.10765]]);
+function lokrum(){const c=xy(42.6272,18.1194),a=800,b=290,th=146*toR,ux=Math.sin(th),uy=-Math.cos(th),vx=-uy,vy=ux,pts=[];
+ for(let i=0;i<40;i++){const t=i/40*2*Math.PI,r=1+.07*Math.sin(3*t+1)+.04*Math.sin(7*t+2)+.03*Math.cos(11*t);
+  const A=a*Math.cos(t)*r*(Math.cos(t)<0?0.97:1.0),B=b*Math.sin(t)*r*(Math.cos(t)<0?1.12:0.92);pts.push([c[0]+ux*A+vx*B,c[1]+uy*A+vy*B])}return pts}
+const LABELS=[
+ {t:'MAR ADRIÁTICO',lat:42.6345,lon:18.1050,c:'sea',s:15},
+ {t:'Cidade Velha',lat:42.64095,lon:18.1095,c:'',s:12.5},
+ {t:'LOKRUM',lat:42.6296,lon:18.1172,c:'',s:14},
+ {t:'Monte Srđ',lat:42.6512,lon:18.1060,c:'',s:13},
+ {t:'Porto Velho',lat:42.64045,lon:18.1140,c:'sea',s:10},
+ {t:'Baía de Pile',lat:42.6400,lon:18.1055,c:'sea',s:9.5},
+ {t:'Ploče',lat:42.6428,lon:18.1160,c:'',s:10.5},
+ {t:'Pile',lat:42.6430,lon:18.1050,c:'',s:10.5},
+ {t:'Sv. Jakov',lat:42.6378,lon:18.1272,c:'',s:10.5}
+];
+const MAP={s:1,cx:0,cy:0,W:300,H:500,svg:$('#map'),cs:[]};
+function buildMap(){
+ const svg=MAP.svg,c0=COAST[0],cN=COAST[COAST.length-1];
+ const land=`M-6000,-6000L-6000,${f1(c0[1])}L${f1(c0[0])},${f1(c0[1])}`+curve(COAST,false)+`L6000,${f1(cN[1])}L6000,-6000Z`;
+ const srd=xy(42.6503,18.1108);let contours='';
+ [[1300,560],[1050,450],[820,350],[600,255],[400,170],[220,95]].forEach(([rx,ry],i)=>{contours+=`<ellipse class="m-contour" cx="${f1(srd[0]+i*8)}" cy="${f1(srd[1]+i*14)}" rx="${rx}" ry="${ry}" transform="rotate(-8 ${f1(srd[0])} ${f1(srd[1])})"/>`});
+ const roads=[
+  P([[42.6426,18.0990],[42.6424,18.1020],[42.6423,18.1040],[42.6420,18.1060],[42.6419,18.1068]]),
+  P([[42.6419,18.1068],[42.6427,18.1072],[42.6436,18.1090],[42.6434,18.1112],[42.6428,18.1130],[42.6424,18.1150],[42.6418,18.1172],[42.6406,18.1205],[42.6393,18.1235],[42.6378,18.1268],[42.6360,18.1292],[42.6346,18.1310],[42.6332,18.1330],[42.6322,18.1370]])];
+ let roadsS=roads.map(r=>`<path class="m-roadc" d="${pathC(r,false)}"/><path class="m-road" d="${pathC(r,false)}"/>`).join('');
+ // ruas internas
+ const st=(a,b)=>{const p=xy(a[0],a[1]),q=xy(b[0],b[1]);return `<line class="m-street" x1="${f1(p[0])}" y1="${f1(p[1])}" x2="${f1(q[0])}" y2="${f1(q[1])}"/>`};
+ let streets=st([42.6421,18.10805],[42.64158,18.1106])+st([42.64122,18.1078],[42.64062,18.1101])+st([42.6409,18.1081],[42.64035,18.1099]);
+ [[18.1081,0],[18.1088,0],[18.1094,0],[18.1100,0]].forEach(([lo])=>{const a=[42.6420-(lo-18.1081)*0.21,lo],b=[42.6400-(lo-18.1081)*0.21,lo+0.0002];streets+=st(a,b)});
+ const strA=xy(42.64166,18.10748),strB=xy(42.64103,18.11042);
+ // árvores de Gradac / Lokrum
+ let trees='';const tc=(lat,lon,r)=>{const p=xy(lat,lon);trees+=`<circle class="m-tree" cx="${f1(p[0])}" cy="${f1(p[1])}" r="${r}"/>`};
+ tc(42.64215,18.1018,70);tc(42.6424,18.1006,55);tc(42.6265,18.1205,230);tc(42.6295,18.1180,150);tc(42.6240,18.1235,150);
+ const fort=(pts)=>`<path class="m-fort" d="${pathL(P(pts),true)}"/>`;
+ const circ=(lat,lon,r)=>{const p=xy(lat,lon);return `<circle class="m-fort" cx="${f1(p[0])}" cy="${f1(p[1])}" r="${r}"/>`};
+ const cabA=xy(42.6443,18.1095),cabB=xy(42.6488,18.1104);
+ const brk=P([[42.6398,18.1129],[42.6402,18.1137],[42.6405,18.1140]]);
+ svg.innerHTML=`<defs><pattern id="waves" width="90" height="60" patternUnits="userSpaceOnUse"><path class="m-waves" d="M5 20q10-8 20 0t20 0M50 48q10-8 20 0t20 0"/></pattern>
+ <pattern id="roof" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(-22)"><line class="m-hatch" x1="0" y1="0" x2="0" y2="9"/></pattern></defs>
+ <rect class="m-sea" x="-6000" y="-6000" width="12000" height="12000"/><rect x="-6000" y="-6000" width="12000" height="12000" fill="url(#waves)"/>
+ <path class="m-land" d="${land}"/>${contours}<path class="m-island" d="${pathC(lokrum(),true)}"/>${trees}
+ <path class="m-fort" d="${pathL(brk,false)}" style="fill:none;stroke-width:3"/>
+ ${roadsS}
+ <line class="m-cable" x1="${f1(cabA[0])}" y1="${f1(cabA[1])}" x2="${f1(cabB[0])}" y2="${f1(cabB[1])}"/>
+ <path class="m-old" d="${pathL(WALL,true)}"/><path d="${pathL(WALL,true)}" fill="url(#roof)"/>
+ ${streets}<line class="m-stradun" x1="${f1(strA[0])}" y1="${f1(strA[1])}" x2="${f1(strB[0])}" y2="${f1(strB[1])}"/>
+ <path class="m-wallo" d="${pathL(WALL,true)}" vector-effect="non-scaling-stroke"/><path class="m-wall" d="${pathL(WALL,true)}" vector-effect="non-scaling-stroke"/>
+ ${fort([[42.64108,18.10418],[42.64098,18.10474],[42.64042,18.10452]])}
+ ${circ(42.64094,18.10618,13)}${circ(42.6429,18.1085,12)}
+ ${fort([[42.64232,18.11205],[42.64222,18.11262],[42.64185,18.11255],[42.6419,18.11205]])}
+ ${fort([[42.6398,18.1120],[42.63975,18.1129],[42.6394,18.1127],[42.63945,18.1119]])}
+ <g id="gRoute"></g><g id="gLabels"></g><g id="gPhotos"></g><g id="gMarkers"></g><g id="gMe"></g>`;
+ // rótulos (tamanho constante)
+ $('#gLabels').innerHTML=LABELS.map(l=>{const p=xy(l.lat,l.lon);return `<g class="cs" data-x="${f1(p[0])}" data-y="${f1(p[1])}"><text class="lbl ${l.c}" font-size="${l.s}" text-anchor="middle">${esc(l.t)}</text></g>`}).join('');
+ drawMarkers();drawPhotos();
+}
+function drawMarkers(){
+ $('#gMarkers').innerHTML=L.filter(l=>l.id!=='trsteno').map(l=>{const p=xy(l.lat,l.lon);const col=`var(--c-${l.cat})`;const v=S.visited.has(l.id);
+  return `<g class="mk cs${S.sel===l.id?' sel':''}" data-id="${l.id}" data-x="${f1(p[0])}" data-y="${f1(p[1])}">
+   <circle class="halo" r="20"/><path d="M0 0 C-5-8-14-12-14-23a14 14 0 1 1 28 0c0 11-9 15-14 23z" fill="${col}" stroke="#fff" stroke-width="2.2" transform="translate(0,0)"/>
+   <text y="-23">${l.n}</text>${v?'<circle cx="11" cy="-34" r="7" fill="var(--ok)" stroke="#fff" stroke-width="1.8"/><path d="m7.5-34 2.4 2.4 4.4-4.6" stroke="#fff" stroke-width="2" fill="none"/>':''}</g>`}).join('');
+ refreshCS();
+}
+function drawPhotos(){
+ const g=$('#gPhotos');if(!S.showPhotos){g.innerHTML='';refreshCS();return}
+ g.innerHTML=PH.filter(p=>p.stand).map(p=>{const q=xy(p.stand[0],p.stand[1]);
+  return `<g class="pm cs" data-ph="${p.id}" data-x="${f1(q[0])}" data-y="${f1(q[1])}"><path d="M0 0 L-9 -26 A26 26 0 0 1 9 -26Z" transform="rotate(${p.dir.toFixed(0)})" fill="var(--gold2)" opacity=".55" style="fill:var(--gold2)"/><circle r="10"/><path d="M-5.5-2.5h2.5l1.3-2h3.4l1.3 2h2.5v7h-11z M0 -0.8a2.2 2.2 0 1 0 .01 0z"/></g>`}).join('');
+ refreshCS();
+}
+function refreshCS(){MAP.cs=$$('.cs',MAP.svg);applyView()}
+function applyView(){const {W,H,s,cx,cy}=MAP;MAP.svg.setAttribute('viewBox',`${f1(cx-W/2/s)} ${f1(cy-H/2/s)} ${f1(W/s)} ${f1(H/s)}`);
+ const k=1/s,km=k*Math.max(0.66,Math.min(1,0.5+s*0.35));
+ for(const g of MAP.cs)g.setAttribute('transform',`translate(${g.dataset.x},${g.dataset.y}) scale(${(g.classList.contains('mk')||g.classList.contains('pm')?km:k).toFixed(4)})`);drawMe(true)}
+function resizeMap(){const r=MAP.svg.getBoundingClientRect();if(r.width<10)return;MAP.W=r.width;MAP.H=r.height;applyView()}
+function fit(pts,pad=50,top=0){if(!pts.length)return;let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;pts.forEach(([x,y])=>{x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)});
+ const w=Math.max(80,x1-x0),h=Math.max(80,y1-y0);MAP.s=Math.min((MAP.W-pad*2)/w,(MAP.H-pad*2-top)/h,4);MAP.cx=(x0+x1)/2;MAP.cy=(y0+y1)/2-(top/2)/MAP.s;applyView()}
+function fitOld(){fit(['gradac','lovr','minceta','ploce','walls','oldport'].map(id=>xy(LBY[id].lat,LBY[id].lon)),36)}
+function centerOn(lat,lon,minS){const p=xy(lat,lon);MAP.cx=p[0];MAP.cy=p[1]+ (MAP.H*0.18)/MAP.s;if(minS&&MAP.s<minS)MAP.s=minS;applyView()}
+function zoomAt(f,px,py){const r=MAP.svg.getBoundingClientRect();px=px??r.left+MAP.W/2;py=py??r.top+MAP.H/2;
+ const wx=MAP.cx+(px-r.left-MAP.W/2)/MAP.s,wy=MAP.cy+(py-r.top-MAP.H/2)/MAP.s;MAP.s=Math.max(0.06,Math.min(5,MAP.s*f));
+ MAP.cx=wx-(px-r.left-MAP.W/2)/MAP.s;MAP.cy=wy-(py-r.top-MAP.H/2)/MAP.s;applyView()}
+// gestos
+(()=>{const svg=MAP.svg,pts=new Map();let moved=0,downMk=null,downPh=null,last=null;
+ svg.addEventListener('pointerdown',e=>{try{svg.setPointerCapture(e.pointerId)}catch(_){ }pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pts.size===1){moved=0;const mk=e.target.closest&&e.target.closest('.mk');downMk=mk?mk.dataset.id:null;const ph=e.target.closest&&e.target.closest('.pm');downPh=ph?ph.dataset.ph:null}else{downMk=null;downPh=null}last=null});
+ svg.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;const prev=pts.get(e.pointerId);const cur={x:e.clientX,y:e.clientY};
+  if(pts.size===1){const dx=cur.x-prev.x,dy=cur.y-prev.y;moved+=Math.abs(dx)+Math.abs(dy);if(S.follow&&moved>12){S.follow=false;$('#zMe').style.background='';$('#zMe').style.color=''}MAP.cx-=dx/MAP.s;MAP.cy-=dy/MAP.s;pts.set(e.pointerId,cur);applyView()}
+  else if(pts.size===2){const ids=[...pts.keys()];const a0=pts.get(ids[0]),b0=pts.get(ids[1]);pts.set(e.pointerId,cur);const a1=pts.get(ids[0]),b1=pts.get(ids[1]);
+   const d0=Math.hypot(a0.x-b0.x,a0.y-b0.y),d1=Math.hypot(a1.x-b1.x,a1.y-b1.y);const m0={x:(a0.x+b0.x)/2,y:(a0.y+b0.y)/2},m1={x:(a1.x+b1.x)/2,y:(a1.y+b1.y)/2};
+   if(d0>0){const r=svg.getBoundingClientRect();const wx=MAP.cx+(m0.x-r.left-MAP.W/2)/MAP.s,wy=MAP.cy+(m0.y-r.top-MAP.H/2)/MAP.s;MAP.s=Math.max(0.06,Math.min(5,MAP.s*d1/d0));
+    MAP.cx=wx-(m1.x-r.left-MAP.W/2)/MAP.s;MAP.cy=wy-(m1.y-r.top-MAP.H/2)/MAP.s;moved+=99;applyView()}}});
+ const up=e=>{if(!pts.has(e.pointerId))return;const single=pts.size===1;pts.delete(e.pointerId);
+  if(single&&moved<9){if(S.placing){const r=svg.getBoundingClientRect();const wx=MAP.cx+(e.clientX-r.left-MAP.W/2)/MAP.s,wy=MAP.cy+(e.clientY-r.top-MAP.H/2)/MAP.s;setManualPos(ll(wx,wy),'no mapa');S.placing=false;renderMapTop();return}
+   if(downMk)openLoc(downMk);else if(downPh)openPhoto(downPh)}};
+ svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',e=>pts.delete(e.pointerId));
+ svg.addEventListener('wheel',e=>{e.preventDefault();zoomAt(Math.exp(-e.deltaY*0.0016),e.clientX,e.clientY)},{passive:false});
+ let lastTap=0;svg.addEventListener('pointerup',e=>{const t=Date.now();if(t-lastTap<300&&moved<9&&!downMk)zoomAt(1.8,e.clientX,e.clientY);lastTap=t});
+})();
+$('#zIn').onclick=()=>zoomAt(1.5);$('#zOut').onclick=()=>zoomAt(1/1.5);$('#zFit').onclick=fitOld;
+$('#zMe').onclick=()=>{if(!S.pos){openLocModal();return}
+ if(S.posSrc==='gps'){S.follow=!S.follow;$('#zMe').style.background=S.follow?'var(--blue)':'';$('#zMe').style.color=S.follow?'#fff':'';toast(S.follow?'Seguindo você no mapa':'Parei de seguir')}
+ centerOn(S.pos.lat,S.pos.lon,1.2)};
+$('#zLayer').onclick=()=>{S.showPhotos=!S.showPhotos;drawPhotos();$('#zLayer').style.background=S.showPhotos?'var(--gold2)':'';toast(S.showPhotos?'📷 Mostrando onde ficar para cada foto (o leque indica a direção da câmera)':'Pontos de foto ocultos')};
+function drawMe(onlyTransform){const g=$('#gMe');if(!S.pos){g.innerHTML='';return}const p=xy(S.pos.lat,S.pos.lon);const k=1/MAP.s;
+ const acc=S.pos.acc&&S.posSrc==='gps'?Math.min(S.pos.acc,400):0;const hd=S.heading;
+ g.innerHTML=`${acc?`<circle class="me-acc" cx="${f1(p[0])}" cy="${f1(p[1])}" r="${acc}"/>`:''}<g transform="translate(${f1(p[0])},${f1(p[1])}) scale(${k.toFixed(4)})">${hd!=null?`<path class="me-cone" d="M0 0 L-16 -44 A46 46 0 0 1 16 -44Z" transform="rotate(${hd.toFixed(0)})"/>`:''}<circle class="me-dot" r="8"/></g>`}
+function drawRoute(){const g=$('#gRoute');if(!S.route){g.innerHTML='';renderMapTop();return}const r=ROUTES.find(x=>x.id===S.route);const pts=r.stops.map(id=>xy(LBY[id].lat,LBY[id].lon));
+ g.innerHTML=`<path class="m-route" d="${pathL(pts,false)}" vector-effect="non-scaling-stroke"/>`;renderMapTop();fit(pts,56,($('#mapTop').offsetHeight||0)+10)}
+function renderMapTop(){const el=$('#mapTop');let h='';
+ if(!store.get('welcomed',false))h+=`<div class="welcome"><b class="t">Bem-vindo a Porto Real</b>Toque nos pinos para ver a cena, a história e como chegar. O botão 📷 mostra onde ficar para cada foto. <div class="row" style="margin-top:8px"><button class="btn sm gold" id="wOk">Entendi</button><button class="btn sm" id="wLoc">${FRAMED?'Definir minha posição':'📡 Ativar GPS'}</button></div></div>`;
+ if(S.placing)h+=`<span class="floatchip" style="background:var(--gold2);color:#fff">👆 Toque no mapa onde você está <b id="cancelPlace" style="margin-left:6px">✕</b></span>`;
+ if(S.route){const r=ROUTES.find(x=>x.id===S.route);h+=`<span class="floatchip" id="routeChip">🗺️ ${esc(r.name)} <b style="margin-left:4px">✕</b></span>`}
+ const t=LBY.trsteno;h+=`<span class="floatchip" id="trChip">↖ Trsteno · ${S.pos?fmtD(dist(S.pos,t)):'18 km'}</span>`;
+ el.innerHTML=h;
+ const w=$('#wOk');if(w)w.onclick=()=>{store.set('welcomed',true);renderMapTop()};const wl=$('#wLoc');if(wl)wl.onclick=()=>{store.set('welcomed',true);if(FRAMED)openLocModal();else{startGPS(true);startCompass(true);renderMapTop()}};
+ const cp=$('#cancelPlace');if(cp)cp.onclick=()=>{S.placing=false;renderMapTop()};
+ const rc=$('#routeChip');if(rc)rc.onclick=()=>{S.route=null;drawRoute()};
+ $('#trChip').onclick=()=>openLoc('trsteno');
+}
+$('#legend').innerHTML=Object.entries(CATS).map(([k,v])=>`<span><i style="background:var(--c-${k})"></i>${v.split(' ')[0]==='Colado'?'Arredores':v.split(' ')[0]==='Dentro'?'Cidade':v.split(' ')[0]}</span>`).join('');
+
+/* ============ posição e bússola ============ */
+function setManualPos(p,how){S.pos={lat:p.lat,lon:p.lon};S.posSrc='manual';store.set('pos',S.pos);updatePosUI();toast('📍 Posição marcada '+how);}
+function updatePosUI(){const pill=$('#locPill'),t=$('#locTxt');pill.classList.remove('live','manual');
+ if(S.posSrc==='gps'){pill.classList.add('live');t.textContent='GPS'+(S.pos.acc?' ±'+Math.round(S.pos.acc)+' m':'')}
+ else if(S.posSrc==='manual'){pill.classList.add('manual');t.textContent='Posição manual'}else t.textContent='Sem posição';
+ drawMe();renderMapTop();if(cur==='locais')renderList();if(cur==='bussola')renderCompass();if(cur==='fotos')renderPhotosLight()}
+function startGPS(fromUser){if(!('geolocation' in navigator)){if(fromUser)gpsFail();return}
+ try{navigator.geolocation.getCurrentPosition(onPos,()=>{if(fromUser)gpsFail()},{enableHighAccuracy:true,timeout:9000,maximumAge:20000});
+  if(S.watch==null)S.watch=navigator.geolocation.watchPosition(onPos,()=>{},{enableHighAccuracy:true,maximumAge:5000});}catch(e){if(fromUser)gpsFail()}}
+function gpsFail(){toast(FRAMED?'GPS bloqueado dentro do app do Claude. Abra a versão com GPS (toque na posição, no topo) ou marque no mapa.':'Não consegui o GPS. Confira se a localização está liberada para o navegador nos Ajustes do celular.',4800)}
+function onPos(p){const first=S.posSrc!=='gps';S.pos={lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy};S.posSrc='gps';updatePosUI();
+ if(S.follow&&cur==='mapa')centerOn(S.pos.lat,S.pos.lon);
+ if(CAM.on)camTick();
+ if(first){const d=dist(S.pos,{lat:LAT0,lon:LON0});if(d>40000)toast('Você está a '+fmtD(d)+' de Dubrovnik — as distâncias vão ficar enormes até você chegar 😉',4200)}
+ // proximidade
+ for(const l of L){if(S.alerted.has(l.id))continue;if(dist(S.pos,l)<35){S.alerted.add(l.id);toast(`⚔️ Você chegou: <b>${esc(l.name)}</b> — ${esc(l.got)}. <u id="tGo">Ver cena</u>`,6000);setTimeout(()=>{const g=$('#tGo');if(g)g.onclick=()=>openLoc(l.id)},50);try{navigator.vibrate&&navigator.vibrate([60,40,60])}catch(e){}break}}}
+let compassTimer=null,compassOn=false;
+// direção para onde a câmera traseira aponta (celular em pé) ou o topo do aparelho (deitado)
+function headingFrom(a,b,g){const A=a*toR,B=b*toR,G=g*toR;
+ const vx=-Math.cos(A)*Math.sin(G)-Math.sin(A)*Math.sin(B)*Math.cos(G),vy=-Math.sin(A)*Math.sin(G)+Math.cos(A)*Math.sin(B)*Math.cos(G),vz=-Math.cos(B)*Math.cos(G);
+ if(Math.abs(vz)<0.8)return {h:(Math.atan2(vx,vy)/toR+360)%360,cam:true};return {h:(360-a+360)%360,cam:false}}
+async function startCompass(silent){
+ if(compassOn&&S.headingSrc==='live')return true;
+ try{if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){const r=await DeviceOrientationEvent.requestPermission();if(r!=='granted')throw 0}}catch(e){if(!silent)compassFail();return false}
+ compassOn=true;let got=false;
+ const h=e=>{if(e.beta!=null)S.tilt={b:e.beta,g:e.gamma};let hd=null,so=0;try{so=(screen.orientation&&screen.orientation.angle)||window.orientation||0}catch(_){ }
+  if(typeof e.webkitCompassHeading==='number'&&!isNaN(e.webkitCompassHeading)){hd=(e.webkitCompassHeading+so+360)%360}
+  else if((e.absolute||e.type==='deviceorientationabsolute')&&e.alpha!=null){const r=headingFrom(e.alpha,e.beta||0,e.gamma||0);hd=r.cam?r.h:(r.h+so+360)%360}
+  if(hd==null)return;got=true;
+  S.heading=S.heading==null?hd:(S.heading+angDiff(hd,S.heading)*0.22+360)%360;S.headingSrc='live';
+  if(!compassTimer)compassTimer=requestAnimationFrame(()=>{compassTimer=null;drawMe();if(cur==='bussola')updateCompassDyn();if(CAM.on)camTick()})};
+ try{window.addEventListener('deviceorientationabsolute',h,true);window.addEventListener('deviceorientation',h,true)}catch(e){}
+ return await new Promise(res=>setTimeout(()=>{if(!got&&!silent)compassFail();res(got)},2600))}
+function compassFail(){if(S.headingSrc!=='live')toast(FRAMED?'Dentro do app do Claude o sensor fica bloqueado. Use “Calibrar” ou abra a versão com GPS (Mais → Ajuda).':'Sensor de direção indisponível. Use “Calibrar” com um marco ou com o sol.',4500)}
+function openLocModal(){
+ const opts=L.map(l=>`<option value="${l.id}">${l.n}. ${esc(l.name)}</option>`).join('');
+ modal(`<h2 style="font-size:19px">Onde você está?</h2>
+ ${FRAMED?`<p class="small muted">Dentro do app do Claude, o guia roda numa janela protegida que <b>bloqueia GPS, bússola e câmera ao vivo</b>. Aqui você marca sua posição (no mapa ou escolhendo um local) e o guia calcula distância, direção e luz.</p>
+ <a class="btn gold" style="width:100%;margin-bottom:10px" href="${HOSTED_URL}" target="_blank" rel="noopener">📡 Abrir a versão com GPS ao vivo</a>
+ <div class="grid2"><button class="btn" id="mPlace">👆 Marcar no mapa</button><button class="btn" id="mGps">Tentar GPS aqui</button></div>`
+ :`<p class="small muted">Toque em <b>Ativar GPS</b> e permita a localização. O ponto azul passa a seguir você e o guia avisa quando você chega numa locação. Ligue também a bússola para a seta girar com o celular.</p>
+ <div class="grid2"><button class="btn gold" id="mGps">📡 Ativar GPS</button><button class="btn" id="mComp">🧭 Ligar bússola</button></div>
+ <button class="btn sm" id="mPlace" style="margin-top:8px">👆 Marcar no mapa (sem GPS)</button>`}
+ <h3 style="font-size:14px;margin:14px 0 6px">Ou: estou em…</h3><select id="mSel"><option value="">Escolha um local</option>${opts}</select>
+ ${S.pos?'<button class="btn sm" id="mClear" style="margin-top:10px">Apagar posição</button>':''}
+ <button class="btn" style="width:100%;margin-top:12px" data-close>Fechar</button>`);
+ $('#mPlace').onclick=()=>{closeModal();S.placing=true;go('mapa');renderMapTop();};
+ $('#mGps').onclick=()=>{startGPS(true);if(!FRAMED)startCompass(true);closeModal()};
+ const mc=$('#mComp');if(mc)mc.onclick=()=>{startCompass(false).then(ok=>{if(ok)toast('🧭 Bússola ligada')});closeModal()};
+ $('#mSel').onchange=e=>{const l=LBY[e.target.value];if(l){setManualPos(l,'em '+l.name);closeModal()}};
+ const c=$('#mClear');if(c)c.onclick=()=>{S.pos=null;S.posSrc=null;store.set('pos',null);updatePosUI();closeModal()};
+}
+$('#locPill').onclick=openLocModal;
+
+/* ============ sol ============ */
+const SUN=(()=>{const dayMs=864e5,J1970=2440588,J2000=2451545,e=toR*23.4397;
+ const toDays=d=>d.valueOf()/dayMs-0.5+J1970-J2000;
+ return function(date,lat,lng){const lw=toR*-lng,phi=toR*lat,d=toDays(date);const M=toR*(357.5291+0.98560028*d);
+  const C=toR*(1.9148*Math.sin(M)+0.02*Math.sin(2*M)+0.0003*Math.sin(3*M));const Lm=M+C+toR*102.9372+Math.PI;
+  const dec=Math.asin(Math.sin(e)*Math.sin(Lm)),ra=Math.atan2(Math.sin(Lm)*Math.cos(e),Math.cos(Lm));const H=toR*(280.16+360.9856235*d)-lw-ra;
+  const az=Math.atan2(Math.sin(H),Math.cos(H)*Math.sin(phi)-Math.tan(dec)*Math.cos(phi));const alt=Math.asin(Math.sin(phi)*Math.sin(dec)+Math.cos(phi)*Math.cos(dec)*Math.cos(H));
+  return {az:(az/toR+180+360)%360,alt:alt/toR}}})();
+function sunDay(){const now=new Date(),today=zDate(now);const out={};let prev=null;
+ for(let t=now.getTime()-26*36e5;t<now.getTime()+26*36e5;t+=120000){const d=new Date(t);const a=SUN(d,LAT0,LON0).alt;
+  if(prev!=null&&zDate(d)===today){if(prev<-0.83&&a>=-0.83)out.rise=d;if(prev>=-0.83&&a<-0.83)out.set=d;if(prev<6&&a>=6)out.gEndAM=d;if(prev>=6&&a<6)out.gStartPM=d}prev=a}return out}
+function lightFor(dir,date){const s=SUN(date||new Date(),LAT0,LON0);if(s.alt<-6)return {k:'night',t:'Noite',d:'Só luz artificial — ótimo para fotos noturnas da muralha iluminada.',s};
+ if(s.alt<-0.83)return {k:'blue',t:'Hora azul',d:'Céu azul profundo e luzes acesas: segure o celular firme.',s};
+ if(dir==null)return {k:'ok',t:s.alt<6?'Hora dourada':'Dia',d:'Local coberto ou sem direção fixa.',s};
+ const diff=Math.abs(angDiff(s.az,dir));let k,t,d;
+ if(diff<50){k='back';t='Contraluz';d='O sol está na sua frente: ótimo para silhuetas; para rostos, use o flash ou vire um pouco.'}
+ else if(diff<120){k='side';t='Luz lateral';d='Sol de lado: textura e relevo bonitos na pedra.'}
+ else{k='front';t='Luz a favor';d='Sol nas suas costas: cores fortes e céu azul.'}
+ if(s.alt<6)t+=' · hora dourada';return {k,t,d,s}}
+function bestWindow(dir){if(dir==null)return null;const now=new Date(),today=zDate(now);let best=null,curW=null;
+ for(let t=now.getTime()-24*36e5;t<now.getTime()+24*36e5;t+=600000){const d=new Date(t);if(zDate(d)!==today){if(curW){best=(!best||curW.n>best.n)?curW:best;curW=null}continue}
+  const s=SUN(d,LAT0,LON0);const ok=s.alt>2&&s.alt<38&&Math.abs(angDiff(s.az,dir))>=95;
+  if(ok){if(!curW)curW={a:d,b:d,n:0};curW.b=d;curW.n++}else if(curW){best=(!best||curW.n>best.n)?curW:best;curW=null}}
+ if(curW)best=(!best||curW.n>best.n)?curW:best;return best}
+
+/* ============ navegação entre abas ============ */
+let cur='mapa';const VIEWS=['mapa','locais','bussola','fotos','mais'];
+function go(v){if(!VIEWS.includes(v))v='mapa';cur=v;$$('.view').forEach(x=>x.classList.toggle('active',x.id==='v-'+v));$$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+ try{if(location.hash!=='#'+v)history.replaceState(null,'','#'+v)}catch(e){}
+ if(v==='mapa')requestAnimationFrame(resizeMap);if(v==='locais')renderList();if(v==='bussola')renderCompass();if(v==='fotos')renderFotos();if(v==='mais')renderMais()}
+$$('#tabs button').forEach(b=>b.onclick=()=>{closeSheet();go(b.dataset.v)});
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h&&h!==cur)go(h)});
+
+/* ============ sheet de detalhes ============ */
+function openSheet(html){$('#sheetBody').innerHTML=html;$('#sheetBody').scrollTop=0;$('#sheet').classList.add('open');$('#scrim').classList.add('on')}
+function closeSheet(){$('#sheet').classList.remove('open');$('#scrim').classList.remove('on');if(S.sel){S.sel=null;drawMarkers()}}
+$('#scrim').onclick=closeSheet;
+(()=>{let y0=null,dy=0;const g=$('#grab'),sh=$('#sheet');g.addEventListener('pointerdown',e=>{y0=e.clientY;dy=0;sh.style.transition='none';try{g.setPointerCapture(e.pointerId)}catch(_){ }});
+ g.addEventListener('pointermove',e=>{if(y0==null)return;dy=Math.max(0,e.clientY-y0);sh.style.transform=`translateY(${dy}px)`});
+ const end=()=>{if(y0==null)return;sh.style.transition='';sh.style.transform='';if(dy>90)closeSheet();y0=null};g.addEventListener('pointerup',end);g.addEventListener('pointercancel',end)})();
+const gmaps=(lat,lon)=>`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=walking`;
+const amaps=(lat,lon,n)=>`https://maps.apple.com/?daddr=${lat},${lon}&dirflg=w&q=${encodeURIComponent(n||'')}`;
+const epTag=s=>s[0]?`T${s[0]}E${s[1]}`:'★';
+function locMeta(l){if(!S.pos)return '';const d=dist(S.pos,l),b=bearing(S.pos,l);return `<span class="chip">${arrowSVG(b,14)} ${fmtD(d)} · ${card(b)}</span><span class="chip">🚶 ~${walk(d)} min</span>`}
+function openLoc(id){const l=LBY[id];if(!l)return;S.sel=id;drawMarkers();
+ if(cur==='mapa'&&id!=='trsteno')centerOn(l.lat,l.lon,Math.max(MAP.s,1.1));
+ const v=S.visited.has(id);const phs=PH.filter(p=>p.loc===id);
+ const seasons=[...new Set(l.scenes.filter(s=>s[0]).map(s=>s[0]))].sort((a,b)=>a-b);
+ openSheet(`<div class="shead"><span class="badge" style="background:var(--c-${l.cat})">${l.n}</span><div style="flex:1;min-width:0"><h2>${esc(l.name)}</h2><div class="alias">${esc(l.got)}</div><div class="small muted">${esc(l.hr)} · ${CATS[l.cat]}</div></div><button class="iconbtn" onclick="closeSheet()" aria-label="Fechar">✕</button></div>
+ <div class="chips">${seasons.map(s=>`<span class="chip s">Temporada ${s}</span>`).join('')}${locMeta(l)}</div>
+ <div class="quick">
+  <a href="${gmaps(l.lat,l.lon)}" target="_blank" rel="noopener">${IC.nav}Google Maps</a>
+  <a href="${amaps(l.lat,l.lon,l.name)}" target="_blank" rel="noopener">${IC.apple}Apple Maps</a>
+  <button onclick="setTarget('${id}')">${IC.comp}Bússola</button>
+  <button class="${v?'on':''}" onclick="toggleVisit('${id}')">${IC.check}${v?'Visitado':'Visitei'}</button>
+ </div>
+ <h3 class="serif" style="font-size:15px;margin:14px 0 4px">Na série</h3>
+ ${l.scenes.map(s=>`<div class="scene"><span class="ep ${s[0]?'':'n'}">${epTag(s)}</span><div class="spoil" onclick="this.classList.add('rev')">${s[0]?`<em>“${esc(s[2])}”</em><br>`:''}${esc(s[3])}</div></div>`).join('')}
+ <h3 class="serif" style="font-size:15px;margin:14px 0 4px">Na vida real</h3><p style="margin:0">${esc(l.real)}</p>
+ ${l.curios.length?`<h3 class="serif" style="font-size:15px;margin:14px 0 4px">Curiosidades</h3><ul class="clean">${l.curios.map(c=>`<li>${esc(c)}</li>`).join('')}</ul>`:''}
+ <h3 class="serif" style="font-size:15px;margin:14px 0 4px">Dicas práticas</h3><ul class="clean">${l.tips.map(c=>`<li>${esc(c)}</li>`).join('')}</ul>
+ ${phs.length?`<h3 class="serif" style="font-size:15px;margin:14px 0 6px">Fotos neste lugar</h3><div class="row">${phs.map(p=>`<button class="btn sm" onclick="openPhoto('${p.id}')">📷 ${esc(p.title)}</button>`).join('')}</div>`:''}
+ <div class="sep"></div>
+ <div class="row"><button class="btn sm" onclick="copyCoords(${l.lat},${l.lon})">${IC.copy.replace('<svg','<svg width="16" height="16"')} ${l.lat.toFixed(5)}, ${l.lon.toFixed(5)}</button>
+ <button class="btn sm" onclick="setManualPos(LBY['${id}'],'em ${esc(l.name).replace(/'/g,'')}')">${IC.pin.replace('<svg','<svg width="16" height="16"')} Estou aqui</button>
+ ${cur!=='mapa'?`<button class="btn sm" onclick="closeSheet();go('mapa');setTimeout(()=>openLoc('${id}'),60)">${IC.map.replace('<svg','<svg width="16" height="16"')} Ver no mapa</button>`:''}</div>`)}
+function copyCoords(a,b){const s=a.toFixed(6)+', '+b.toFixed(6);try{navigator.clipboard.writeText(s).then(()=>toast('Coordenadas copiadas'),()=>toast(s))}catch(e){toast(s)}}
+function toggleVisit(id){if(S.visited.has(id))S.visited.delete(id);else{S.visited.add(id);toast('✓ '+LBY[id].name+' conquistado! ('+S.visited.size+'/'+L.length+')')}store.set('visited',[...S.visited]);drawMarkers();if(cur==='locais')renderList();openLoc(id)}
+function setTarget(id){S.target=id;store.set('target',id);closeSheet();go('bussola')}
+
+/* ============ lista ============ */
+function renderList(){const el=$('#v-locais');let items=L.slice();
+ if(S.filter!=='all'&&S.filter!=='todo')items=items.filter(l=>l.cat===S.filter);if(S.filter==='todo')items=items.filter(l=>!S.visited.has(l.id));
+ if(S.pos)items.sort((a,b)=>dist(S.pos,a)-dist(S.pos,b));
+ const pct=Math.round(S.visited.size/L.length*100);
+ el.innerHTML=`<div class="wrap" style="padding-bottom:0"><div class="card" style="margin-bottom:4px"><div style="display:flex;justify-content:space-between;align-items:baseline"><h2 style="font-size:16px">Sua conquista de Porto Real</h2><b>${S.visited.size}/${L.length}</b></div><div class="prog" style="margin-top:8px"><i style="width:${pct}%"></i></div><div class="small muted" style="margin-top:6px">${S.pos?'Ordenado do mais perto para o mais longe de você.':'Defina sua posição (no topo) para ver distâncias e ordenar por proximidade.'}</div></div></div>
+ <div class="seg">${[['all','Todos'],['cidade','Cidade velha'],['muralhas','Muralhas'],['arredores','Arredores'],['excursao','Excursões'],['todo','Faltam']].map(([k,v])=>`<button class="${S.filter===k?'on':''}" data-f="${k}">${v}</button>`).join('')}</div>
+ ${items.map(l=>{const d=S.pos?dist(S.pos,l):null,b=S.pos?bearing(S.pos,l):0;const seasons=[...new Set(l.scenes.filter(s=>s[0]).map(s=>s[0]))];
+  return `<div class="loc ${S.visited.has(l.id)?'done':''}" data-id="${l.id}"><span class="badge" style="background:var(--c-${l.cat})">${l.n}</span><div class="info"><div class="nm">${esc(l.name)}</div><div class="al">${esc(l.got)}</div><div class="meta">${seasons.map(s=>`<span class="chip s" style="height:22px;font-size:11px">T${s}</span>`).join('')}${PH.some(p=>p.loc===l.id)?'<span class="chip" style="height:22px;font-size:11px">📷 foto</span>':''}</div></div>${d!=null?`<div class="dist">${arrowSVG(b,20)}${fmtD(d)}<br><span style="font-weight:600">${walk(d)} min</span></div>`:''}</div>`}).join('')}`;
+ $$('.seg button',el).forEach(b=>b.onclick=()=>{S.filter=b.dataset.f;renderList()});
+ $$('.loc',el).forEach(c=>c.onclick=()=>openLoc(c.dataset.id));}
+
+/* ============ bússola ============ */
+function compassSVG(){let ticks='';for(let a=0;a<360;a+=10){const big=a%30===0;ticks+=`<line x1="0" y1="${-140}" x2="0" y2="${big?-124:-131}" stroke="var(--ink)" stroke-width="${big?2.4:1.2}" transform="rotate(${a})" opacity="${big?.9:.5}"/>`}
+ const lbl=[['N',0,'var(--crimson)'],['L',90,'var(--ink)'],['S',180,'var(--ink)'],['O',270,'var(--ink)']].map(([t,a,c])=>`<text class="cl" data-a="${a}" x="${(104*Math.sin(a*toR)).toFixed(1)}" y="${(-104*Math.cos(a*toR)).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-family="Cinzel,serif" font-weight="900" font-size="20" fill="${c}">${t}</text>`).join('');
+ return `<svg id="compass" viewBox="-160 -160 320 320"><circle r="152" fill="var(--paper)" stroke="var(--gold2)" stroke-width="4"/><circle r="142" fill="none" stroke="var(--line)" stroke-width="1"/>
+ <g id="cRose">${ticks}${lbl}<g id="cSun"></g><g id="cTgtRing"></g></g>
+ <g id="cArrow"><path d="M0 -96 L16 10 L0 0 L-16 10Z" fill="var(--crimson)"/><path d="M0 0 L16 10 L0 34 L-16 10Z" fill="var(--muted)" opacity=".35"/></g>
+ <circle r="8" fill="var(--gold2)" stroke="var(--paper)" stroke-width="3"/><path d="M0 -158 l-8 -0 l8 14 l8 -14z" fill="var(--gold)" transform="translate(0,4)"/></svg>`}
+function compassHeading(){if(S.headingSrc==='live'&&S.heading!=null)return {h:S.heading,src:'live'};if(S.calib&&Date.now()-S.calib.t<20*60000)return {h:S.calib.h,src:'calib'};return {h:0,src:'none'}}
+function renderCompass(){const el=$('#v-bussola');const t=LBY[S.target]||LBY.jesuit;
+ const opts=L.map(l=>`<option value="${l.id}" ${l.id===t.id?'selected':''}>${l.n}. ${esc(l.name)} — ${esc(l.got)}</option>`).join('');
+ el.innerHTML=`<div class="wrap"><div class="card"><label class="small muted" for="cSel">Destino</label><select id="cSel">${opts}</select>
+ <div class="cwrap">${compassSVG()}</div><div id="cInfo"></div>
+ <div class="grid2" style="margin-top:12px"><button class="btn gold" id="cLive">🧭 Bússola ao vivo</button><button class="btn" id="cCal">🎯 Calibrar</button></div>
+ <div class="grid2" style="margin-top:8px"><a class="btn" href="${gmaps(t.lat,t.lon)}" target="_blank" rel="noopener">${IC.nav.replace('<svg','<svg width="18" height="18"')} Google Maps</a><a class="btn" href="${amaps(t.lat,t.lon,t.name)}" target="_blank" rel="noopener">${IC.apple.replace('<svg','<svg width="18" height="18"')} Apple Maps</a></div></div>
+ <div class="card"><h2 style="font-size:16px">Achar o norte sem sensor</h2><ul class="clean small">
+ <li><b>O mar fica ao sul</b> da cidade velha; o <b>Monte Srđ</b>, com a grande cruz branca, fica ao norte.</li>
+ <li>O <b>Stradun</b> corre quase de oeste (Pile) para leste (torre do relógio).</li>
+ <li>Use <b>Calibrar</b>: aponte o topo do celular para um marco que você vê (Lovrijenac, Minčeta, Lokrum, a cruz do Srđ) ou para o sol, e toque em “estou apontando”. A bússola se orienta a partir disso.</li></ul></div></div>`;
+ $('#cSel').onchange=e=>{S.target=e.target.value;store.set('target',S.target);renderCompass()};
+ $('#cLive').onclick=()=>startCompass(false).then(ok=>{if(ok)toast('🧭 Bússola ao vivo ligada')});$('#cCal').onclick=openCalib;updateCompassDyn()}
+function updateCompassDyn(){const info=$('#cInfo');if(!info)return;const t=LBY[S.target]||LBY.jesuit;const H=compassHeading();
+ $('#cRose').setAttribute('transform',`rotate(${(-H.h).toFixed(1)})`);
+ $$('#cRose .cl').forEach(t=>t.setAttribute('transform',`rotate(${H.h.toFixed(1)} ${t.getAttribute('x')} ${t.getAttribute('y')})`));
+ const sun=SUN(new Date(),LAT0,LON0);$('#cSun').innerHTML=sun.alt>-2?`<g transform="rotate(${sun.az.toFixed(1)}) translate(0,-118)"><circle r="9" fill="#f3c44a" stroke="#e0a21b" stroke-width="2"/></g>`:'';
+ if(!S.pos){$('#cArrow').style.display='none';$('#cTgtRing').innerHTML='';info.innerHTML=`<div class="cbig" style="font-size:22px">Onde você está?</div><div class="csub">A bússola precisa da sua posição para apontar o destino.</div><div style="text-align:center;margin-top:10px"><button class="btn gold" onclick="openLocModal()">📍 Definir posição</button></div>`;return}
+ const d=dist(S.pos,t),b=bearing(S.pos,t);$('#cArrow').style.display='';$('#cArrow').setAttribute('transform',`rotate(${(b-H.h).toFixed(1)})`);
+ $('#cTgtRing').innerHTML=`<g transform="rotate(${b.toFixed(1)}) translate(0,-140)"><circle r="6" fill="var(--crimson)"/></g>`;
+ let turn='';if(H.src!=='none'){const r=angDiff(b,H.h);turn=Math.abs(r)<12?'⬆ Siga em frente':r>0?`↻ Vire ${Math.round(r)}° à direita`:`↺ Vire ${Math.round(-r)}° à esquerda`}
+ const srcTxt=H.src==='live'?'Bússola ao vivo':H.src==='calib'?`Calibrado por ${esc(S.calib.by)} — se girar o corpo, recalibre`:'Sem sensor: o N está para cima. Gire o mapa mental ou calibre.';
+ info.innerHTML=`<div class="cbig">${fmtD(d)}</div><div class="csub">${esc(t.name)} · rumo ${Math.round(b)}° (${card(b)}) · 🚶 ~${walk(d)} min</div>${turn?`<div class="turn">${turn}</div>`:''}<div class="csub" style="margin-top:6px">${srcTxt}${sun.alt>-2?' · ☀ no anel = posição do sol agora':''}</div>`}
+function openCalib(){if(!S.pos){openLocModal();return}const sun=SUN(new Date(),LAT0,LON0);
+ const marks=['lovr','minceta','bokar','srd','lokrum','reitor','ploce','pile'].map(id=>LBY[id]);
+ modal(`<h2 style="font-size:19px">Calibrar a bússola</h2><p class="small muted">Aponte o <b>topo do celular</b> para algo que você está vendo e toque nele abaixo. Funciona sem sensor nenhum — só precisa da sua posição.</p>
+ ${sun.alt>3?`<button class="btn gold" style="width:100%;margin:4px 0 10px" id="calSun">☀ Estou apontando para o sol</button>`:''}
+ <div class="grid2">${marks.map(m=>`<button class="btn sm" data-m="${m.id}">${esc(m.name.replace(' (teleférico)','').replace('Ilha de ',''))}</button>`).join('')}</div>
+ <button class="btn" style="width:100%;margin-top:12px" data-close>Cancelar</button>`);
+ const sb=$('#calSun');if(sb)sb.onclick=()=>{S.calib={h:sun.az,by:'sol',t:Date.now()};store.set('calib',S.calib);closeModal();updateCompassDyn();toast('🎯 Calibrado pelo sol')};
+ $$('[data-m]',$('#modalBox')).forEach(b=>b.onclick=()=>{const m=LBY[b.dataset.m];if(dist(S.pos,m)<25){toast('Você está em cima desse marco — escolha outro');return}S.calib={h:bearing(S.pos,m),by:m.name,t:Date.now()};store.set('calib',S.calib);closeModal();updateCompassDyn();toast('🎯 Calibrado por '+m.name)})}
+
+/* ============ fotos ============ */
+function sketch(k,ghost){const g='<g stroke="var(--line)" stroke-width=".8"><line x1="26.7" y1="0" x2="26.7" y2="100"/><line x1="53.3" y1="0" x2="53.3" y2="100"/><line x1="0" y1="33.3" x2="80" y2="33.3"/><line x1="0" y1="66.7" x2="80" y2="66.7"/></g>';
+ const ink='var(--muted)',per='<g class="pp" transform="translate(%x,%y)"><circle r="3.2" fill="var(--crimson)"/><path d="M-4 12 L0 3 L4 12z" fill="var(--crimson)"/></g>';
+ const pp=(x,y)=>per.replace('%x',x).replace('%y',y);let s='';
+ if(k==='fort')s=`<rect x="0" y="70" width="80" height="30" fill="var(--sea)"/><path d="M8 72 Q20 50 36 52 L44 70Z" fill="${ink}" opacity=".5"/><path d="M14 52 h22 v-12 h-4 v4 h-4 v-4 h-4 v4 h-4 v-4 h-6z" fill="${ink}"/><path d="M50 70 v-20 h28 v20" fill="${ink}" opacity=".35"/>`+pp(62,58);
+ else if(k==='stairs')s=`<path d="M22 22 h36 v14 h-36z" fill="${ink}" opacity=".45"/><path d="M5 100 Q40 80 75 100" fill="none" stroke="${ink}" stroke-width="2"/>${[0,1,2,3,4,5].map(i=>`<path d="M${10+i*3} ${92-i*9} Q40 ${84-i*9} ${70-i*3} ${92-i*9}" fill="none" stroke="${ink}" stroke-width="1.6"/>`).join('')}`+pp(40,30);
+ else if(k==='gate')s=`<rect x="10" y="20" width="60" height="80" fill="${ink}" opacity=".35"/><path d="M26 100 V56 a14 14 0 0 1 28 0 V100z" fill="var(--paper)"/><rect x="36" y="26" width="8" height="12" fill="${ink}"/>`+pp(40,80);
+ else if(k==='street')s=`<path d="M0 0 L34 40 L34 66 L0 100z M80 0 L46 40 L46 66 L80 100z" fill="${ink}" opacity=".35"/><rect x="37" y="22" width="6" height="22" fill="${ink}"/><path d="M34 66 L0 100 M46 66 L80 100" stroke="${ink}"/>`+pp(40,74);
+ else if(k==='panorama')s=`<rect x="0" y="0" width="80" height="34" fill="var(--sea)" opacity=".5"/><ellipse cx="18" cy="33" rx="14" ry="3" fill="${ink}" opacity=".5"/><path d="M0 60 l8-8 8 8 8-10 8 10 8-7 8 7 8-9 8 9 8-8 8 8V100H0z" fill="var(--old)" opacity=".8"/>`+pp(64,84);
+ else if(k==='arena')s=`<path d="M8 80 a32 26 0 0 1 64 0" fill="none" stroke="${ink}" stroke-width="3"/><path d="M16 80 a24 19 0 0 1 48 0" fill="none" stroke="${ink}" stroke-width="2"/><path d="M24 80 a16 12 0 0 1 32 0" fill="none" stroke="${ink}" stroke-width="1.6"/>`;
+ else if(k==='throne')s=`<path d="M24 92 V40 l4-8 4 6 4-10 4 10 4-6 4 8 V92z" fill="${ink}" opacity=".5"/>`+pp(40,62);
+ else if(k==='garden')s=`<rect x="0" y="0" width="80" height="30" fill="var(--sea)" opacity=".5"/>${[8,24,40,56,72].map(x=>`<rect x="${x-2}" y="30" width="4" height="60" fill="${ink}" opacity=".5"/>`).join('')}<rect x="0" y="26" width="80" height="5" fill="${ink}" opacity=".5"/>`+pp(30,78)+pp(48,78);
+ if(ghost)return s.replace(/<rect x="0" y="(70|0)" width="80" height="(30|34)"[^>]*\/>/g,'');
+ return `<svg viewBox="0 0 80 100" width="96" height="120" preserveAspectRatio="none">${s}${g}</svg>`}
+function lightBox(p){const L1=lightFor(p.dir);const ic=L1.k==='night'||L1.k==='blue'?IC.moon:IC.sun;
+ const bw=bestWindow(p.dir);const bwt=p.dir==null?'':bw?`Hoje, luz a favor ~${fmtT(bw.a)}–${fmtT(new Date(bw.b.getTime()+600000))}`:'Hoje o sol não fica às suas costas nesse ângulo — aposte em contraluz/silhueta ou dia nublado.';
+ return `<div class="light">${ic}<div><b>${L1.t}</b>${p.dir!=null?` · câmera para ${Math.round(p.dir)}° (${card(p.dir)})`:''}<br><span class="muted">${L1.d}</span>${bwt?`<br><span style="color:var(--gold);font-weight:600">${bwt}</span>`:''}</div></div>`}
+function photoCard(p,full){const l=LBY[p.loc];const st=p.stand?{lat:p.stand[0],lon:p.stand[1]}:l;const d=S.pos?dist(S.pos,st):null;
+ return `<div class="card" id="pc-${p.id}"><div class="ph"><div class="vf">${sketch(p.sk)}</div><div style="min-width:0"><h2 style="font-size:16px">${esc(p.title)}</h2><div class="alias" style="font-size:13px">${esc(l.name)} · ${esc(l.got)}</div>
+ <div class="chips" style="margin-top:6px"><span class="chip">${esc(p.lens)}</span><span class="chip">${esc(p.orient)}</span>${d!=null?`<span class="chip">${fmtD(d)}</span>`:''}${p.dir!=null?`<span class="chip">${arrowSVG(p.dir,13,'var(--gold)')} ${card(p.dir)}</span>`:''}</div></div></div>
+ <div class="ltb" data-ph="${p.id}">${lightBox(p)}</div>
+ <div class="kv" style="margin-top:10px"><b>Onde ficar</b><span>${esc(p.where)}</span><b>Enquadrar</b><span>${esc(p.how)}</span><b>Melhor luz</b><span>${esc(p.best)}</span><b>Recrie</b><span>${esc(p.recreate)}</span></div>
+ <div class="row" style="margin-top:12px"><button class="btn gold sm" onclick="openCam('${p.id}')">${IC.cam.replace('<svg','<svg width="18" height="18"')} Câmera com guia</button><button class="btn sm" onclick="takePhoto('${p.id}',false)">${IC.img.replace('<svg','<svg width="18" height="18"')} Da galeria</button>
+ <a class="btn sm" href="${gmaps(st.lat,st.lon)}" target="_blank" rel="noopener">${IC.nav.replace('<svg','<svg width="16" height="16"')} Ir até o ponto</a>${full?'':`<button class="btn sm" onclick="showPhotoOnMap('${p.id}')">${IC.map.replace('<svg','<svg width="16" height="16"')} Mapa</button>`}</div>
+ <div class="thumbs" id="th-${p.id}"></div></div>`}
+function openPhoto(id){const p=PH.find(x=>x.id===id);if(!p)return;openSheet(`<div class="shead"><span class="badge" style="background:var(--gold)">📷</span><div style="flex:1"><h2>Estúdio de foto</h2><div class="small muted">Toque em Câmera para fotografar, ou importe da galeria.</div></div><button class="iconbtn" onclick="closeSheet()">✕</button></div>${photoCard(p,true)}`);fillThumbs(p.id)}
+function showPhotoOnMap(id){const p=PH.find(x=>x.id===id);S.showPhotos=true;drawPhotos();$('#zLayer').style.background='var(--gold2)';closeSheet();go('mapa');if(p.stand)setTimeout(()=>centerOn(p.stand[0],p.stand[1],2),80)}
+function renderFotos(){const el=$('#v-fotos');const sd=sunDay();const now=new Date();const s=SUN(now,LAT0,LON0);
+ const m=zMonth();const low=[11,12,1,2,3].includes(m);
+ el.innerHTML=`<div class="wrap"><div class="card"><div class="sunbar">${s.alt>-0.83?IC.sun:IC.moon}<div style="flex:1"><div class="big">${fmtT(now)} <span class="small muted" style="font-weight:600">em Dubrovnik</span></div>
+ <div class="small">${s.alt>-0.83?`Sol a ${Math.round(s.az)}° (${card(s.az)}), ${Math.round(s.alt)}° de altura`:'Sol abaixo do horizonte'}</div></div></div>
+ <div class="grid2 small" style="margin-top:10px"><div>🌅 Nascer: <b>${sd.rise?fmtT(sd.rise):'—'}</b></div><div>🌇 Pôr: <b>${sd.set?fmtT(sd.set):'—'}</b></div><div>✨ Dourada manhã: <b>${sd.rise&&sd.gEndAM?fmtT(sd.rise)+'–'+fmtT(sd.gEndAM):'—'}</b></div><div>✨ Dourada tarde: <b>${sd.gStartPM&&sd.set?fmtT(sd.gStartPM)+'–'+fmtT(sd.set):'—'}</b></div></div>
+ <div class="small muted" style="margin-top:8px">A luz de cada foto é calculada para agora e para hoje (estimativa: ignora prédios e morros). ${low?'Baixa temporada: ruas vazias, mas Lokrum e o teleférico podem estar fechados ou com horário reduzido.':''}</div></div>
+ <div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="font-size:16px">Seu álbum de Porto Real</h2><span class="chip" id="albCount">…</span></div><div class="album" id="album" style="margin-top:8px"></div>
+ <div class="hint" style="margin-top:10px">As fotos ficam guardadas só neste aparelho e podem sumir se o app limpar os dados. Fotos tiradas pelo botão <b>Câmera</b> podem não ir para o rolo do celular: toque numa foto do álbum e use <b>Salvar postal</b>, ou fotografe com a câmera normal e importe pela galeria.</div></div>
+ ${PH.map(p=>photoCard(p,false)).join('')}</div>`;
+ PH.forEach(p=>fillThumbs(p.id));renderAlbum()}
+function renderPhotosLight(){$$('.ltb').forEach(b=>{const p=PH.find(x=>x.id===b.dataset.ph);if(p)b.innerHTML=lightBox(p)})}
+setInterval(()=>{if(cur==='fotos')renderPhotosLight();if(cur==='bussola')updateCompassDyn()},60000);
+
+/* --- armazenamento de fotos (IndexedDB com fallback) --- */
+const DB={mem:[],db:null,ok:true,
+ open(){if(this.db)return Promise.resolve(this.db);return new Promise((res,rej)=>{let r;try{r=indexedDB.open('portoreal',1)}catch(e){this.ok=false;rej(e);return}
+  r.onupgradeneeded=()=>{try{r.result.createObjectStore('fotos',{keyPath:'id'})}catch(e){}};r.onsuccess=()=>{this.db=r.result;res(this.db)};r.onerror=()=>{this.ok=false;rej(r.error)}})},
+ async tx(mode,fn){const db=await this.open();return new Promise((res,rej)=>{const t=db.transaction('fotos',mode);const st=t.objectStore('fotos');const out=fn(st);t.oncomplete=()=>res(out&&out.result!==undefined?out.result:out);t.onerror=()=>rej(t.error)})},
+ async put(o){try{await this.tx('readwrite',s=>s.put(o))}catch(e){this.mem.push(o)}},
+ async all(){try{const r=await this.tx('readonly',s=>s.getAll());return (r||[]).concat(this.mem)}catch(e){return this.mem.slice()}},
+ async del(id){try{await this.tx('readwrite',s=>s.delete(id))}catch(e){}this.mem=this.mem.filter(x=>x.id!==id)}};
+let pendingPh=null;
+function takePhoto(id,cam){pendingPh=id;const inp=cam?$('#fCam'):$('#fGal');inp.value='';inp.click()}
+/* --- câmera ao vivo com guia de enquadramento --- */
+const CAM={on:false,stream:null,ph:null,facing:'environment',grid:true,ghost:true,frame:null};
+async function openCam(id){const p=PH.find(x=>x.id===id);if(!p)return;
+ if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){takePhoto(id,true);return}
+ CAM.ph=p;
+ try{await camStart()}catch(e){toast(FRAMED?'No app do Claude a câmera ao vivo é bloqueada — abrindo a câmera do sistema. Na versão com GPS o guia de enquadramento funciona.':'Não consegui abrir a câmera ao vivo — usando a câmera do sistema.',4200);takePhoto(id,true);return}
+ CAM.on=true;$('#cam').classList.add('on');closeSheet();
+ $('#camTitle').textContent=p.title;$('#camTip').innerHTML=`${esc(p.how)}<br><b>Lente:</b> ${esc(p.lens)} · <b>${esc(p.orient)}</b> · <b>Onde ficar:</b> ${esc(p.where)}`;
+ camOverlay();camTick();camLastThumb();
+ if(!FRAMED&&p.dir!=null)startCompass(true);
+ window.addEventListener('resize',camOverlay)}
+async function camStart(){camStopTracks();const v=$('#camV');
+ const st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:CAM.facing},width:{ideal:3840},height:{ideal:2160}},audio:false});
+ CAM.stream=st;v.srcObject=st;try{await v.play()}catch(e){}v.style.transform=CAM.facing==='user'?'scaleX(-1)':''}
+function camStopTracks(){if(CAM.stream){CAM.stream.getTracks().forEach(t=>t.stop());CAM.stream=null}}
+function closeCam(){camStopTracks();CAM.on=false;$('#cam').classList.remove('on');window.removeEventListener('resize',camOverlay)}
+function camOverlay(){const W=innerWidth,H=innerHeight,p=CAM.ph;if(!p)return;const svg=$('#camOv');svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+ const vert=p.orient.startsWith('Vertical'),portrait=H>=W;let fw=W,fh=H;
+ if(vert!==portrait){if(portrait){fw=W*0.94;fh=fw*2/3}else{fh=H*0.9;fw=fh*0.8}}
+ const fx=(W-fw)/2,fy=(H-fh)/2;CAM.frame={fx,fy,fw,fh};let s='';
+ if(vert!==portrait)s+=`<path d="M0 0H${W}V${H}H0Z M${fx} ${fy}v${fh}h${fw}v-${fh}Z" fill="rgba(0,0,0,.5)" fill-rule="evenodd"/><rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="6 5"/>`;
+ if(CAM.grid)for(const t of [1/3,2/3])s+=`<line x1="${fx+fw*t}" y1="${fy}" x2="${fx+fw*t}" y2="${fy+fh}" stroke="rgba(255,255,255,.6)" stroke-width="1"/><line x1="${fx}" y1="${fy+fh*t}" x2="${fx+fw}" y2="${fy+fh*t}" stroke="rgba(255,255,255,.6)" stroke-width="1"/>`;
+ if(CAM.ghost)s+=`<g id="camGhost" opacity=".8" transform="translate(${fx},${fy}) scale(${fw/80},${fh/100})">${sketch(p.sk,true)}</g>`;
+ s+=`<g id="camLevel" transform="translate(${W/2},${H/2})"></g>`;svg.innerHTML=s;
+ $('#camRot').style.display=vert===portrait?'none':'block';$('#camRot').textContent=vert?'↻ Esta foto fica melhor na vertical':'↻ Esta foto fica melhor na horizontal';
+ $('#camGrid').classList.toggle('on',CAM.grid);$('#camGh').classList.toggle('on',CAM.ghost);$('#camComp').classList.toggle('on',S.headingSrc==='live');camTick()}
+function camTick(){if(!CAM.on)return;const p=CAM.ph,g=$('#camGuide');let html='',ok=false;
+ if(p.dir!=null){if(S.headingSrc==='live'&&S.heading!=null){const r=angDiff(p.dir,S.heading);ok=Math.abs(r)<8;
+   html=ok?`✓ Direção certa · ${card(p.dir)}`:`${r>0?'↻':'↺'} Gire ${Math.round(Math.abs(r))}° para a ${r>0?'direita':'esquerda'}`}
+  else html=`🧭 Aponte a câmera para ${card(p.dir)} (${Math.round(p.dir)}°)`}
+ if(p.stand&&S.posSrc==='gps'){const st={lat:p.stand[0],lon:p.stand[1]};const d=dist(S.pos,st);if(d>15){html+=`${html?' · ':''}📍 ponto ideal a ${fmtD(d)} (${card(bearing(S.pos,st))})`;ok=false}}
+ g.style.display=html?'flex':'none';g.innerHTML=html;g.classList.toggle('ok',ok);$('#camComp').classList.toggle('on',S.headingSrc==='live');
+ const lv=$('#camLevel');if(!lv)return;if(!S.tilt){lv.innerHTML='';return}
+ let so=0;try{so=(screen.orientation&&screen.orientation.angle)||0}catch(e){}
+ const b=S.tilt.b*toR,gm=(S.tilt.g||0)*toR,ux=-Math.cos(b)*Math.sin(gm),uy=Math.sin(b),uz=Math.cos(b)*Math.cos(gm);
+ if(Math.abs(uz)>0.85){lv.innerHTML='';return}let roll=Math.atan2(-ux,uy)/toR+so;roll=((roll+540)%360)-180;
+ const lvl=Math.abs(roll)<1.5,c=lvl?'#4ade80':'#fff',rt=`rotate(${(-roll).toFixed(1)})`;
+ lv.innerHTML=`<line x1="-110" y1="0" x2="110" y2="0" stroke="rgba(255,255,255,.28)" stroke-width="1"/><g transform="${rt}"><line x1="-80" y1="0" x2="-22" y2="0" stroke="${c}" stroke-width="3" stroke-linecap="round"/><line x1="22" y1="0" x2="80" y2="0" stroke="${c}" stroke-width="3" stroke-linecap="round"/></g>${lvl?'<text y="22" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="800" font-family="Inter,sans-serif">NIVELADO</text>':''}`}
+async function camShot(){const v=$('#camV');if(!v.videoWidth){toast('A câmera ainda está abrindo…');return}const p=CAM.ph;
+ const vw=v.videoWidth,vh=v.videoHeight,W=innerWidth,H=innerHeight,sc=Math.max(W/vw,H/vh),ox=(W-vw*sc)/2,oy=(H-vh*sc)/2,F=CAM.frame||{fx:0,fy:0,fw:W,fh:H};
+ const sx=Math.max(0,(F.fx-ox)/sc),sy=Math.max(0,(F.fy-oy)/sc),sw=Math.min(vw-sx,F.fw/sc),sh=Math.min(vh-sy,F.fh/sc);
+ const c=document.createElement('canvas');c.width=Math.round(sw);c.height=Math.round(sh);const x=c.getContext('2d');
+ if(CAM.facing==='user'){x.translate(c.width,0);x.scale(-1,1)}x.drawImage(v,sx,sy,sw,sh,0,0,c.width,c.height);
+ const f=$('#camFlash');f.style.transition='none';f.style.opacity='.9';requestAnimationFrame(()=>{f.style.transition='';f.style.opacity='0'});try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}
+ const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.92));if(!blob)return;
+ const o={id:'f'+Date.now().toString(36),ph:p.id,loc:p.loc,ts:Date.now(),blob};await DB.put(o);
+ if(!S.visited.has(o.loc)){S.visited.add(o.loc);store.set('visited',[...S.visited]);drawMarkers()}
+ camLastThumb(o);fillThumbs(p.id);renderAlbum();toast('📸 No álbum! Toque na miniatura para salvar no celular ou fazer o postal',2800)}
+async function camLastThumb(o){const im=$('#camLast');if(!o){const all=(await DB.all()).filter(x=>x.ph===(CAM.ph&&CAM.ph.id)).sort((a,b)=>b.ts-a.ts);o=all[0]}
+ if(o){im.src=urlOf(o);im.dataset.f=o.id;im.style.visibility='visible'}else{im.removeAttribute('src');im.style.visibility='hidden'}}
+$('#camX').onclick=closeCam;$('#camShot').onclick=camShot;
+$('#camFlip').onclick=async()=>{CAM.facing=CAM.facing==='environment'?'user':'environment';try{await camStart()}catch(e){toast('Não deu para trocar de câmera')}};
+$('#camGrid').onclick=()=>{CAM.grid=!CAM.grid;camOverlay()};$('#camGh').onclick=()=>{CAM.ghost=!CAM.ghost;camOverlay()};
+$('#camComp').onclick=()=>startCompass(false).then(ok=>{if(ok){toast('🧭 Bússola ligada: siga a seta no topo');camTick()}});
+$('#camLast').onclick=()=>{const id=$('#camLast').dataset.f;if(id){closeCam();viewFoto(id)}};
+async function onFile(e){const file=e.target.files&&e.target.files[0];if(!file||!pendingPh)return;toast('Guardando foto…');
+ try{const blob=await shrink(file,1800);const o={id:'f'+Date.now().toString(36),ph:pendingPh,loc:PH.find(p=>p.id===pendingPh).loc,ts:Date.now(),blob};await DB.put(o);
+  if(!S.visited.has(o.loc)){S.visited.add(o.loc);store.set('visited',[...S.visited]);drawMarkers()}
+  toast('📸 Foto guardada no álbum');fillThumbs(pendingPh);renderAlbum()}catch(err){toast('Não consegui ler essa imagem.')}}
+$('#fCam').onchange=onFile;$('#fGal').onchange=onFile;
+function shrink(file,max){return new Promise((res,rej)=>{const url=URL.createObjectURL(file);const im=new Image();im.onload=()=>{let w=im.naturalWidth,h=im.naturalHeight;const k=Math.min(1,max/Math.max(w,h));w=Math.round(w*k);h=Math.round(h*k);
+ const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);URL.revokeObjectURL(url);c.toBlob(b=>b?res(b):rej(),'image/jpeg',0.86)};im.onerror=()=>{URL.revokeObjectURL(url);rej()};im.src=url})}
+const urls=new Map();const urlOf=o=>{if(!urls.has(o.id))urls.set(o.id,URL.createObjectURL(o.blob));return urls.get(o.id)};
+async function fillThumbs(phId){const el=$('#th-'+phId);if(!el)return;const all=(await DB.all()).filter(o=>o.ph===phId).sort((a,b)=>b.ts-a.ts);
+ el.innerHTML=all.slice(0,8).map(o=>`<img src="${urlOf(o)}" alt="" data-f="${o.id}">`).join('');$$('img',el).forEach(i=>i.onclick=()=>viewFoto(i.dataset.f))}
+async function renderAlbum(){const el=$('#album');if(!el)return;const all=(await DB.all()).sort((a,b)=>b.ts-a.ts);$('#albCount').textContent=all.length+' foto'+(all.length===1?'':'s');
+ el.innerHTML=all.length?all.map(o=>`<img src="${urlOf(o)}" alt="" data-f="${o.id}">`).join(''):'<div class="small muted" style="grid-column:1/-1">Nenhuma foto ainda. Escolha uma cena abaixo e toque em Câmera.</div>';
+ $$('img',el).forEach(i=>i.onclick=()=>viewFoto(i.dataset.f))}
+async function viewFoto(fid){const o=(await DB.all()).find(x=>x.id===fid);if(!o)return;const p=PH.find(x=>x.id===o.ph),l=LBY[o.loc];
+ modal(`<h2 style="font-size:18px">${esc(p?p.title:l.name)}</h2><div class="small muted">${esc(l.name)} · ${new Date(o.ts).toLocaleString('pt-BR')}</div>
+ <img id="vfImg" src="${urlOf(o)}" style="width:100%;border-radius:12px;margin:10px 0;display:block">
+ <div class="grid2"><button class="btn gold" id="mkPost">🖼️ Fazer postal GoT</button><button class="btn" id="svOrig">⬇️ Salvar original</button></div>
+ <div class="grid2" style="margin-top:8px"><button class="btn red" id="delF">Apagar</button><button class="btn" data-close>Fechar</button></div><div class="small muted" id="dlNote" style="margin-top:8px"></div>`);
+ $('#mkPost').onclick=async()=>{const b=await makePostal(o);const u=URL.createObjectURL(b);$('#vfImg').src=u;$('#mkPost').textContent='💾 Salvar postal';$('#mkPost').onclick=()=>saveBlob(b,`porto-real-${l.id}.jpg`)};
+ $('#svOrig').onclick=()=>saveBlob(o.blob,`dubrovnik-${l.id}-${o.id}.jpg`);
+ $('#delF').onclick=async()=>{await DB.del(fid);closeModal();renderAlbum();if(p)fillThumbs(p.id);toast('Foto apagada')};
+ if(!DL)$('#dlNote').textContent='Se o botão de salvar não funcionar aqui, pressione e segure a imagem para salvá-la.'}
+let DL=null;(async()=>{try{if(window.claude&&typeof window.claude.use==='function'){DL=await window.claude.use('downloads')}}catch(e){DL=null}})();
+async function saveBlob(blob,name){if(DL){try{await DL.save({filename:name,data:blob});toast('Salvo ✓');return}catch(e){if(e&&e.code==='declined'){toast('Cancelado');return}}}
+ try{const file=new File([blob],name,{type:'image/jpeg'});if(!FRAMED&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Porto Real · Dubrovnik'});return}}catch(e){if(e&&e.name==='AbortError')return}
+ try{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();toast('Se nada aconteceu, pressione e segure a imagem para salvar.',3800)}catch(e){toast('Pressione e segure a imagem para salvar.')}}
+async function makePostal(o){try{await document.fonts.load('900 60px Cinzel');await document.fonts.load('600 30px Inter')}catch(e){}
+ const W=1080,H=1350,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+ const im=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=urlOf(o)});
+ const k=Math.max(W/im.width,H/im.height),w=im.width*k,h=im.height*k;x.drawImage(im,(W-w)/2,(H-h)/2,w,h);
+ let g=x.createLinearGradient(0,H*0.5,0,H);g.addColorStop(0,'rgba(10,8,6,0)');g.addColorStop(1,'rgba(10,8,6,.88)');x.fillStyle=g;x.fillRect(0,0,W,H);
+ g=x.createLinearGradient(0,0,0,220);g.addColorStop(0,'rgba(10,8,6,.65)');g.addColorStop(1,'rgba(10,8,6,0)');x.fillStyle=g;x.fillRect(0,0,W,220);
+ x.strokeStyle='#d6ae45';x.lineWidth=6;x.strokeRect(28,28,W-56,H-56);x.lineWidth=2;x.strokeRect(44,44,W-88,H-88);
+ const l=LBY[o.loc],p=PH.find(q=>q.id===o.ph);const sc=l.scenes.find(s=>s[0]);
+ x.fillStyle='#f3e6c4';x.textAlign='center';x.font='700 30px Cinzel, serif';x.fillText('PORTO REAL · DUBROVNIK',W/2,112);
+ // coroa
+ x.save();x.translate(W/2,150);x.fillStyle='#d6ae45';x.beginPath();x.moveTo(-34,14);x.lineTo(34,14);x.lineTo(40,-14);x.lineTo(20,0);x.lineTo(0,-24);x.lineTo(-20,0);x.lineTo(-40,-14);x.closePath();x.fill();x.restore();
+ const wrap=(t,maxW,font)=>{x.font=font;const ws=t.split(' ');const lines=[];let cur='';ws.forEach(w=>{const tt=cur?cur+' '+w:w;if(x.measureText(tt).width>maxW&&cur){lines.push(cur);cur=w}else cur=tt});if(cur)lines.push(cur);return lines};
+ let y=H-300;const tl=wrap(l.got.toUpperCase(),W-170,'900 62px Cinzel, serif');y-= (tl.length-1)*70;x.fillStyle='#f6e7bf';tl.forEach(t=>{x.font='900 62px Cinzel, serif';x.fillText(t,W/2,y);y+=70});
+ x.font='600 34px Inter, sans-serif';x.fillStyle='#ffffff';x.fillText(l.name,W/2,y+6);
+ if(sc){x.font='500 27px Inter, sans-serif';x.fillStyle='#d6ae45';x.fillText(`Game of Thrones · T${sc[0]}E${sc[1]} “${sc[2]}”`,W/2,y+56)}
+ x.font='500 24px Inter, sans-serif';x.fillStyle='rgba(255,255,255,.75)';x.fillText(new Date(o.ts).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}),W/2,H-86);
+ return await new Promise(r=>c.toBlob(r,'image/jpeg',0.9))}
+
+/* ============ modal ============ */
+function modal(html){$('#modalBox').innerHTML=html;$('#modal').classList.add('on');$$('[data-close]',$('#modalBox')).forEach(b=>b.onclick=closeModal)}
+function closeModal(){$('#modal').classList.remove('on')}
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
+
+/* ============ Mais ============ */
+let quizState=null;
+function renderMais(){const el=$('#v-mais');const m=zMonth();const low=[11,12,1,2,3].includes(m);
+ el.innerHTML=`<div class="wrap">
+ <div class="card"><h2>Roteiros</h2><p class="small muted" style="margin-top:0">O <b>modo guiado</b> leva você parada por parada, com a cena de cada lugar. No mapa as linhas são retas; para a rota a pé de verdade, use os botões do Google ou Apple Maps.</p>
+ ${ROUTES.map(r=>`<details ${r.id==='vergonha'?'open':''}><summary>${esc(r.name)} <span class="chip" style="margin-left:auto;margin-right:8px">${esc(r.time)}</span></summary><p class="small" style="margin:4px 0 8px">${esc(r.desc)}</p>${routeStops(r)}<div class="row" style="margin-top:8px"><button class="btn gold sm" onclick="guide('${r.id}',0)">▶ Modo guiado</button><button class="btn sm" onclick="showRoute('${r.id}')">🗺️ Ver no mapa</button></div></details>`).join('')}</div>
+ <div class="card"><h2>Ingressos e horários (2026)</h2>
+ <table class="t"><tr><td>Muralhas (adulto) — inclui o Lovrijenac</td><td>€40</td></tr><tr><td>Muralhas 7–18 anos</td><td>€15</td></tr><tr><td>Dubrovnik Pass 1 dia (muralhas + museus + ônibus)</td><td>€40</td></tr><tr><td>Forte Lovrijenac avulso</td><td>€15</td></tr><tr><td>Palácio do Reitor</td><td>€15</td></tr><tr><td>Bilhete de 10 museus</td><td>€20</td></tr><tr><td>Lokrum (barco + reserva), adulto</td><td>€30</td></tr><tr><td>Teleférico ida e volta</td><td>€27–30</td></tr><tr><td>Arboreto de Trsteno</td><td>€10</td></tr><tr><td>Parque Gradac, Escadaria Jesuíta, ruas</td><td>grátis</td></tr></table>
+ <p class="small muted">O Dubrovnik Pass de 1 dia custa o mesmo que o ingresso das muralhas e ainda inclui museus e ônibus. O teleférico não entra no Pass. Preços mudam — confira no local.</p>
+ ${low?'<div class="hint">🗓️ <b>Baixa temporada agora.</b> Muralhas abrem mais tarde e fecham por volta das 15h; Lokrum costuma ficar fechada no inverno; o teleférico fecha em janeiro e fevereiro.</div>':''}</div>
+ <div class="card"><h2>Regras e dicas de ouro</h2><ul class="clean small">
+ <li><b>Roupa de banho ou sem camisa</b> nas ruas da cidade velha dá multa (cerca de €150, campanha “Respect the City”). Recriar a Caminhada da Vergonha, só vestido!</li>
+ <li><b>Malas de rodinha:</b> a prefeitura desmentiu a famosa “multa”; não há proibição oficial, mas carregar é mais gentil com os moradores.</li>
+ <li><b>Drone</b> sobre a cidade velha exige autorização.</li>
+ <li>O calcário do chão é <b>escorregadio</b>: tênis com boa aderência.</li>
+ <li>Picos de cruzeiro: <b>10h–14h</b>. Faça os pontos famosos às 8h ou depois das 16h.</li>
+ <li>Croácia usa <b>euro</b>; a água da torneira e das fontes é potável.</li></ul></div>
+ <div class="card"><h2>Curiosidades de bastidor</h2>${CUR.map(c=>`<div class="cur"><span class="ic">${c[0]}</span><div class="small">${esc(c[1])}</div></div>`).join('')}</div>
+ <div class="card" id="quizCard"></div>
+ <div class="card"><h2>Ajustes</h2><div class="row" style="margin-top:8px"><button class="btn sm" id="spBtn">${S.spoil?'🙈 Modo sem spoilers: ligado':'👀 Modo sem spoilers: desligado'}</button><button class="btn sm" id="rsBtn">Zerar conquistas</button></div></div>
+ <div class="card" id="ajuda"><h2>Ajuda: GPS e bússola</h2><ul class="clean small">
+ <li><b>Dentro do app do Claude</b>, a página roda numa janela protegida que bloqueia localização e sensores de movimento. Por isso o guia usa posição manual, calibração por marco ou pelo sol, e botões que abrem o <b>Google Maps / Apple Maps</b> com GPS real.</li>
+ <li><b>Versão com GPS, bússola e câmera ao vivo:</b> <a href="${HOSTED_URL}" target="_blank" rel="noopener">${HOSTED_URL}</a> — abra no Safari/Chrome. O ponto azul segue você, o guia avisa quando você chega numa locação, a seta gira com o celular e a câmera mostra a grade, a silhueta da cena e o nível. Dica: “Adicionar à Tela de Início” para abrir como app.</li>
+ <li>No iPhone, a bússola ao vivo pede permissão de “Movimento e orientação” ao tocar em <b>Bússola ao vivo</b>.</li>
+ <li>Sem internet no passeio? Abra o guia uma vez com Wi-Fi antes de sair; os dados já ficam na página.</li></ul>
+ <p class="small muted">Fontes: Turismo de Dubrovnik, site de fãs King’s Landing Dubrovnik, guias locais e imprensa croata (2026). Os detalhes de cenas seguem o consenso desses guias.</p></div>
+ </div>`;
+ $('#spBtn').onclick=()=>{S.spoil=!S.spoil;store.set('nospoil',S.spoil);document.body.classList.toggle('nospoil',S.spoil);renderMais()};
+ $('#rsBtn').onclick=()=>{S.visited=new Set();store.set('visited',[]);drawMarkers();toast('Conquistas zeradas')};
+ renderQuiz()}
+function routeStops(r){let h='';let tot=0;r.stops.forEach((id,i)=>{const l=LBY[id];if(i>0){const d=dist(LBY[r.stops[i-1]],l);tot+=d;h+=`<div class="leg">↓ ${fmtD(d)} em linha reta · ~${walk(d)} min</div>`}
+  h+=`<div class="stop" onclick="openLoc('${id}')"><span class="badge" style="background:var(--c-${l.cat});width:28px">${l.n}</span><div><b>${esc(l.name)}</b><div class="small" style="color:var(--gold);font-style:italic">${esc(l.got)}</div></div></div>`});
+ return h+`<div class="small muted" style="margin-top:4px">Total em linha reta: ${fmtD(tot)}</div>`}
+function showRoute(id){S.route=id;go('mapa');setTimeout(drawRoute,60)}
+/* modo guiado: uma parada por vez */
+function guide(rid,i){const r=ROUTES.find(x=>x.id===rid);const id=r.stops[i];const l=LBY[id];const nx=r.stops[i+1]?LBY[r.stops[i+1]]:null;
+ const here=S.pos&&dist(S.pos,l)<40;const from=S.pos||(i>0?LBY[r.stops[i-1]]:null);
+ const d=from?dist(from,l):null,b=from?bearing(from,l):0;const sc=l.scenes[0];
+ S.route=rid;drawRoute();
+ openSheet(`<div class="shead"><span class="badge" style="background:var(--c-${l.cat})">${l.n}</span><div style="flex:1;min-width:0"><div class="small muted">${esc(r.name)} · parada ${i+1} de ${r.stops.length}</div><h2>${esc(l.name)}</h2><div class="alias">${esc(l.got)}</div></div><button class="iconbtn" onclick="closeSheet()">✕</button></div>
+ <div class="prog" style="margin:4px 0 10px"><i style="width:${Math.round((i+1)/r.stops.length*100)}%"></i></div>
+ ${d!=null&&!here?`<div class="light" style="margin-top:0">${arrowSVG(b,30)}<div><b>${fmtD(d)} · ${card(b)}</b> ${S.pos?'de você':'da parada anterior'}<br><span class="muted">~${walk(d)} min a pé</span></div></div>`:here?'<div class="light" style="margin-top:0">✅ <b>Você está aqui.</b></div>':''}
+ <div class="quick" style="grid-template-columns:repeat(3,1fr)"><a href="${gmaps(l.lat,l.lon)}" target="_blank" rel="noopener">${IC.nav}Ir com Google</a><a href="${amaps(l.lat,l.lon,l.name)}" target="_blank" rel="noopener">${IC.apple}Ir com Apple</a><button onclick="setTarget('${id}')">${IC.comp}Bússola</button></div>
+ ${sc?`<div class="scene" style="border:0"><span class="ep ${sc[0]?'':'n'}">${epTag(sc)}</span><div class="spoil" onclick="this.classList.add('rev')">${sc[0]?`<em>“${esc(sc[2])}”</em><br>`:''}${esc(sc[3])}</div></div>`:''}
+ ${l.curios[0]?`<div class="hint" style="margin-top:6px">💡 ${esc(l.curios[0])}</div>`:''}
+ ${PH.some(p=>p.loc===id)?`<div class="row" style="margin-top:10px">${PH.filter(p=>p.loc===id).map(p=>`<button class="btn sm" onclick="openPhoto('${p.id}')">📷 ${esc(p.title)}</button>`).join('')}</div>`:''}
+ <div class="grid2" style="margin-top:14px">${i>0?`<button class="btn" onclick="guide('${rid}',${i-1})">← Anterior</button>`:'<span></span>'}
+ <button class="btn gold" onclick="guideArrive('${rid}',${i})">${nx?'Cheguei ✓ Próxima →':'Cheguei ✓ Fim!'}</button></div>
+ <button class="btn sm" style="margin-top:8px;width:100%" onclick="openLoc('${id}')">Ver tudo sobre este lugar</button>`)}
+function guideArrive(rid,i){const r=ROUTES.find(x=>x.id===rid);const id=r.stops[i];if(!S.visited.has(id)){S.visited.add(id);store.set('visited',[...S.visited]);drawMarkers()}
+ if(S.posSrc!=='gps'){S.pos={lat:LBY[id].lat,lon:LBY[id].lon};S.posSrc='manual';store.set('pos',S.pos);updatePosUI()}
+ if(r.stops[i+1])guide(rid,i+1);else{closeSheet();toast(`🏆 Roteiro “${esc(r.name)}” completo!`,4000)}}
+function renderQuiz(){const el=$('#quizCard');if(!el)return;if(!quizState){el.innerHTML=`<h2>Quiz de Porto Real</h2><p class="small muted" style="margin-top:0">${QUIZ.length} perguntas sobre as locações. Bom para a fila das muralhas.</p><button class="btn gold" id="qStart">⚔️ Começar</button>`;$('#qStart').onclick=()=>{quizState={i:0,ok:0,done:false};renderQuiz()};return}
+ const q=QUIZ[quizState.i];if(quizState.i>=QUIZ.length||!q){const sc=quizState.ok;const title=sc>=9?'Mão do Rei 👑':sc>=6?'Meistre de Vilavelha 📜':sc>=3?'Escudeiro ⚔️':'Fazendeiro do Alcance 🌾';
+  el.innerHTML=`<h2>Resultado</h2><div class="cbig" style="margin:10px 0">${sc}/${QUIZ.length}</div><p style="text-align:center;margin:0">${title}</p><div style="text-align:center;margin-top:10px"><button class="btn gold" id="qAgain">Jogar de novo</button></div>`;$('#qAgain').onclick=()=>{quizState={i:0,ok:0};renderQuiz()};return}
+ el.innerHTML=`<div style="display:flex;justify-content:space-between"><h2 style="font-size:16px">Pergunta ${quizState.i+1}/${QUIZ.length}</h2><span class="chip">${quizState.ok} acertos</span></div><p style="font-weight:600">${esc(q[0])}</p>${q[1].map((o,i)=>`<button class="qopt" data-i="${i}">${esc(o)}</button>`).join('')}<div id="qExp" class="small" style="margin-top:6px"></div>`;
+ $$('.qopt',el).forEach(b=>b.onclick=()=>{if(quizState.ans!=null)return;const i=+b.dataset.i;quizState.ans=i;if(i===q[2])quizState.ok++;
+  $$('.qopt',el).forEach(x=>{const j=+x.dataset.i;if(j===q[2])x.classList.add('right');else if(j===i)x.classList.add('wrong')});
+  $('#qExp').innerHTML=`${i===q[2]?'✅ Isso!':'❌ Quase.'} ${esc(q[3])}<div style="margin-top:8px"><button class="btn sm gold" id="qNext">Próxima →</button></div>`;
+  $('#qNext').onclick=()=>{quizState.i++;quizState.ans=null;renderQuiz()}})}
+
+/* ============ início ============ */
+buildMap();
+window.addEventListener('resize',()=>{if(cur==='mapa')resizeMap()});
+updatePosUI();
+const initV=(location.hash||'').slice(1);
+go(VIEWS.includes(initV)?initV:'mapa');
+requestAnimationFrame(()=>{resizeMap();fitOld()});
+// tenta GPS em silêncio (funciona quando o guia é aberto fora da janela protegida)
+setTimeout(()=>startGPS(false),600);
+</script>
+</body>
+</html>
