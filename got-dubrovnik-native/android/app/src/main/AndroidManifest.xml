@@ -33,6 +33,13 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+        <meta-data android:name="com.google.ar.core" android:value="optional" />
+        <activity
+            android:name=".ArNavActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
     </application>
 
     <!-- Permissions -->

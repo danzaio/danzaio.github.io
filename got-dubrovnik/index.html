@@ -314,6 +314,7 @@ body.nav-on #navBar{display:block}body.nav-on #mapTop,body.nav-on #near,body.nav
 .navmain{display:flex;align-items:center;gap:10px;background:#1f6fd1;color:#fff;border-radius:16px 16px 0 0;padding:10px 12px;box-shadow:var(--shadow)}
 .navmain b{display:block;font-size:19px;line-height:1.15}.navmain span{display:block;font-size:13px;opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .navic{flex:none;width:44px;height:44px;display:grid;place-items:center}.navflag{font-size:28px}
+#navAR{flex:none;height:34px;padding:0 10px;border-radius:17px;border:0;background:#fff;color:#1f6fd1;font-weight:900;font-size:13px;cursor:pointer}
 #navX{flex:none;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.22);color:#fff;font-size:16px;font-weight:800;cursor:pointer}
 .navsub{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-top:0;border-radius:0 0 16px 16px;padding:8px 12px;font-size:13px;box-shadow:var(--shadow)}
 .navsub b{white-space:nowrap}
@@ -1194,6 +1195,12 @@ Object.assign(UI.es,{"navBtn": "Ir andando (ruta en la app)", "navStop": "Detene
 Object.assign(UI.de,{"navBtn": "Zu Fuß hin (Route in der App)", "navStop": "Navigation beenden", "navReroute": "Route wird neu berechnet…", "navFar": "Zu weit zum Laufen: nutze Google Maps für Bus oder Auto", "navArrived": "Du bist bei {0} angekommen!", "navFollow": "Folge dem Pfeil", "navStraight": "Luftlinie: keine Verbindung für die Straßenroute", "nav_l": "links abbiegen", "nav_r": "rechts abbiegen", "nav_sl": "links halten", "nav_sr": "rechts halten", "nav_hl": "scharf links", "nav_hr": "scharf rechts", "nav_st": "geradeaus", "nav_ut": "umdrehen"});
 Object.assign(UI.fr,{"navBtn": "Y aller à pied (itinéraire dans l'app)", "navStop": "Arrêter la navigation", "navReroute": "Recalcul de l'itinéraire…", "navFar": "Trop loin à pied d'ici : utilisez Google Maps pour le bus ou la voiture", "navArrived": "Vous êtes arrivé : {0} !", "navFollow": "Suivez la flèche", "navStraight": "Ligne droite : pas de connexion pour tracer les rues", "nav_l": "tournez à gauche", "nav_r": "tournez à droite", "nav_sl": "serrez à gauche", "nav_sr": "serrez à droite", "nav_hl": "virage serré à gauche", "nav_hr": "virage serré à droite", "nav_st": "tout droit", "nav_ut": "faites demi-tour"});
 Object.assign(UI.it,{"navBtn": "Vai a piedi (percorso nell'app)", "navStop": "Ferma la navigazione", "navReroute": "Ricalcolo del percorso…", "navFar": "Troppo lontano a piedi da qui: usa Google Maps per bus o auto", "navArrived": "Sei arrivato a {0}!", "navFollow": "Segui la freccia", "navStraight": "Linea retta: nessuna connessione per tracciare le strade", "nav_l": "gira a sinistra", "nav_r": "gira a destra", "nav_sl": "tieni la sinistra", "nav_sr": "tieni la destra", "nav_hl": "svolta stretta a sinistra", "nav_hr": "svolta stretta a destra", "nav_st": "vai dritto", "nav_ut": "inverti la marcia"});
+Object.assign(UI.pt,{"arNativeFail": "Não consegui abrir o AR neste aparelho"});
+Object.assign(UI.en,{"arNativeFail": "Couldn't open AR on this device"});
+Object.assign(UI.es,{"arNativeFail": "No pude abrir el AR en este dispositivo"});
+Object.assign(UI.de,{"arNativeFail": "AR ließ sich auf diesem Gerät nicht öffnen"});
+Object.assign(UI.fr,{"arNativeFail": "Impossible d'ouvrir la RA sur cet appareil"});
+Object.assign(UI.it,{"arNativeFail": "Non riesco ad aprire l'AR su questo dispositivo"});
 /* ============ i18n: conteúdo traduzido ============ */
 const TRB={};
 TRB.en={
@@ -2209,8 +2216,10 @@ function navTick(){const n=NAV;if(!n||!S.pos)return;const l=LBY[n.id];if(dist(S.
   if(!s||s.ty==='arrive'){const d=s?s.at-bal:rest;ic='<div class="navflag">🏁</div>';txt=fmtD(d);sub=esc(l.name)}
   else{ic=arrow(NAVROT[s.mod]??0);txt=`${fmtD(s.at-bal)} · ${t(NAVKEY[s.mod]||'nav_st')}`;sub=esc(s.name||l.name)}}
  else{const b=bearing(S.pos,l);ic=arrow(S.heading!=null?angDiff(b,S.heading):b);txt=`${fmtD(rest)} · ${card(b)}`;sub=t(S.heading!=null?'navFollow':'navStraight')}
- $('#navBar').innerHTML=`<div class="navmain"><div class="navic">${ic}</div><div style="flex:1;min-width:0"><b>${txt}</b><span>${sub}</span></div><button id="navX" aria-label="${t('navStop')}">✕</button></div><div class="navsub"><span class="badge" style="background:var(--c-${l.cat});width:22px;height:22px;font-size:11px">${l.n}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l.name)}</span><b>${fmtD(rest)} · ${t('walkMin',walk(rest))}</b></div>`;
- $('#navX').onclick=()=>endNav(false);drawRoute(true);drawMe();if(S.follow&&cur==='mapa')centerOn(S.pos.lat,S.pos.lon,null,true)}
+ $('#navBar').innerHTML=`<div class="navmain"><div class="navic">${ic}</div><div style="flex:1;min-width:0"><b>${txt}</b><span>${sub}</span></div>${NATIVE?`<button id="navAR" aria-label="AR">AR</button>`:''}<button id="navX" aria-label="${t('navStop')}">✕</button></div><div class="navsub"><span class="badge" style="background:var(--c-${l.cat});width:22px;height:22px;font-size:11px">${l.n}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l.name)}</span><b>${fmtD(rest)} · ${t('walkMin',walk(rest))}</b></div>`;
+ $('#navX').onclick=()=>endNav(false);{const ab=$('#navAR');if(ab)ab.onclick=navAR}drawRoute(true);drawMe();if(S.follow&&cur==='mapa')centerOn(S.pos.lat,S.pos.lon,null,true)}
+const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
+function navAR(){if(!NAV||!NATIVE)return;const o={points:navRest().map(q=>[q[1],q[0]]),name:LBY[NAV.id].name,hint:LANG};try{const P=Capacitor.Plugins&&Capacitor.Plugins.ArNav;(P?P.start(o):Capacitor.nativePromise('ArNav','start',o)).catch(()=>toast(t('arNativeFail')))}catch(e){toast(t('arNativeFail'))}}
 const navRest=()=>NAV?[NAV.cut||NAV.line[0]].concat(NAV.line.slice((NAV.seg||0)+1)):null;
 /* ============ mapa real (MapLibre + OpenFreeMap; o desenhado fica de reserva) ============ */
 const RM={on:false,map:null,ready:false,tried:false,mk:{},ph:{},me:null,head:false,lastB:0,warm:false,tok:0,terr:0};

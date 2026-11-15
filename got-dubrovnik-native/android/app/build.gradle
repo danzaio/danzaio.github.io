@@ -3,6 +3,10 @@ apply plugin: 'com.android.application'
 android {
     namespace "com.danzaio.gotdubrovnik"
     compileSdk rootProject.ext.compileSdkVersion
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
     defaultConfig {
         applicationId "com.danzaio.gotdubrovnik"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -16,7 +20,19 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        // fixed development key so the app's signature (and the Google Cloud authorization tied to it) stays the same on every build
+        dev {
+            storeFile file('gotdubrovnik-dev.keystore')
+            storePassword 'android'
+            keyAlias 'gotdev'
+            keyPassword 'android'
+        }
+    }
     buildTypes {
+        debug {
+            signingConfig signingConfigs.dev
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -36,6 +52,10 @@ dependencies {
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')
+    // AR walking screen (ARCore Geospatial, keyless authorization)
+    implementation 'com.google.ar:core:1.44.0'
+    implementation 'com.google.android.gms:play-services-auth:21.2.0'
+    implementation 'com.google.android.gms:play-services-location:21.3.0'
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
