@@ -22,5 +22,7 @@ tap 400 330 6; shot 4_place_sheet # first place in the list
 tap 500 390 12; shot 5_walk_nav   # "Walk there" button
 tap 700 955 5; shot 6_photos      # Photos tab
 tap 900 955 5; shot 7_more        # More tab
-adb logcat -d | grep -E "FATAL EXCEPTION|Process: $P|Capacitor/Console|ArNav|AndroidRuntime.*$P" | tail -80 >> shots/emu_log.txt
+adb shell dumpsys activity exit-info $P | head -40 >> shots/emu_log.txt
+adb logcat -d -b crash | tail -60 >> shots/emu_log.txt
+adb logcat -d | grep -iE "FATAL|Process: $P|Capacitor|ArNav|render process|RenderProcessGone|chromium|cr_|libc  *: Fatal|DEBUG   :|lowmemory|am_kill|Killing .*gotdubrovnik" | grep -v "Expected value to be of type number" | tail -120 >> shots/emu_log.txt
 exit 0
