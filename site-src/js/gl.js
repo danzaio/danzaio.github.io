@@ -40,6 +40,13 @@ void main(){
   gl_FragColor=vec4(col*alpha,alpha);
 }`;
 
+// most fragments one field canvas may shade per frame (~2560x1250)
+const MAX_PX = 3.2e6;
+// the dot fields drift slowly: 60 renders a second look the same as 120 and halve their GPU time;
+// the canvas itself still moves with the page at the display's full rate (compositor)
+// (13.5 ms: every 2nd tick at 120/144 Hz, every tick at 60 Hz)
+const FIELD_MS = 13.5;
+
 const hex = (s) => {
   s = s.trim().replace("#", "");
   if (s.length === 3) s = s.replace(/./g, (m) => m + m);
@@ -99,7 +106,8 @@ export function initHeroGL(canvas, host, opts = {}) {
   };
   const resize = () => {
     const r = canvas.getBoundingClientRect();
-    dpr = Math.min(devicePixelRatio || 1, 1.5);
+    // pixel budget: a full-screen field on a hi-DPI screen shaded 4-5 million fragments per frame
+    dpr = Math.min(devicePixelRatio || 1, 1.5, Math.sqrt(MAX_PX / Math.max(1, r.width * r.height)));
     w = Math.max(2, Math.round(r.width * dpr));
     h = Math.max(2, Math.round(r.height * dpr));
     canvas.width = w;
@@ -174,9 +182,13 @@ export function initHeroGL(canvas, host, opts = {}) {
   io.observe(canvas);
 
   const t0 = performance.now();
+  let lastDraw = 0;
   const frame = () => {
     if (!visible || document.hidden) return;
     const now = performance.now();
+    const dt = now - lastDraw;
+    if (dt < FIELD_MS) return;
+    lastDraw = now;
     const t = (now - t0) / 1000;
     // idle drift so touch devices / idle mice still see life
     if (now - m.last > 2200) {
@@ -184,7 +196,8 @@ export function initHeroGL(canvas, host, opts = {}) {
       m.ty = 0.5 + Math.sin(t * 0.5) * 0.28;
       m.tp = 0.3;
     }
-    const k = 1 - Math.pow(0.0015, gsap.ticker.deltaRatio() / 60);
+    // same easing as before, from the real time since the last draw (frames are skipped now)
+    const k = 1 - Math.pow(0.0015, Math.min(dt, 100) / 1000);
     m.x += (m.tx - m.x) * k;
     m.y += (m.ty - m.y) * k;
     m.power += (m.tp - m.power) * (k * 0.7);

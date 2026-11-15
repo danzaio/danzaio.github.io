@@ -1,6 +1,6 @@
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { $, $$, rm } from "./util.js";
+import { $, $$, rm, clamp } from "./util.js";
 
 /* The scene kit, as code (the loop's grammar, shared): a paused timeline scrubbed by scroll,
    beats switched at `cuts`, the status pill and the rail kept in step.
@@ -144,10 +144,15 @@ function buildServices(tl, $, track) {
   const os = qq("[data-sm-os] span");
   const len = route.getTotalLength();
   const vp = { p: 0 };
+  // the route is sampled once: querying SVG geometry inside a scrolled frame forced a layout
+  const STEPS = 120;
+  const pts = Array.from({ length: STEPS + 1 }, (_, i) => route.getPointAtLength((len * i) / STEPS));
   const drive = () => {
-    const pt = route.getPointAtLength(len * vp.p);
-    van.setAttribute("cx", pt.x.toFixed(1));
-    van.setAttribute("cy", pt.y.toFixed(1));
+    const x = clamp(vp.p, 0, 1) * STEPS;
+    const i = Math.min(STEPS - 1, Math.floor(x));
+    const t = x - i;
+    van.setAttribute("cx", (pts[i].x + (pts[i + 1].x - pts[i].x) * t).toFixed(1));
+    van.setAttribute("cy", (pts[i].y + (pts[i + 1].y - pts[i].y) * t).toFixed(1));
   };
   gsap.set(phone, { autoAlpha: 0, yPercent: 40 });
   gsap.set(map, { clipPath: "inset(0% 0% 100% 0%)" });

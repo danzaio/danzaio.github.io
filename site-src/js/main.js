@@ -125,20 +125,48 @@ document.addEventListener("click", (e) => {
   // round controls that can scroll under its corner: it steps aside for them
   const avoid = $$(".bw-arrow, [data-idea-go]");
   if (up) {
-    let raf = 0;
+    // geometry is measured only when the layout changes (never inside a frame: that forced a reflow per frame)
+    let max = 1, vh = innerHeight, btn = null, spots = [];
+    // page-relative boxes of the round controls (they ride their scenes, so they are re-read near the end)
+    const readSpots = () => {
+      const y = scrollY;
+      spots = avoid.map((el) => {
+        const a = el.getBoundingClientRect();
+        return { l: a.left, r: a.right, t: a.top + y, b: a.bottom + y };
+      });
+    };
+    const measure = () => {
+      vh = innerHeight;
+      max = Math.max(1, document.documentElement.scrollHeight - vh);
+      const b = up.getBoundingClientRect();
+      btn = { l: b.left - 12, r: b.right + 12, t: b.top - 12, b: b.bottom + 12 };
+      readSpots();
+    };
+    let raf = 0, lastP = "", lastOn = null;
     const paint = () => {
       raf = 0;
-      const max = document.documentElement.scrollHeight - innerHeight;
-      const b = up.getBoundingClientRect();
-      const clash = avoid.some((el) => {
-        const a = el.getBoundingClientRect();
-        return a.right > b.left - 12 && a.left < b.right + 12 && a.bottom > b.top - 12 && a.top < b.bottom + 12;
-      });
-      up.classList.toggle("on", scrollY > innerHeight * 1.1 && !clash);
-      up.style.setProperty("--p", max > 0 ? Math.min(1, scrollY / max).toFixed(3) : "0");
+      if (!btn) measure();
+      const y = scroller.y();
+      const clash = spots.some((s) => s.r > btn.l && s.l < btn.r && s.b - y > btn.t && s.t - y < btn.b);
+      const on = y > vh * 1.1 && !clash;
+      if (on !== lastOn) up.classList.toggle("on", (lastOn = on));
+      const p = Math.min(1, y / max).toFixed(3);
+      if (p !== lastP) up.style.setProperty("--p", (lastP = p));
     };
-    addEventListener("scroll", () => (raf ||= requestAnimationFrame(paint)), { passive: true });
-    paint();
+    // scroll events run before this frame's animation writes, so reading layout here costs no extra reflow
+    addEventListener(
+      "scroll",
+      () => {
+        if (btn && scroller.y() > max - vh * 2.5) readSpots();
+        raf ||= requestAnimationFrame(paint);
+      },
+      { passive: true }
+    );
+    new ResizeObserver(() => {
+      measure();
+      paint();
+    }).observe(document.body);
+    addEventListener("resize", () => (btn = null), { passive: true });
   }
 }
 document.addEventListener("keydown", (e) => {
@@ -357,13 +385,16 @@ if (rm) {
 
   /* ----- top bar (progress, hide on the way down), dock (after the cover) */
   const prog = gsap.quickSetter($("[data-progress]"), "scaleX");
+  // the cover's height, read on layout refreshes only (reading it per scroll frame forced a reflow)
+  let heroH = hero.offsetHeight;
+  ScrollTrigger.addEventListener("refresh", () => (heroH = hero.offsetHeight));
   ScrollTrigger.create({
     start: 0,
     end: "max",
     onUpdate(self) {
       prog(self.progress);
       const y = self.scroll();
-      dock.classList.toggle("on", y > hero.offsetHeight * 0.55);
+      dock.classList.toggle("on", y > heroH * 0.55);
       if (menuOpen || !palEl.hidden) return;
       if (self.direction === 1 && y > 480) header.classList.add("is-hidden");
       else if (self.direction === -1) header.classList.remove("is-hidden");
@@ -395,10 +426,10 @@ if (rm) {
   const strip = $("[data-strip] .strip-track");
   if (strip) {
     const tw = gsap.to(strip, { xPercent: -33.3333, ease: "none", duration: 30, repeat: -1 });
-    let last = scrollY;
+    let last = scroller.y();
     let ts = 1;
     gsap.ticker.add(() => {
-      const y = scrollY;
+      const y = scroller.y();
       const v = y - last;
       last = y;
       ts = lerp(ts, 1 + clamp(v * 0.12, -9, 12), 0.08);
@@ -565,6 +596,28 @@ if (rm) {
     // touch: the reel picture drifts with scroll instead of tilting under a pointer
     const img = $(".reel-img img");
     if (img) gsap.fromTo(img, { yPercent: -6, scale: 1.12 }, { yPercent: 6, scale: 1.12, ease: "none", scrollTrigger: { trigger: reel, start: "top bottom", end: "bottom top", scrub: true } });
+  }
+
+  /* off-screen plates skip style, layout and paint (content-visibility): without it the whole ~29k px page was
+     re-layerized every frame. Each plate keeps its measured height, so nothing moves; ScrollTrigger measures
+     with the containment lifted (refreshInit), and the heights are re-read after every refresh. */
+  if (CSS.supports?.("content-visibility", "auto")) {
+    // (not the footer: paint containment would clip its logo's crosshair ticks, and it is 155 px)
+    const plates = $$("main > section");
+    const px = (cs, k) => parseFloat(cs[k]) || 0;
+    ScrollTrigger.addEventListener("refreshInit", () => plates.forEach((s) => (s.style.contentVisibility = "")));
+    ScrollTrigger.addEventListener("refresh", () => {
+      // all reads first, then all writes (no layout between plates)
+      const hs = plates.map((s) => {
+        const cs = getComputedStyle(s);
+        // contain-intrinsic-size is the content box: padding and border come on top
+        return s.getBoundingClientRect().height - px(cs, "paddingTop") - px(cs, "paddingBottom") - px(cs, "borderTopWidth") - px(cs, "borderBottomWidth");
+      });
+      plates.forEach((s, i) => {
+        s.style.containIntrinsicSize = `auto ${hs[i].toFixed(2)}px`;
+        s.style.contentVisibility = "auto";
+      });
+    });
   }
 
   /* arriving on /#section: the pins grow the page after the browser's own jump, so land again after each

@@ -81,7 +81,8 @@ export function scramble(el, text, duration = 0.6) {
 
 export function createWipe(canvas, items) {
   if (!canvas || rm || items.length < 2) return null;
-  const gl = canvas.getContext("webgl", { alpha: false, antialias: false, powerPreference: "low-power" });
+  // alpha stays on (MDN: alpha:false is emulated, and slow, on some GPUs); the shader writes alpha 1 anyway
+  const gl = canvas.getContext("webgl", { alpha: true, antialias: false, powerPreference: "low-power" });
   if (!gl) return null;
   const sh = (type, src) => {
     const s = gl.createShader(type);
@@ -116,11 +117,24 @@ export function createWipe(canvas, items) {
 
   const tex = items.map(() => null);
   const pending = items.map(() => null);
-  const load = (i) =>
-    (pending[i] ||= new Promise((res, rej) => {
-      const im = new Image();
-      im.decoding = "async";
-      im.onload = () => {
+  // pictures decode off the main thread (an <img> handed to texImage2D decoded inside the frame: a 40 ms hitch)
+  const decode = (url) =>
+    typeof createImageBitmap === "function"
+      ? fetch(url)
+          .then((r) => (r.ok ? r.blob() : Promise.reject(new Error(url))))
+          .then((b) => createImageBitmap(b))
+      : new Promise((res, rej) => {
+          const im = new Image();
+          im.onload = () => im.decode().then(() => res(im), () => res(im));
+          im.onerror = rej;
+          im.src = url;
+        });
+  // GPU uploads go one per idle slot, so no single frame carries two of them
+  let queue = Promise.resolve();
+  const idle = () => new Promise((r) => (window.requestIdleCallback ? requestIdleCallback(r, { timeout: 400 }) : setTimeout(r, 32)));
+  const load = (i, now = false) =>
+    (pending[i] ||= decode("/assets/site/img/" + items[i].img).then((im) => {
+      const up = () => {
         const t = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, t);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, im);
@@ -128,11 +142,12 @@ export function createWipe(canvas, items) {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        tex[i] = { t, a: im.naturalWidth / im.naturalHeight };
-        res();
+        tex[i] = { t, a: (im.naturalWidth || im.width) / (im.naturalHeight || im.height) };
+        im.close?.();
+        draw();
       };
-      im.onerror = rej;
-      im.src = "/assets/site/img/" + items[i].img;
+      if (now) return up();
+      return (queue = queue.then(idle).then(up));
     }));
 
   const st = { a: 0, b: 0, p: 0, lens: 0, mx: 0, my: 0 };
@@ -190,7 +205,7 @@ export function createWipe(canvas, items) {
     // first picture as soon as it decodes, then the rest
     start(first = 0) {
       st.a = st.b = first;
-      return load(first)
+      return load(first, true)
         .then(() => {
           resize();
           canvas.classList.add("is-live");
@@ -313,33 +328,44 @@ export function initWorkStage(root, scrollTo) {
   const stackEl = $("[data-wk-stack]", stage);
   // labels keep inside the picture: long ones (PT, phones) get nudged back in from whichever edge they cross
   const view = $(".wk-view", stage);
+  const labels = sets.flat().map((el) => el.lastElementChild);
   const fit = () => {
     const vr = view.getBoundingClientRect();
     if (!vr.width) return;
     const pad = vr.width * 0.02;
-    sets.flat().forEach((el) => {
-      const s = el.lastElementChild;
+    // all writes, one layout for all reads, then the writes (it re-laid the page out once per label before)
+    labels.forEach((s) => {
       s.style.removeProperty("--nx");
       s.style.removeProperty("--ny");
-      const r = s.getBoundingClientRect();
+    });
+    const rs = labels.map((s) => s.getBoundingClientRect());
+    labels.forEach((s, i) => {
+      const r = rs[i];
       const nx = r.right > vr.right - pad ? vr.right - pad - r.right : r.left < vr.left + pad ? vr.left + pad - r.left : 0;
       const ny = r.bottom > vr.bottom - pad ? vr.bottom - pad - r.bottom : r.top < vr.top + pad ? vr.top + pad - r.top : 0;
       if (nx) s.style.setProperty("--nx", `${nx.toFixed(1)}px`);
       if (ny) s.style.setProperty("--ny", `${ny.toFixed(1)}px`);
     });
   };
-  new ResizeObserver(fit).observe(view);
+  // only on a real size change: the observer also fires when the plate comes back from content-visibility
+  // skipping mid-scroll, with the same box
+  let box = "";
+  new ResizeObserver(([e]) => {
+    const k = `${Math.round(e.contentRect.width)}x${Math.round(e.contentRect.height)}`;
+    if (k !== box) (box = k), fit();
+  }).observe(view);
   document.fonts?.ready.then(fit);
   let st = null;
   let cur = 0;
   let enter = 1;
   let lastT = -1;
   const lastA = new Map();
-  const setA = (el, v) => {
+  // style writes only when the rounded value changes (each write re-runs style for that element)
+  const setA = (el, v, prop = "--a") => {
     const r = Math.round(v * 100) / 100;
     if (lastA.get(el) === r) return;
     lastA.set(el, r);
-    el.style.setProperty("--a", r);
+    el.style.setProperty(prop, r);
   };
   // a project's callouts draw while the stage holds on it and retract before the wipe; the stack types alongside
   const settle = (f, k) => clamp((0.3 - Math.abs(f - k)) / 0.15, 0, 1) * (k === 0 ? enter : 1);
@@ -389,7 +415,7 @@ export function initWorkStage(root, scrollTo) {
     const a = Math.min(n - 2, Math.floor(f));
     const p = clamp((f - a - 0.3) / 0.4, 0, 1);
     eng?.live && eng.set(a, a + 1, p);
-    meter.forEach((m, k) => m.style.setProperty("--f", clamp(f - k + 1, 0, 1).toFixed(3)));
+    meter.forEach((m, k) => setA(m, clamp(f - k + 1, 0, 1), "--f"));
     activate(p > 0.5 ? a + 1 : a);
     notes(f);
   }
