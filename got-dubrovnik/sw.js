@@ -1,5 +1,5 @@
 // Porto Real — cache offline. Página: rede primeiro (pega atualizações), cache se estiver sem internet.
-const V = 'porto-real-v3';
+const V = 'porto-real-v4';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(V).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
