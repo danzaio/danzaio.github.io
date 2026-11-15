@@ -1,0 +1,6 @@
+{
+  "appId": "com.danzaio.gotdubrovnik",
+  "appName": "GoT Dubrovnik",
+  "webDir": "www",
+  "android": { "allowMixedContent": false }
+}
