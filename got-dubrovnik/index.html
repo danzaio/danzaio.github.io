@@ -297,6 +297,33 @@ table.t td:last-child{text-align:right;font-weight:700;white-space:nowrap}
 .aredge{position:absolute;top:46%;padding:10px 12px;background:rgba(0,0,0,.6);color:#ffd76a;font:800 15px Inter,sans-serif;border-radius:12px;pointer-events:none}
 .aredge.l{left:8px}.aredge.r{right:66px}
 @media (min-width:760px){ .loc{max-width:700px;margin-left:auto;margin-right:auto} #sheet{max-width:620px;margin:0 auto} }
+
+/* mapa real */
+#rmap{position:absolute;inset:0;display:none;background:#efe9dc}
+body.rm-on #rmap{display:block}
+body.rm-on #map{visibility:hidden}
+.rmonly{display:none!important}
+body.rm-on #z3D,body.rm-on #zNorth.show{display:grid!important}
+#z3D.on{background:var(--ink,#2a1d10);color:#fff}
+#zMe.head{box-shadow:0 0 0 3px rgba(31,111,209,.35),var(--shadow)}
+.rmk{width:32px;height:42px;position:relative;cursor:pointer;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
+.rmk svg{display:block;overflow:visible;transition:transform .15s}
+.rmk text{font:800 12px Inter,sans-serif;fill:#fff}
+.rmk.sel svg{transform:scale(1.28);transform-origin:50% 100%}
+.rmk .ok{position:absolute;right:-6px;top:-5px;width:17px;height:17px;border-radius:50%;background:var(--ok);color:#fff;font:900 10px/14px Inter,sans-serif;text-align:center;border:1.6px solid #fff;font-style:normal}
+.rmk .nm{position:absolute;top:44px;left:50%;transform:translateX(-50%);white-space:nowrap;font:700 11px/1.15 Inter,sans-serif;color:#2a1d10;background:rgba(255,251,242,.94);padding:2px 6px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.25);display:none;max-width:150px;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+#rmap.lbl .rmk .nm{display:block}
+.rph{width:26px;height:26px;border-radius:50%;background:var(--gold2);border:2px solid #fff;display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.35);cursor:pointer}
+.rme{width:64px;height:64px;position:relative;pointer-events:none}
+.rme svg{position:absolute;inset:0}
+.rme.nohd svg{display:none}
+.rme .dot{position:absolute;left:22px;top:22px;width:20px;height:20px;border-radius:50%;background:#1f6fd1;border:3px solid #fff;box-shadow:0 0 0 3px rgba(31,111,209,.25),0 2px 6px rgba(0,0,0,.35);box-sizing:border-box}
+#rmap .maplibregl-ctrl-bottom-right{bottom:0;right:0}
+#rmap .maplibregl-ctrl-attrib{font-size:10px}
+.plwrap{position:relative;margin-top:8px}
+#plMap{position:absolute;inset:0;border-radius:12px;overflow:hidden;display:none}
+#plMap.on{display:block}
+#plSvg.over{background:transparent!important;pointer-events:none}
 </style>
 </head>
 <body>
@@ -312,12 +339,15 @@ table.t td:last-child{text-align:right;font-weight:700;white-space:nowrap}
 <main>
   <section class="view" id="v-mapa">
     <svg id="map" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div id="rmap"></div>
     <div class="maptop" id="mapTop"></div>
     <div class="mapctl">
+      <button id="zNorth" class="rmonly" aria-label="North up" data-i18n-aria="a_north" title="North up"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 2l4.5 10h-9z" fill="#b3261e"/><path d="M12 22l-4.5-10h9z" fill="#9a8f80"/></svg></button>
       <button id="zIn" aria-label="Aproximar" data-i18n-aria="a_zin">＋</button>
       <button id="zOut" aria-label="Afastar" data-i18n-aria="a_zout">－</button>
       <button id="zMe" aria-label="Minha posição" data-i18n-aria="a_me" title="Minha posição"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
       <button id="zFit" aria-label="Ver tudo" data-i18n-aria="a_fit" title="Ver tudo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      <button id="z3D" class="rmonly" aria-label="3D" data-i18n-aria="a_3d" title="3D" style="font-size:13px;font-weight:900">3D</button>
       <button id="zAR" aria-label="Radar AR" data-i18n-aria="arTitle" title="Radar AR" style="font-size:13px;font-weight:900;letter-spacing:.04em;background:linear-gradient(180deg,var(--gold2),var(--gold));color:#fff;border-color:transparent">AR</button>
       <button id="zLayer" aria-label="Pontos de foto" data-i18n-aria="a_photos" title="Pontos de foto"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
     </div>
@@ -1113,6 +1143,12 @@ Object.assign(UI.es,{followOn:"Siguiéndote en el mapa",followOff:"Dejé de segu
 Object.assign(UI.de,{followOn:"Karte folgt dir",followOff:"Folgen beendet"});
 Object.assign(UI.fr,{followOn:"La carte vous suit",followOff:"Suivi arrêté"});
 Object.assign(UI.it,{followOn:"La mappa ti segue",followOff:"Non ti seguo più"});
+Object.assign(UI.pt,{mapMode:"Mapa",mapReal:"real",mapDrawn:"ilustrado",headOn:"O mapa gira junto com você",a_north:"Norte para cima",a_3d:"Vista 3D",mapOffline:"Sem internet: mostrando o mapa ilustrado",tour3p:"Centraliza o mapa em você. Com o GPS ligado, toque de novo e o mapa <b>passa a te seguir</b>; com a bússola ligada, mais um toque e ele <b>gira junto com você</b>. Use <b>3D</b> para ver os prédios em pé."});
+Object.assign(UI.en,{mapMode:"Map",mapReal:"real",mapDrawn:"illustrated",headOn:"Map now turns with you",a_north:"North up",a_3d:"3D view",mapOffline:"Offline: showing the illustrated map",tour3p:"Centres the map on you. With GPS on, tap again and the map <b>follows you</b>; with the compass on, one more tap and it <b>turns with you</b>. Try <b>3D</b> to see the buildings stand up."});
+Object.assign(UI.es,{mapMode:"Mapa",mapReal:"real",mapDrawn:"ilustrado",headOn:"El mapa gira contigo",a_north:"Norte arriba",a_3d:"Vista 3D",mapOffline:"Sin conexión: mostrando el mapa ilustrado",tour3p:"Centra el mapa en ti. Con el GPS activado, toca otra vez y el mapa <b>te sigue</b>; con la brújula activada, un toque más y <b>gira contigo</b>. Prueba <b>3D</b> para ver los edificios en pie."});
+Object.assign(UI.de,{mapMode:"Karte",mapReal:"echt",mapDrawn:"illustriert",headOn:"Die Karte dreht sich mit dir",a_north:"Norden oben",a_3d:"3D-Ansicht",mapOffline:"Offline: illustrierte Karte wird gezeigt",tour3p:"Zentriert die Karte auf dich. Mit GPS nochmal tippen, dann <b>folgt dir die Karte</b>; mit Kompass noch ein Tipp und sie <b>dreht sich mit dir</b>. Mit <b>3D</b> stehen die Gebäude auf."});
+Object.assign(UI.fr,{mapMode:"Carte",mapReal:"réelle",mapDrawn:"illustrée",headOn:"La carte tourne avec vous",a_north:"Nord en haut",a_3d:"Vue 3D",mapOffline:"Hors ligne : carte illustrée affichée",tour3p:"Centre la carte sur vous. GPS activé, touchez à nouveau et la carte <b>vous suit</b> ; boussole activée, encore une fois et elle <b>tourne avec vous</b>. Essayez la <b>3D</b> pour voir les bâtiments en relief."});
+Object.assign(UI.it,{mapMode:"Mappa",mapReal:"reale",mapDrawn:"illustrata",headOn:"La mappa ruota con te",a_north:"Nord in alto",a_3d:"Vista 3D",mapOffline:"Offline: mostro la mappa illustrata",tour3p:"Centra la mappa su di te. Con il GPS attivo, tocca di nuovo e la mappa <b>ti segue</b>; con la bussola attiva, un altro tocco e <b>ruota con te</b>. Prova il <b>3D</b> per vedere gli edifici in piedi."});
 /* ============ i18n: conteúdo traduzido ============ */
 const TRB={};
 TRB.en={
@@ -1957,9 +1993,9 @@ function drawMarkers(){
   return `<g class="mk cs${S.sel===l.id?' sel':''}" data-id="${l.id}" data-x="${f1(p[0])}" data-y="${f1(p[1])}">
    <circle class="halo" r="20"/><path d="M0 0 C-5-8-14-12-14-23a14 14 0 1 1 28 0c0 11-9 15-14 23z" fill="${col}" stroke="#fff" stroke-width="2.2" transform="translate(0,0)"/>
    <text y="-23">${l.n}</text><text class="mkl" y="15">${esc(l.name.replace(/ \(.*\)/,'').replace('Muralhas — trecho do mar','Muralhas (mar)'))}</text>${v?'<circle cx="11" cy="-34" r="7" fill="var(--ok)" stroke="#fff" stroke-width="1.8"/><path d="m7.5-34 2.4 2.4 4.4-4.6" stroke="#fff" stroke-width="2" fill="none"/>':''}</g>`}).join('');
- refreshCS();
+ refreshCS();rmMarkers();
 }
-function drawPhotos(){
+function drawPhotos(){rmPhotos();
  const g=$('#gPhotos');if(!S.showPhotos){g.innerHTML='';refreshCS();return}
  g.innerHTML=PH.filter(p=>p.stand).map(p=>{const q=xy(p.stand[0],p.stand[1]);
   return `<g class="pm cs" data-ph="${p.id}" data-x="${f1(q[0])}" data-y="${f1(q[1])}"><path d="M0 0 L-9 -26 A26 26 0 0 1 9 -26Z" transform="rotate(${p.dir.toFixed(0)})" fill="var(--gold2)" opacity=".55" style="fill:var(--gold2)"/><circle r="10"/><path d="M-5.5-2.5h2.5l1.3-2h3.4l1.3 2h2.5v7h-11z M0 -0.8a2.2 2.2 0 1 0 .01 0z"/></g>`}).join('');
@@ -1969,12 +2005,12 @@ function refreshCS(){MAP.cs=$$('.cs',MAP.svg);applyView()}
 function applyView(){const {W,H,s,cx,cy}=MAP;MAP.svg.setAttribute('viewBox',`${f1(cx-W/2/s)} ${f1(cy-H/2/s)} ${f1(W/s)} ${f1(H/s)}`);
  const k=1/s,km=k*Math.max(0.66,Math.min(1,0.5+s*0.35));MAP.svg.classList.toggle('zoomed',s>2.1);
  for(const g of MAP.cs)g.setAttribute('transform',`translate(${g.dataset.x},${g.dataset.y}) scale(${(g.classList.contains('mk')||g.classList.contains('pm')?km:k).toFixed(4)})`);drawMe(true)}
-function resizeMap(){const r=MAP.svg.getBoundingClientRect();if(r.width<10)return;MAP.W=r.width;MAP.H=r.height;applyView()}
-function fit(pts,pad=50,top=0){if(!pts.length)return;let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;pts.forEach(([x,y])=>{x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)});
+function resizeMap(){if(RM.on){RM.map.resize();return}const r=MAP.svg.getBoundingClientRect();if(r.width<10)return;MAP.W=r.width;MAP.H=r.height;applyView()}
+function fit(pts,pad=50,top=0,instant){if(!pts.length)return;if(RM.on){rmFit(pts.map(q=>ll(q[0],q[1])),pad,top,instant);return}let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;pts.forEach(([x,y])=>{x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)});
  const w=Math.max(80,x1-x0),h=Math.max(80,y1-y0);MAP.s=Math.min((MAP.W-pad*2)/w,(MAP.H-pad*2-top)/h,4);MAP.cx=(x0+x1)/2;MAP.cy=(y0+y1)/2-(top/2)/MAP.s;applyView()}
-function fitOld(){fit(['gradac','lovr','minceta','ploce','walls','oldport'].map(id=>xy(LBY[id].lat,LBY[id].lon)),36)}
-function centerOn(lat,lon,minS,noOffset){if(minS&&MAP.s<minS)MAP.s=minS;const p=xy(lat,lon);MAP.cx=p[0];MAP.cy=p[1]+(noOffset?0:(MAP.H*0.18)/MAP.s);applyView()}
-function zoomAt(f,px,py){const r=MAP.svg.getBoundingClientRect();px=px??r.left+MAP.W/2;py=py??r.top+MAP.H/2;
+function fitOld(instant){fit(['gradac','lovr','minceta','ploce','walls','oldport'].map(id=>xy(LBY[id].lat,LBY[id].lon)),36,0,instant===true)}
+function centerOn(lat,lon,minS,noOffset){if(RM.on){rmCenter(lat,lon,minS,noOffset);return}if(minS&&MAP.s<minS)MAP.s=minS;const p=xy(lat,lon);MAP.cx=p[0];MAP.cy=p[1]+(noOffset?0:(MAP.H*0.18)/MAP.s);applyView()}
+function zoomAt(f,px,py){if(RM.on){RM.map.easeTo({zoom:RM.map.getZoom()+Math.log2(f),duration:260});return}const r=MAP.svg.getBoundingClientRect();px=px??r.left+MAP.W/2;py=py??r.top+MAP.H/2;
  const wx=MAP.cx+(px-r.left-MAP.W/2)/MAP.s,wy=MAP.cy+(py-r.top-MAP.H/2)/MAP.s;MAP.s=Math.max(0.06,Math.min(5,MAP.s*f));
  MAP.cx=wx-(px-r.left-MAP.W/2)/MAP.s;MAP.cy=wy-(py-r.top-MAP.H/2)/MAP.s;applyView()}
 // gestos
@@ -1998,13 +2034,19 @@ function zoomAt(f,px,py){const r=MAP.svg.getBoundingClientRect();px=px??r.left+M
 })();
 $('#zAR').onclick=()=>openCam(null,true);$('#zIn').onclick=()=>zoomAt(1.5);$('#zOut').onclick=()=>zoomAt(1/1.5);$('#zFit').onclick=fitOld;
 $('#zMe').onclick=()=>{if(!S.pos){openLocModal();return}
- if(S.posSrc==='gps'){S.follow=!S.follow;$('#zMe').style.background=S.follow?'var(--blue)':'';$('#zMe').style.color=S.follow?'#fff':'';toast(S.follow?t('followOn'):t('followOff'))}
- centerOn(S.pos.lat,S.pos.lon,1.2)};
+ if(S.posSrc==='gps'){
+  if(!S.follow){S.follow=true;RM.head=false;toast(t('followOn'))}
+  else if(RM.on&&!RM.head&&S.headingSrc==='live'&&S.heading!=null){RM.head=true;toast('🧭 '+t('headOn'))}
+  else{S.follow=false;if(RM.head&&RM.on)RM.map.easeTo({bearing:0,duration:400});RM.head=false;toast(t('followOff'))}
+  styleZMe()}
+ centerOn(S.pos.lat,S.pos.lon,RM.on?z2s(16.6):1.2)};
+$('#zNorth').onclick=()=>{if(!RM.on)return;RM.head=false;styleZMe();RM.map.easeTo({bearing:0,pitch:0,duration:450})};
+$('#z3D').onclick=()=>{if(!RM.on)return;const m=RM.map,on=m.getPitch()>10;m.easeTo({pitch:on?0:60,zoom:on?m.getZoom():Math.max(m.getZoom(),16.3),duration:700})};
 $('#zLayer').onclick=()=>{S.showPhotos=!S.showPhotos;drawPhotos();$('#zLayer').style.background=S.showPhotos?'var(--gold2)':'';toast(S.showPhotos?t('photoLayerOn'):t('photoLayerOff'))};
-function drawMe(onlyTransform){const g=$('#gMe');if(!S.pos){g.innerHTML='';return}const p=xy(S.pos.lat,S.pos.lon);const k=1/MAP.s;
+function drawMe(onlyTransform){if(!onlyTransform)rmMe();const g=$('#gMe');if(!S.pos){g.innerHTML='';return}const p=xy(S.pos.lat,S.pos.lon);const k=1/MAP.s;
  const acc=S.pos.acc&&S.posSrc==='gps'?Math.min(S.pos.acc,400):0;const hd=S.heading;
  g.innerHTML=`${acc?`<circle class="me-acc" cx="${f1(p[0])}" cy="${f1(p[1])}" r="${acc}"/>`:''}<g transform="translate(${f1(p[0])},${f1(p[1])}) scale(${k.toFixed(4)})">${hd!=null?`<path class="me-cone" d="M0 0 L-16 -44 A46 46 0 0 1 16 -44Z" transform="rotate(${hd.toFixed(0)})"/>`:''}<circle class="me-dot" r="8"/></g>`}
-function drawRoute(){const g=$('#gRoute');if(!S.route){g.innerHTML='';renderMapTop();return}const r=ROUTES.find(x=>x.id===S.route);const pts=r.stops.map(id=>xy(LBY[id].lat,LBY[id].lon));
+function drawRoute(){rmRoute();const g=$('#gRoute');if(!S.route){g.innerHTML='';renderMapTop();return}const r=ROUTES.find(x=>x.id===S.route);const pts=r.stops.map(id=>xy(LBY[id].lat,LBY[id].lon));
  g.innerHTML=`<path class="m-route" d="${pathL(pts,false)}" vector-effect="non-scaling-stroke"/>`;renderMapTop();fit(pts,56,($('#mapTop').offsetHeight||0)+10)}
 function renderMapTop(){const el=$('#mapTop');let h='';
  if(S.placing)h+=`<span class="floatchip" style="background:var(--gold2);color:#fff">👆 ${t('tapWhere')} <b id="cancelPlace" style="margin-left:6px">✕</b></span>`;
@@ -2018,6 +2060,105 @@ function renderMapTop(){const el=$('#mapTop');let h='';
  const sc=$('#simChip');if(sc)sc.onclick=()=>setSim(false);const fc=$('#farChip');if(fc)fc.onclick=()=>{setSim(true,'pile');centerOn(LBY.pile.lat,LBY.pile.lon,1.4,true)};
  $('#trChip').onclick=()=>openLoc('trsteno')}
 function renderLegend(){$('#legend').innerHTML=Object.keys(CATS).map(k=>`<span><i style="background:var(--c-${k})"></i>${t('catS_'+k)}</span>`).join('')}
+
+/* ============ mapa real (MapLibre + OpenFreeMap; o desenhado fica de reserva) ============ */
+const RM={on:false,map:null,ready:false,tried:false,mk:{},ph:{},me:null,head:false,lastB:0,warm:false,tok:0,terr:0};
+const RM_STYLE='https://tiles.openfreemap.org/styles/liberty';
+const MPP0=78271.517*Math.cos(LAT0*toR);           // metros por pixel no zoom 0 (tiles de 512)
+const s2z=s=>Math.log2(s*MPP0),z2s=z=>Math.pow(2,z)/MPP0;
+function webglOK(){try{const c=document.createElement('canvas');return !!(c.getContext('webgl2')||c.getContext('webgl'))}catch(e){return false}}
+function wantReal(){return !FRAMED&&store.get('mapMode','real')!=='drawn'&&webglOK()}
+let _libP=null;
+function loadMapLib(){if(window.maplibregl)return Promise.resolve();if(_libP)return _libP;
+ _libP=new Promise((res,rej)=>{const l=document.createElement('link');l.rel='stylesheet';l.href='lib/maplibre-gl.css';document.head.appendChild(l);
+  const s=document.createElement('script');s.src='lib/maplibre-gl.js';s.onload=()=>window.maplibregl?res():rej();s.onerror=()=>{_libP=null;rej()};document.head.appendChild(s)});return _libP}
+function rmText(m){const f=['coalesce',['get','name:'+LANG],['get','name:latin'],['get','name']];
+ try{for(const ly of m.getStyle().layers){if(ly.type!=='symbol'||!ly.layout||!ly.layout['text-field'])continue;if(!/name/.test(JSON.stringify(ly.layout['text-field'])))continue;try{m.setLayoutProperty(ly.id,'text-field',f)}catch(e){}}}catch(e){}}
+const circlePoly=(lat,lon,r,n=48)=>{const c=[];for(let i=0;i<=n;i++){const a=i/n*2*Math.PI;c.push([lon+Math.sin(a)*r/MX,lat+Math.cos(a)*r/MY])}return c};
+const sectorPoly=(lat,lon,dir,half,r)=>{const c=[[lon,lat]];for(let a=dir-half;a<=dir+half+0.01;a+=4)c.push([lon+Math.sin(a*toR)*r/MX,lat+Math.cos(a*toR)*r/MY]);c.push([lon,lat]);return c};
+const FC=f=>({type:'FeatureCollection',features:f});
+async function initReal(){if(RM.tried||!wantReal())return;RM.tried=true;
+ try{await loadMapLib()}catch(e){RM.tried=false;return}
+ const c=ll(MAP.cx,MAP.cy);let map;
+ try{map=new maplibregl.Map({container:'rmap',style:RM_STYLE,center:[c.lon,c.lat],zoom:Math.max(11,Math.min(18,s2z(MAP.s))),maxZoom:19.5,minZoom:9,maxPitch:70,
+  attributionControl:{compact:true},fadeDuration:120,dragRotate:true,touchPitch:true,pitchWithRotate:true})}catch(e){RM.tried=false;return}
+ RM.map=map;const to=setTimeout(()=>{if(!RM.ready)realFail()},15000);
+ map.on('sourcedata',e=>{if(e.tile&&e.sourceId&&!/^rm-/.test(e.sourceId))RM.tok++});
+ map.on('error',e=>{if(e&&e.tile&&e.sourceId&&!/^rm-/.test(e.sourceId))RM.terr++;if(RM.ready)return;const m=String((e&&e.error&&e.error.message)||'');if(/fetch|NetworkError|Failed|style/i.test(m))realFail()});
+ map.on('load',()=>{clearTimeout(to);if(RM.map!==map)return;RM.ready=true;RM.on=true;document.body.classList.add('rm-on');
+  rmText(map);rmLayers();rmMarkers();rmPhotos();rmMe();rmRoute();rmZoomCls();rmNorth();
+  if(S.route)drawRoute();
+  map.resize();
+  if($('#tour').classList.contains('on'))setTimeout(()=>placeTour(TOUR[tourI]),300);
+  // sem internet e sem tiles guardados: o mapa real ficaria em branco, então volta para o ilustrado
+  map.once('idle',()=>{if(RM.terr>0&&RM.tok===0){realFail();return}setTimeout(rmPrefetch,2500)})});
+ map.on('click',e=>{const tg=e.originalEvent&&e.originalEvent.target;if(tg&&tg.closest&&tg.closest('.maplibregl-marker'))return;const p={lat:e.lngLat.lat,lon:e.lngLat.lng};
+  if(S.placing){setManualPos(p,null);S.placing=false;renderMapTop();return}
+  if(S.sim){clearTimeout(S.simT);S.simT=setTimeout(()=>setManualPos(p,null,true),300)}});
+ map.on('dblclick',()=>clearTimeout(S.simT));
+ map.on('dragstart',()=>{if(S.follow){S.follow=false;RM.head=false;styleZMe()}});
+ map.on('zoom',rmZoomCls);map.on('rotate',rmNorth);map.on('pitch',rmNorth);
+ map.on('moveend',()=>{MAP.s=z2s(map.getZoom())})}
+window.addEventListener('online',()=>{if(!RM.on&&!RM.map&&wantReal()){RM.tried=false;initReal()}});
+function realFail(){if(RM.map){try{RM.map.remove()}catch(e){}}RM.map=null;RM.on=false;RM.ready=false;RM.mk={};RM.ph={};RM.me=null;document.body.classList.remove('rm-on');
+ if(!navigator.onLine)toast('🗺️ '+t('mapOffline'),3500);resizeMap()}
+function setMapMode(m){store.set('mapMode',m);if(m==='drawn'){RM.tried=true;realFail();RM.tried=false;drawMarkers();drawPhotos();drawMe();drawRoute();fitOld()}else{RM.tried=false;initReal()}}
+function rmZoomCls(){if(!RM.map)return;$('#rmap').classList.toggle('lbl',RM.map.getZoom()>=15.7)}
+function rmNorth(){const b=$('#zNorth');if(!b||!RM.map)return;const br=RM.map.getBearing(),pt=RM.map.getPitch();b.classList.toggle('show',Math.abs(br)>0.5||pt>1);
+ const n=b.querySelector('svg');if(n)n.style.transform=`rotate(${(-br).toFixed(1)}deg)`;$('#z3D').classList.toggle('on',pt>10)}
+function rmFirstSymbol(){try{const l=RM.map.getStyle().layers.find(l=>l.type==='symbol');return l&&l.id}catch(e){return undefined}}
+function rmLayers(){const m=RM.map,b=rmFirstSymbol();
+ m.addSource('rm-acc',{type:'geojson',data:FC([])});m.addSource('rm-route',{type:'geojson',data:FC([])});m.addSource('rm-fan',{type:'geojson',data:FC([])});
+ m.addLayer({id:'rm-fan',type:'fill',source:'rm-fan',paint:{'fill-color':'#d6ae45','fill-opacity':.38}},b);
+ m.addLayer({id:'rm-fan-l',type:'line',source:'rm-fan',paint:{'line-color':'#a8801f','line-width':1.4}},b);
+ m.addLayer({id:'rm-route-c',type:'line',source:'rm-route',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#fff','line-width':8,'line-opacity':.9}},b);
+ m.addLayer({id:'rm-route',type:'line',source:'rm-route',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#8f1d1d','line-width':4.5,'line-dasharray':[1.6,1.2]}},b);
+ m.addLayer({id:'rm-acc',type:'fill',source:'rm-acc',paint:{'fill-color':'#1f6fd1','fill-opacity':.12}});
+ m.addLayer({id:'rm-acc-l',type:'line',source:'rm-acc',paint:{'line-color':'#1f6fd1','line-opacity':.4,'line-width':1.2}})}
+const shortName=l=>l.name.replace(/ \(.*\)/,'');
+function rmPin(l){const v=S.visited.has(l.id);return `<svg viewBox="-16 -40 32 42" width="32" height="42"><path d="M0 0 C-5-8-14-12-14-23a14 14 0 1 1 28 0c0 11-9 15-14 23z" fill="var(--c-${l.cat})" stroke="#fff" stroke-width="2.2"/><text y="-19" text-anchor="middle">${l.n}</text></svg>${v?'<i class="ok">✓</i>':''}<span class="nm">${esc(shortName(l))}</span>`}
+function rmMarkers(){if(!RM.on)return;const m=RM.map;
+ for(const l of L){let mk=RM.mk[l.id];if(!mk){const el=document.createElement('div');el.className='rmk';el.dataset.id=l.id;
+   el.addEventListener('click',e=>{e.stopPropagation();openLoc(l.id)});mk=RM.mk[l.id]=new maplibregl.Marker({element:el,anchor:'bottom'}).setLngLat([l.lon,l.lat]).addTo(m)}
+  const el=mk.getElement();el.innerHTML=rmPin(l);el.classList.toggle('sel',S.sel===l.id);el.classList.toggle('vis',S.visited.has(l.id));el.style.zIndex=S.sel===l.id?5:'';el.setAttribute('aria-label',l.n+'. '+l.name)}}
+function rmPhotos(){if(!RM.on)return;const m=RM.map,src=m.getSource('rm-fan');
+ if(!S.showPhotos){Object.values(RM.ph).forEach(x=>x.remove());RM.ph={};src&&src.setData(FC([]));return}
+ const feats=[];for(const p of PH){if(!p.stand)continue;feats.push({type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[sectorPoly(p.stand[0],p.stand[1],p.dir,20,42)]}});
+  if(!RM.ph[p.id]){const el=document.createElement('div');el.className='rph';el.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+   el.addEventListener('click',e=>{e.stopPropagation();openPhoto(p.id)});RM.ph[p.id]=new maplibregl.Marker({element:el}).setLngLat([p.stand[1],p.stand[0]]).addTo(m)}}
+ src&&src.setData(FC(feats))}
+function rmMe(){if(!RM.on)return;const m=RM.map,src=m.getSource('rm-acc');
+ if(!S.pos){if(RM.me){RM.me.remove();RM.me=null}src&&src.setData(FC([]));return}
+ if(!RM.me){const el=document.createElement('div');el.className='rme';el.innerHTML='<svg viewBox="-32 -32 64 64" width="64" height="64"><defs><radialGradient id="rmeg" cx="0" cy="0" r="30" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#1f6fd1" stop-opacity=".55"/><stop offset="1" stop-color="#1f6fd1" stop-opacity="0"/></radialGradient></defs><path d="M0 0 L-17 -27 A32 32 0 0 1 17 -27Z" fill="url(#rmeg)"/></svg><b class="dot"></b>';
+  RM.me=new maplibregl.Marker({element:el,rotationAlignment:'map',pitchAlignment:'map'}).setLngLat([S.pos.lon,S.pos.lat]).addTo(m)}
+ RM.me.setLngLat([S.pos.lon,S.pos.lat]);const hd=S.heading;RM.me.getElement().classList.toggle('nohd',hd==null);if(hd!=null)RM.me.setRotation(hd);
+ const acc=S.pos.acc&&S.posSrc==='gps'?Math.min(S.pos.acc,400):0;src&&src.setData(FC(acc>4?[{type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[circlePoly(S.pos.lat,S.pos.lon,acc)]}}]:[]));
+ if(RM.head&&S.follow&&hd!=null){const now=performance.now();if(now-RM.lastB>90){RM.lastB=now;m.jumpTo({bearing:hd,center:[S.pos.lon,S.pos.lat]})}}}
+function rmRoute(){if(!RM.on)return;const src=RM.map.getSource('rm-route');if(!src)return;const r=S.route&&ROUTES.find(x=>x.id===S.route);
+ src.setData(FC(r?[{type:'Feature',properties:{},geometry:{type:'LineString',coordinates:r.stops.map(id=>[LBY[id].lon,LBY[id].lat])}}]:[]))}
+function rmFit(lls,pad,top,instant){const m=RM.map;if(!lls.length)return;let a=[1e9,1e9],b=[-1e9,-1e9];lls.forEach(p=>{a=[Math.min(a[0],p.lon),Math.min(a[1],p.lat)];b=[Math.max(b[0],p.lon),Math.max(b[1],p.lat)]});
+ const H=m.getContainer().clientHeight,W=m.getContainer().clientWidth,pd=Math.min(pad,W/5);
+ try{m.fitBounds([a,b],{padding:{top:pd+top,bottom:pd+(S.pos?70:40),left:pd,right:pd+52},maxZoom:17.2,duration:instant?0:600,bearing:m.getBearing()})}catch(e){m.jumpTo({center:[(a[0]+b[0])/2,(a[1]+b[1])/2]})}}
+function rmCenter(lat,lon,minS,noOffset,instant){const m=RM.map,H=m.getContainer().clientHeight;const z=Math.max(m.getZoom(),minS?Math.min(18,s2z(minS)):0);
+ const o={center:[lon,lat],zoom:z,offset:[0,noOffset?0:-H*0.18]};if(RM.head&&S.heading!=null)o.bearing=S.heading;instant?m.jumpTo(o):m.easeTo(Object.assign(o,{duration:550}))}
+function styleZMe(){const b=$('#zMe');b.style.background=S.follow?'var(--blue)':'';b.style.color=S.follow?'#fff':'';b.classList.toggle('head',!!(S.follow&&RM.head))}
+// guarda o mapa de Dubrovnik e Trsteno para usar sem internet (o service worker guarda o que for baixado)
+async function rmPrefetch(){if(RM.warm||!RM.map||!navigator.onLine)return;RM.warm=true;const last=store.get('tilesWarm',0);if(Date.now()-last<5*864e5)return;
+ if(navigator.connection&&navigator.connection.saveData)return;
+ let tpl=null;try{const st=RM.map.getStyle(),id=st.sources.openmaptiles?'openmaptiles':Object.keys(st.sources).find(k=>st.sources[k].type==='vector');const s=RM.map.getSource(id);tpl=s&&s.tiles&&s.tiles[0]}catch(e){}if(!tpl)return;
+ const t2x=(lon,z)=>Math.floor((lon+180)/360*2**z),t2y=(lat,z)=>{const r=lat*toR;return Math.floor((1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*2**z)};
+ const urls=[];const box=(w,s,e,n,z0,z1)=>{for(let z=z0;z<=z1;z++)for(let x=t2x(w,z);x<=t2x(e,z);x++)for(let y=t2y(n,z);y<=t2y(s,z);y++)urls.push(tpl.replace('{z}',z).replace('{x}',x).replace('{y}',y))};
+ box(17.94,42.60,18.17,42.73,9,12);box(18.07,42.615,18.15,42.665,13,14);box(17.96,42.704,17.99,42.721,13,14);
+ let i=0,ok=0;const worker=async()=>{while(i<urls.length){const u=urls[i++];try{const r=await fetch(u,{mode:'cors'});if(r.ok)ok++}catch(e){}}};
+ await Promise.all([worker(),worker(),worker(),worker()]);if(ok>urls.length*0.8)store.set('tilesWarm',Date.now())}
+// mini mapa real por baixo do planejador de foto
+let PLM=null;
+function plannerMap(p){if(PLM){try{PLM.remove()}catch(e){}PLM=null}const box=$('#plMap'),svg=$('#plSvg');if(!box||!svg)return false;
+ if(!RM.on||!window.maplibregl||!p.stand)return false;
+ const A=xy(p.stand[0],p.stand[1]),B=xy(p.tgt[0],p.tgt[1]),dAB=Math.hypot(B[0]-A[0],B[1]-A[1]),span=Math.max(240,Math.min(1600,dAB*2.4));
+ const c=ll((A[0]+B[0])/2,(A[1]+B[1])/2),w=svg.getBoundingClientRect().width||320;
+ try{PLM=new maplibregl.Map({container:box,style:RM_STYLE,center:[c.lon,c.lat],zoom:Math.log2(MPP0*w/span),interactive:false,attributionControl:{compact:true},fadeDuration:0});
+  PLM.on('load',()=>rmText(PLM));box.classList.add('on');svg.classList.add('over');return true}catch(e){return false}}
 
 /* ============ posição e bússola ============ */
 function setManualPos(p,name,quiet){S.pos={lat:p.lat,lon:p.lon};S.posSrc=S.sim?'sim':'manual';store.set('pos',S.pos);updatePosUI(true);
@@ -2132,7 +2273,7 @@ window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h&&h
 
 /* ============ sheet de detalhes ============ */
 function openSheet(html){$('#sheetBody').innerHTML=html;$('#sheetBody').scrollTop=0;$('#sheet').classList.add('open');$('#scrim').classList.add('on')}
-function closeSheet(){$('#sheet').classList.remove('open');$('#scrim').classList.remove('on');if(S.sel){S.sel=null;drawMarkers()}}
+function closeSheet(){if(PLM){try{PLM.remove()}catch(e){}PLM=null}$('#sheet').classList.remove('open');$('#scrim').classList.remove('on');if(S.sel){S.sel=null;drawMarkers()}}
 $('#scrim').onclick=closeSheet;
 (()=>{let y0=null,dy=0;const g=$('#grab'),sh=$('#sheet');g.addEventListener('pointerdown',e=>{y0=e.clientY;dy=0;sh.style.transition='none';try{g.setPointerCapture(e.pointerId)}catch(_){ }});
  g.addEventListener('pointermove',e=>{if(y0==null)return;dy=Math.max(0,e.clientY-y0);sh.style.transform=`translateY(${dy}px)`});
@@ -2249,7 +2390,7 @@ function photoCard(p,full){const l=LBY[p.loc];const st=p.stand?{lat:p.stand[0],l
  <div class="chips" style="margin-top:6px"><span class="chip g" id="done-${p.id}" style="display:none;background:var(--ok)">✓ ${t('done')}</span><span class="chip">${esc(p.lens)}</span><span class="chip">${esc(p.orient)}</span>${d!=null?`<span class="chip">${fmtD(d)}</span>`:''}${p.dir!=null?`<span class="chip">${arrowSVG(p.dir,13,'var(--gold)')} ${card(p.dir)}</span>`:''}</div></div></div>
  <div class="ltb" data-ph="${p.id}">${lightBox(p)}</div>
  ${full&&p.stand&&p.dir!=null?`<div class="planner"><h3 class="serif" style="font-size:15px;margin:14px 0 4px">${t('plannerTitle')}</h3><div class="small muted">${t('plannerHint')}</div>
-  <svg id="plSvg" viewBox="0 0 340 220" style="width:100%;height:auto;border-radius:12px;border:1px solid var(--line);margin-top:8px;background:var(--sea);display:block"></svg>
+  <div class="plwrap"><div id="plMap"></div><svg id="plSvg" viewBox="0 0 340 220" style="width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:var(--sea);display:block;position:relative"></svg></div>
   <div style="display:flex;align-items:center;gap:8px;margin-top:8px"><div class="seg2" id="plLens">${[t('lens05'),'1×','2×'].map((tx,i)=>`<button data-l="${i}" class="${i===1?'on':''}">${tx}</button>`).join('')}</div><span class="small muted" id="plDate" style="margin-left:auto"></span></div>
   <input type="range" id="plT" style="width:100%;margin-top:10px;accent-color:var(--gold2)" aria-label="${t('timeOfDay')}"><div id="plLbl" style="font-weight:700;font-size:14px"></div></div>`:''}
  <div class="kv" style="margin-top:10px"><b>${t('kWhere')}</b><span>${esc(p.where)}</span><b>${t('kFrame')}</b><span>${esc(p.how)}</span><b>${t('kLight')}</b><span>${esc(p.best)}</span><b>${t('kRecreate')}</b><span>${esc(p.recreate)}</span></div>
@@ -2266,7 +2407,7 @@ function initPlanner(p){const r=$('#plT');if(!r)return;const ds=tripDS(),sd=sunD
  $$('#plLens button').forEach(b=>b.classList.toggle('on',+b.dataset.l===lens));
  const draw=()=>plannerDraw(p,new Date(+r.value),lens);r.oninput=draw;
  $$('#plLens button').forEach(b=>b.onclick=()=>{lens=+b.dataset.l;$$('#plLens button').forEach(x=>x.classList.toggle('on',x===b));draw()});
- $('#plDate').textContent='📅 '+(isToday(ds)?t('todayL'):fmtDay(ds));draw()}
+ $('#plDate').textContent='📅 '+(isToday(ds)?t('todayL'):fmtDay(ds));plannerMap(p);draw()}
 function plannerDraw(p,date,li){const svg=$('#plSvg');if(!svg)return;const A=xy(p.stand[0],p.stand[1]),B=xy(p.tgt[0],p.tgt[1]);
  const dAB=Math.hypot(B[0]-A[0],B[1]-A[1]),span=Math.max(240,Math.min(1600,dAB*2.4)),w=span,h=span*220/340,k=w/340;
  const cx=(A[0]+B[0])/2,cy=(A[1]+B[1])/2;svg.setAttribute('viewBox',`${f1(cx-w/2)} ${f1(cy-h/2)} ${f1(w)} ${f1(h)}`);
@@ -2274,7 +2415,7 @@ function plannerDraw(p,date,li){const svg=$('#plSvg');if(!svg)return;const A=xy(
  const pt=a=>[A[0]+Math.sin(a*toR)*R,A[1]-Math.cos(a*toR)*R],P1=pt(p.dir-half),P2=pt(p.dir+half);
  const up=s.alt>-0.83,sr=span*0.36,S2=[A[0]+Math.sin(s.az*toR)*sr,A[1]-Math.cos(s.az*toR)*sr];
  const col={front:'#2f8a46',side:'#b8860b',back:'#b3261e',blue:'#3b5ba5',night:'#3b4a6b',ok:'#b8860b'}[Lq.k];
- svg.innerHTML=`<use href="#world"/>
+ svg.innerHTML=`${PLM?'':'<use href="#world"/>'}
   <path d="M${f1(A[0])},${f1(A[1])}L${f1(P1[0])},${f1(P1[1])}A${f1(R)} ${f1(R)} 0 0 1 ${f1(P2[0])},${f1(P2[1])}Z" fill="#d6ae45" fill-opacity=".32" stroke="#a8801f" stroke-width="${f1(1.6*k)}"/>
   ${up?`<line x1="${f1(A[0])}" y1="${f1(A[1])}" x2="${f1(S2[0])}" y2="${f1(S2[1])}" stroke="#e0a21b" stroke-width="${f1(2.6*k)}" stroke-dasharray="${f1(7*k)} ${f1(5*k)}"/><circle cx="${f1(S2[0])}" cy="${f1(S2[1])}" r="${f1(10*k)}" fill="#f3c44a" stroke="#e0a21b" stroke-width="${f1(2.2*k)}"/>`:''}
   <circle cx="${f1(B[0])}" cy="${f1(B[1])}" r="${f1(8*k)}" fill="none" stroke="#8f1d1d" stroke-width="${f1(2.4*k)}"/><circle cx="${f1(B[0])}" cy="${f1(B[1])}" r="${f1(2.4*k)}" fill="#8f1d1d"/>
@@ -2503,11 +2644,11 @@ function renderMais(){const el=$('#v-mais');const m=zMonth();const low=[11,12,1,
  <div class="card"><h2>${t('rulesTitle')}</h2><ul class="clean small">${t('rulesHTML')}</ul></div>
  <div class="card"><h2>${t('curTitle')}</h2>${CUR.map(c=>`<div class="cur"><span class="ic">${c[0]}</span><div class="small">${esc(c[1])}</div></div>`).join('')}</div>
  <div class="card" id="quizCard"></div>
- <div class="card"><h2>${t('settings')}</h2><div class="row" style="margin-top:8px"><button class="btn sm gold" id="tourBtn">🎓 ${t('replayTour')}</button><button class="btn sm" id="langBtn">🌐 ${t('language')}: ${LANGS[LANG]}</button><button class="btn sm" id="themeBtn2">🌓 ${t('theme')}: ${t('theme_'+S.theme)}</button><button class="btn sm" id="simBtn">🧪 ${t('simTitle')}: ${S.sim?t('onW'):t('offW')}</button><button class="btn sm" id="spBtn">${S.spoil?'🙈':'👀'} ${t('noSpoilers')}: ${S.spoil?t('onW'):t('offW')}</button><button class="btn sm" id="rsBtn">${t('resetConq')}</button></div></div>
+ <div class="card"><h2>${t('settings')}</h2><div class="row" style="margin-top:8px"><button class="btn sm gold" id="tourBtn">🎓 ${t('replayTour')}</button><button class="btn sm" id="langBtn">🌐 ${t('language')}: ${LANGS[LANG]}</button><button class="btn sm" id="themeBtn2">🌓 ${t('theme')}: ${t('theme_'+S.theme)}</button>${FRAMED?'':`<button class="btn sm" id="mapBtn">🗺️ ${t('mapMode')}: ${store.get('mapMode','real')==='drawn'?t('mapDrawn'):t('mapReal')}</button>`}<button class="btn sm" id="simBtn">🧪 ${t('simTitle')}: ${S.sim?t('onW'):t('offW')}</button><button class="btn sm" id="spBtn">${S.spoil?'🙈':'👀'} ${t('noSpoilers')}: ${S.spoil?t('onW'):t('offW')}</button><button class="btn sm" id="rsBtn">${t('resetConq')}</button></div></div>
  <div class="card" id="ajuda"><h2>${t('helpTitle')}</h2><ul class="clean small">${FRAMED?`<li>${t('helpFramed',`<a href="${HOSTED_URL}?lang=${LANG}" target="_blank" rel="noopener">${HOSTED_URL}</a>`)}</li>`:''}${t('helpHTML')}</ul></div>
  <div class="card"><h2>${t('aboutTitle')}</h2><p class="small" style="margin-top:0">${t('aboutP')}</p><p class="small muted">${t('sourcesP')} · v4</p></div>
  </div>`;
- $('#shareBtn').onclick=shareApp;$('#langBtn').onclick=openLangModal;$('#langBtn2').onclick=openLangModal;
+ $('#shareBtn').onclick=shareApp;{const mb=$('#mapBtn');if(mb)mb.onclick=()=>{setMapMode(store.get('mapMode','real')==='drawn'?'real':'drawn');renderMais();toast('🗺️ '+t('mapMode')+': '+(store.get('mapMode','real')==='drawn'?t('mapDrawn'):t('mapReal')))}}$('#langBtn').onclick=openLangModal;$('#langBtn2').onclick=openLangModal;
  $('#tourBtn').onclick=()=>{go('mapa');setTimeout(()=>startTour(0),120)};
  $('#themeBtn2').onclick=()=>{S.theme=S.theme==='auto'?'light':S.theme==='light'?'dark':'auto';store.set('theme',S.theme);applyTheme();renderMais()};
  $('#simBtn').onclick=()=>{const on=!S.sim;go('mapa');setSim(on,'pile');if(on)setTimeout(()=>centerOn(LBY.pile.lat,LBY.pile.lon,1.4,true),80)};
@@ -2551,7 +2692,7 @@ function openLangModal(){modal(`<h2 style="font-size:19px">🌐 ${t('language')}
 const TOUR=[
  {c:1,icon:'👑',k:0,next:'tourStart',langs:1},
  {sel:'#locPill',k:1,framedAlt:1},
- {sel:()=>$('#gMarkers .mk[data-id="jesuit"]'),pad:12,before:()=>{closeSheet();fitOld()},k:2},
+ {sel:()=>RM.on&&RM.mk.jesuit?RM.mk.jesuit.getElement():$('#gMarkers .mk[data-id="jesuit"]'),pad:12,before:()=>{closeSheet();fitOld(true)},k:2},
  {sel:'#zMe',k:3},
  {sel:'#zAR',k:4},
  {sel:'#zLayer',k:5},
@@ -2603,7 +2744,7 @@ function setLang(lang,initial){if(!LANGS[lang])lang='en';LANG=lang;store.set('la
  document.documentElement.lang=LOCALE[lang];document.title=t('docTitle');
  $$('[data-i18n]').forEach(e=>{e.textContent=t(e.dataset.i18n)});$$('[data-i18n-aria]').forEach(e=>{const v=t(e.dataset.i18nAria);e.setAttribute('aria-label',v);if(e.hasAttribute('title'))e.title=v});
  $('#langCode').textContent=lang.toUpperCase();if(typeof fitBrand==='function')requestAnimationFrame(fitBrand);
- drawLabels();drawMarkers();renderLegend();
+ drawLabels();drawMarkers();renderLegend();if(RM.on)rmText(RM.map);
  if(!initial){quizState=null;updatePosUI(true);closeSheet();if(cur!=='mapa')go(cur);toast('🌐 '+LANGS[lang])}}
 
 /* ============ início ============ */
@@ -2611,6 +2752,7 @@ const PT0=snapshotPT();
 buildMap();
 setLang(LANG,true);
 $('#langHdr').onclick=openLangModal;
+setTimeout(initReal,30);
 // nome da cidade cabe no topo em qualquer idioma (encolhe a fonte se precisar)
 function fitBrand(){const b=$('.brand b');if(!b)return;b.style.fontSize='';b.style.letterSpacing='';let fs=parseFloat(getComputedStyle(b).fontSize),n=0;
  const tw=()=>{try{const r=document.createRange();r.selectNodeContents(b);return r.getBoundingClientRect().width}catch(e){return b.scrollWidth}};
