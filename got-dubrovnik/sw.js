@@ -1,5 +1,5 @@
 // Porto Real — cache offline. Página: rede primeiro (pega atualizações), cache se estiver sem internet.
-const V = 'porto-real-v7';
+const V = 'porto-real-v8';
 const TILES = 'porto-real-tiles-v1';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png', './lib/maplibre-gl.js', './lib/maplibre-gl.css'];
 self.addEventListener('install', e => {
