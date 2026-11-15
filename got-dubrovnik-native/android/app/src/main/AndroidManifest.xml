@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application
         android:allowBackup="true"
@@ -23,6 +24,19 @@
             </intent-filter>
 
         </activity>
+
+        <!-- The app draws everything in the WebView and never uses EmojiCompat. Its startup hook holds a link to the
+             Google Play services fonts provider, and Android kills the app whenever that provider restarts
+             (seen in the emulator test: "DEPENDENCY DIED ... FontsProvider"). So the hook is switched off. -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+                tools:node="remove" />
+        </provider>
 
         <provider
             android:name="androidx.core.content.FileProvider"

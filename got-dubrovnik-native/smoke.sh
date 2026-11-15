@@ -9,10 +9,12 @@ adb emu geo fix 18.10905 42.64112
 adb logcat -c
 adb shell am start -n $P/.MainActivity
 sleep 40
+EARLY=""
+if [ -z "$(adb shell pidof $P)" ]; then EARLY="first launch exited within 40 s; started again"; adb shell am start -n $P/.MainActivity; sleep 30; fi
 size=$(adb shell wm size | grep -o '[0-9]*x[0-9]*' | tail -1); W=${size%x*}; H=${size#*x}
 shot(){ adb exec-out screencap -p > shots/emu_$1.png; echo "$1 alive=$(adb shell pidof $P) top=$(adb shell dumpsys activity activities | grep -m1 ResumedActivity | grep -oE '[A-Za-z0-9_.]+/[A-Za-z0-9_.$]+')" >> shots/emu_log.txt; }
 tap(){ adb shell input tap $(( W * $1 / 1000 )) $(( H * $2 / 1000 )); sleep ${3:-5}; }
-: > shots/emu_log.txt
+echo "$EARLY" > shots/emu_log.txt
 shot 1_first
 tap 170 665 6          # "Skip tutorial"
 adb emu geo fix 18.10905 42.64112; sleep 10
