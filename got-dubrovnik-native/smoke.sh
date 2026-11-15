@@ -10,7 +10,7 @@ adb logcat -c
 adb shell am start -n $P/.MainActivity
 sleep 40
 size=$(adb shell wm size | grep -o '[0-9]*x[0-9]*' | tail -1); W=${size%x*}; H=${size#*x}
-shot(){ adb exec-out screencap -p > shots/emu_$1.png; echo "$1 alive=$(adb shell pidof $P)" >> shots/emu_log.txt; }
+shot(){ adb exec-out screencap -p > shots/emu_$1.png; echo "$1 alive=$(adb shell pidof $P) top=$(adb shell dumpsys activity activities | grep -m1 ResumedActivity | grep -oE '[A-Za-z0-9_.]+/[A-Za-z0-9_.$]+')" >> shots/emu_log.txt; }
 tap(){ adb shell input tap $(( W * $1 / 1000 )) $(( H * $2 / 1000 )); sleep ${3:-5}; }
 : > shots/emu_log.txt
 shot 1_first
@@ -19,7 +19,7 @@ adb emu geo fix 18.10905 42.64112; sleep 10
 shot 2_map_gps
 tap 300 955 5; shot 3_places      # Places tab
 tap 400 330 6; shot 4_place_sheet # first place in the list
-tap 500 390 12; shot 5_walk_nav   # "Walk there" button
+tap 500 340 12; shot 5_walk_nav   # "Walk there" button (y 0.32-0.36; 0.39 hit the Maps links and opened Chrome)
 tap 700 955 5; shot 6_photos      # Photos tab
 tap 900 955 5; shot 7_more        # More tab
 adb shell dumpsys activity exit-info $P | head -40 >> shots/emu_log.txt
