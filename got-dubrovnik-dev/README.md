@@ -18,4 +18,5 @@ sandbox with these assumptions; adjust paths when running elsewhere:
 | `nav.py` | in-app walking navigation and the AR turn arrow (mock router) |
 | `st.py` | scene still: inset, overlay, side-by-side export |
 | `v7.py` | place links, report link, voice (mock speech), trip download with a real service worker + offline reload, conquest card |
+| `v8.py` | paste a still from the clipboard, still opacity in the camera, photo-to-still match editor and export |
 | `clean.py <lang>` | clean screenshots for sharing; `og.py` renders the social preview image |
