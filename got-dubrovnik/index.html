@@ -308,6 +308,7 @@ table.t td:last-child{text-align:right;font-weight:700;white-space:nowrap}
 .still img{width:96px;border-radius:8px;display:block}
 #camStill{position:absolute;left:10px;top:118px;width:34vw;max-width:170px;border:2px solid #fff;border-radius:10px;background:#000 center/cover no-repeat;box-shadow:0 4px 14px rgba(0,0,0,.5);z-index:4;padding:0;transition:width .2s}
 #camStill.big{width:74vw;max-width:420px}
+.scl{display:flex;gap:14px;margin-top:6px;font-size:13px;font-weight:700}.scl a{color:var(--crimson);text-decoration:none}
 /* mapa real */
 #rmap{position:absolute;inset:0;display:none;background:#efe9dc}
 body.rm-on #rmap{display:block}
@@ -1172,6 +1173,12 @@ Object.assign(UI.es,{"stillTitle": "Fotograma de la escena", "stillHint": "Añad
 Object.assign(UI.de,{"stillTitle": "Szenenbild", "stillHint": "Füge einen Screenshot der Szene aus der Serie hinzu: Er erscheint in der Kamera zum Nachstellen und danach neben deinem Foto. Er bleibt nur auf deinem Handy.", "stillAdd": "Szenenbild hinzufügen", "stillFind": "Szenenbild suchen", "stillHave": "Szenenbild gespeichert. In der Kamera liegt es in der Ecke; antippen zum Vergrößern.", "stillRemove": "Entfernen", "stillOn": "Szenenbild hinzugefügt! Öffne die Kamera: Es liegt in der Ecke, und GUIDE legt es über das Bild", "guideStill": "Guide: Szenenbild als Überlagerung", "sideBySide": "Vergleich mit der Szene erstellen", "saveSBS": "Vergleich speichern", "sbsShow": "IN DER SERIE", "sbsMe": "ICH, AM SELBEN ORT"});
 Object.assign(UI.fr,{"stillTitle": "Image de la scène", "stillHint": "Ajoutez une capture de la scène de la série : elle s'affiche dans la caméra pour copier le cadrage, puis côte à côte avec votre photo. Elle reste uniquement sur votre téléphone.", "stillAdd": "Ajouter l'image", "stillFind": "Chercher l'image", "stillHave": "Image enregistrée. Dans la caméra, elle est dans le coin ; touchez-la pour l'agrandir.", "stillRemove": "Retirer", "stillOn": "Image ajoutée ! Ouvrez la caméra : elle est dans le coin, et GUIDE la superpose à l'image", "guideStill": "Guide : image de la scène en surimpression", "sideBySide": "Créer un avant/après avec la scène", "saveSBS": "Enregistrer le montage", "sbsShow": "DANS LA SÉRIE", "sbsMe": "MOI, AU MÊME ENDROIT"});
 Object.assign(UI.it,{"stillTitle": "Fotogramma della scena", "stillHint": "Aggiungi uno screenshot della scena della serie: compare nella fotocamera per copiare l'inquadratura e poi accanto alla tua foto. Resta solo sul tuo telefono.", "stillAdd": "Aggiungi il fotogramma", "stillFind": "Cerca il fotogramma", "stillHave": "Fotogramma salvato. Nella fotocamera sta nell'angolo; toccalo per ingrandirlo.", "stillRemove": "Rimuovi", "stillOn": "Fotogramma aggiunto! Apri la fotocamera: sta nell'angolo e GUIDA lo sovrappone all'immagine", "guideStill": "Guida: fotogramma in sovrimpressione", "sideBySide": "Crea il confronto con la scena", "saveSBS": "Salva il confronto", "sbsShow": "NELLA SERIE", "sbsMe": "IO, NELLO STESSO POSTO"});
+Object.assign(UI.pt,{"seeTake": "Ver o take", "seeClip": "Ver o clipe", "cmpTitle": "Série × vida real", "cmpP": "Em cada cena e em cada missão de foto há um atalho para ver o take e o clipe. Estes sites já trazem as comparações lado a lado prontas:"});
+Object.assign(UI.en,{"seeTake": "See the shot", "seeClip": "Watch the clip", "cmpTitle": "Show vs real life", "cmpP": "Every scene and photo mission has a shortcut to the shot and the clip. These sites already have ready-made side-by-side comparisons:"});
+Object.assign(UI.es,{"seeTake": "Ver el plano", "seeClip": "Ver el clip", "cmpTitle": "Serie vs. realidad", "cmpP": "Cada escena y cada misión de foto tiene un atajo al plano y al clip. Estas webs ya traen comparaciones hechas:"});
+Object.assign(UI.de,{"seeTake": "Einstellung ansehen", "seeClip": "Clip ansehen", "cmpTitle": "Serie vs. Realität", "cmpP": "Jede Szene und Foto-Mission hat einen Link zur Einstellung und zum Clip. Diese Seiten zeigen fertige Vergleiche:"});
+Object.assign(UI.fr,{"seeTake": "Voir le plan", "seeClip": "Voir l'extrait", "cmpTitle": "Série vs réalité", "cmpP": "Chaque scène et chaque mission photo a un raccourci vers le plan et l'extrait. Ces sites proposent déjà des comparaisons côte à côte :"});
+Object.assign(UI.it,{"seeTake": "Vedi l'inquadratura", "seeClip": "Guarda la clip", "cmpTitle": "Serie vs realtà", "cmpP": "Ogni scena e ogni missione foto ha una scorciatoia per l'inquadratura e la clip. Questi siti hanno già i confronti pronti:"});
 /* ============ i18n: conteúdo traduzido ============ */
 const TRB={};
 TRB.en={
@@ -2121,13 +2128,16 @@ async function makeRef(blob){const im=await new Promise((res,rej)=>{const i=new 
 /* ============ take da cena: a pessoa traz o print da série; fica só no aparelho (o app não inclui imagens da série) ============ */
 const stillGet=id=>store.get('still_'+id,null);
 const phScene=p=>{const l=LBY[p.loc];return l.scenes.find(s=>s[0])||null};
-const stillSearch=p=>{const sc=phScene(p),l=LBY[p.loc];return 'https://www.google.com/search?tbm=isch&q='+encodeURIComponent('Game of Thrones '+(sc?`S${sc[0]}E${sc[1]} "${sc[2]}" `:'')+LBY[p.loc].hr+' Dubrovnik scene')};
+const sceneQ=(l,s)=>'Game of Thrones '+(s&&s[0]?`S${s[0]}E${s[1]} ${s[2]} `:'')+l.got.split(' · ')[0]+' '+l.hr.split(' · ')[0]+' Dubrovnik';
+const sceneImg=(l,s)=>'https://www.google.com/search?tbm=isch&q='+encodeURIComponent(sceneQ(l,s)+' scene');
+const sceneVid=(l,s)=>'https://www.youtube.com/results?search_query='+encodeURIComponent(sceneQ(l,s).replace(' Dubrovnik','')+' scene');
+const stillSearch=p=>sceneImg(LBY[p.loc],phScene(p));
 function pickStill(id){const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=async()=>{const f=inp.files&&inp.files[0];if(!f)return;
   try{const im=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=URL.createObjectURL(f)});const k=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);
    store.set('still_'+id,{u:c.toDataURL('image/jpeg',.82),w:c.width,h:c.height});if(!stillGet(id))throw 0;CAM.ghost=1;stillUI(id);toast('🎬 '+t('stillOn'),3400)}catch(e){toast(t('badImage'))}};inp.click()}
 function stillUI(id){const el=$('#st-'+id);if(!el)return;const p=PH.find(x=>x.id===id),s=stillGet(id);
  el.innerHTML=s?`<img src="${s.u}" alt=""><div style="flex:1;min-width:0"><b>🎬 ${t('stillTitle')}</b><div class="small muted">${t('stillHave')}</div><button class="btn sm" style="margin-top:6px" onclick="store.set('still_${id}',null);stillUI('${id}')">✕ ${t('stillRemove')}</button></div>`
-  :`<div style="flex:1;min-width:0"><b>🎬 ${t('stillTitle')}</b><div class="small muted">${t('stillHint')}</div><div class="row" style="margin-top:8px"><button class="btn sm gold" onclick="pickStill('${id}')">＋ ${t('stillAdd')}</button><a class="btn sm" href="${stillSearch(p)}" target="_blank" rel="noopener">🔎 ${t('stillFind')}</a></div></div>`}
+  :`<div style="flex:1;min-width:0"><b>🎬 ${t('stillTitle')}</b><div class="small muted">${t('stillHint')}</div><div class="row" style="margin-top:8px"><button class="btn sm gold" onclick="pickStill('${id}')">＋ ${t('stillAdd')}</button><a class="btn sm" href="${stillSearch(p)}" target="_blank" rel="noopener">🎬 ${t('seeTake')}</a>${phScene(p)?`<a class="btn sm" href="${sceneVid(LBY[p.loc],phScene(p))}" target="_blank" rel="noopener">▶ ${t('seeClip')}</a>`:''}</div></div>`}
 // lado a lado: take em cima, sua foto embaixo
 async function makeSBS(o,p){const s=stillGet(p.id),ld=u=>new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=u});
  try{await document.fonts.load('900 40px Cinzel');await document.fonts.load('700 30px Inter')}catch(e){}
@@ -2402,7 +2412,7 @@ function openLoc(id){const l=LBY[id];if(!l)return;S.sel=id;drawMarkers();
  </div>
  ${id==='jesuit'?`<button class="btn sm red" style="width:100%;margin-top:6px" onclick="shameBell()">🔔 ${t('bellBtn')}</button>`:''}
  <h3 class="serif" style="font-size:15px;margin:14px 0 4px">${t('inShow')}</h3>
- ${l.scenes.map(s=>`<div class="scene"><span class="ep ${s[0]?'':'n'}">${epTag(s)}</span><div class="spoil" onclick="this.classList.add('rev')">${s[0]?`<em>“${esc(s[2])}”</em><br>`:''}${esc(s[3])}</div></div>`).join('')}
+ ${l.scenes.map(s=>`<div class="scene"><span class="ep ${s[0]?'':'n'}">${epTag(s)}</span><div class="spoil" onclick="this.classList.add('rev')">${s[0]?`<em>“${esc(s[2])}”</em><br>`:''}${esc(s[3])}${s[0]?`<div class="scl" onclick="event.stopPropagation()"><a href="${sceneImg(l,s)}" target="_blank" rel="noopener">🎬 ${t('seeTake')}</a><a href="${sceneVid(l,s)}" target="_blank" rel="noopener">▶ ${t('seeClip')}</a></div>`:''}</div></div>`).join('')}
  <h3 class="serif" style="font-size:15px;margin:14px 0 4px">${t('inReal')}</h3><p style="margin:0">${esc(l.real)}</p>
  ${l.curios.length?`<h3 class="serif" style="font-size:15px;margin:14px 0 4px">${t('trivia')}</h3><ul class="clean">${l.curios.map(c=>`<li>${esc(c)}</li>`).join('')}</ul>`:''}
  <h3 class="serif" style="font-size:15px;margin:14px 0 4px">${t('tips')}</h3><ul class="clean">${l.tips.map(c=>`<li>${esc(c)}</li>`).join('')}</ul>
@@ -2760,6 +2770,7 @@ function renderMais(){const el=$('#v-mais');const m=zMonth();const low=[11,12,1,
  ${low?`<div class="hint">🗓️ ${t('lowSeasonBox')}</div>`:''}</div>
  <div class="card"><h2>${t('rulesTitle')}</h2><ul class="clean small">${t('rulesHTML')}</ul></div>
  <div class="card"><h2>${t('curTitle')}</h2>${CUR.map(c=>`<div class="cur"><span class="ic">${c[0]}</span><div class="small">${esc(c[1])}</div></div>`).join('')}</div>
+ <div class="card"><h2>🎬 ${t('cmpTitle')}</h2><p class="small" style="margin-top:0">${t('cmpP')}</p><div class="row"><a class="btn sm" href="https://gretastravels.com/game-of-thrones-filming-set-in-dubrovnik/" target="_blank" rel="noopener">Greta's Travels ↗</a><a class="btn sm" href="https://boredpanda.com/game-of-thrones-filming-locations-before-after" target="_blank" rel="noopener">Bored Panda ↗</a></div></div>
  <div class="card" id="quizCard"></div>
  <div class="card"><h2>${t('settings')}</h2><div class="row" style="margin-top:8px"><button class="btn sm gold" id="tourBtn">🎓 ${t('replayTour')}</button><button class="btn sm" id="langBtn">🌐 ${t('language')}: ${LANGS[LANG]}</button><button class="btn sm" id="themeBtn2">🌓 ${t('theme')}: ${t('theme_'+S.theme)}</button>${FRAMED?'':`<button class="btn sm" id="mapBtn">🗺️ ${t('mapMode')}: ${store.get('mapMode','real')==='drawn'?t('mapDrawn'):t('mapReal')}</button>`}<button class="btn sm" id="simBtn">🧪 ${t('simTitle')}: ${S.sim?t('onW'):t('offW')}</button><button class="btn sm" id="spBtn">${S.spoil?'🙈':'👀'} ${t('noSpoilers')}: ${S.spoil?t('onW'):t('offW')}</button><button class="btn sm" id="rsBtn">${t('resetConq')}</button></div></div>
  <div class="card" id="ajuda"><h2>${t('helpTitle')}</h2><ul class="clean small">${FRAMED?`<li>${t('helpFramed',`<a href="${HOSTED_URL}?lang=${LANG}" target="_blank" rel="noopener">${HOSTED_URL}</a>`)}</li>`:''}${t('helpHTML')}</ul></div>
