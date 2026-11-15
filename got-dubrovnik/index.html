@@ -322,6 +322,7 @@ body.nav-on #navBar{display:block}body.nav-on #mapTop,body.nav-on #near,body.nav
 .arnav span{background:#1f6fd1;color:#fff;font:800 14px Inter,sans-serif;padding:5px 10px;border-radius:12px;white-space:nowrap}
 .arnav.side{top:46%;flex-direction:row;gap:8px;background:#1f6fd1;border-radius:16px;padding:8px 12px}.arnav.side b{color:#fff;font-size:22px}.arnav.side span{padding:0;background:none}
 .arnav.side.l{left:10px}.arnav.side.r{left:auto;right:66px;flex-direction:row-reverse}
+body.rm-on #legend{bottom:30px}
 /* mapa real */
 #rmap{position:absolute;inset:0;display:none;background:#efe9dc}
 body.rm-on #rmap{display:block}
@@ -2898,7 +2899,7 @@ const TOUR=[
 ];
 let tourI=0;
 function startTour(i){store.set('welcomed',true);renderMapTop();closeSheet();closeModal();tourI=i||0;$('#tour').classList.add('on');showTour()}
-function endTour(){$('#tour').classList.remove('on');store.set('toured',true)}
+function endTour(){$('#tour').classList.remove('on');store.set('toured',true);if(!FRAMED&&S.posSrc!=='gps'&&!S.sim)setTimeout(()=>startGPS(false),400)}
 function showTour(){const st=TOUR[tourI];if(!st){endTour();return}if(st.before)st.before();
  requestAnimationFrame(()=>requestAnimationFrame(()=>placeTour(st)))}
 function placeTour(st){const spot=$('#tourSpot'),cardEl=$('#tourCard'),W=innerWidth,H=innerHeight;
