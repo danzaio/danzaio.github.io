@@ -1,9 +1,11 @@
 // Porto Real — cache offline. Página: rede primeiro (pega atualizações), cache se estiver sem internet.
-const V = 'porto-real-v10';
+const V = 'porto-real-v11';
+// dentro do app Android os arquivos já vêm no pacote: ali o service worker só guarda o mapa
+const NATIVE = new URL(self.location.href).searchParams.has('native');
 const TILES = 'porto-real-tiles-v1';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png', './lib/maplibre-gl.js', './lib/maplibre-gl.css'];
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(V).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
+  e.waitUntil((NATIVE ? Promise.resolve() : caches.open(V).then(c => c.addAll(CORE))).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== V && k !== TILES).map(k => caches.delete(k)))).then(() => self.clients.claim()));
@@ -37,7 +39,7 @@ self.addEventListener('fetch', e => {
     }));
     return;
   }
-  if (url.origin !== location.origin) return;
+  if (NATIVE || url.origin !== location.origin) return;
   // navegação e arquivos do app: rede primeiro, cache de reserva
   e.respondWith((async () => {
     const c = await caches.open(V);

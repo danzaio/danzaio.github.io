@@ -17,4 +17,5 @@ sandbox with these assumptions; adjust paths when running elsewhere:
 | `v6.py` | pin clusters, street routes (mock router), outlines, photo guide, compare slider |
 | `nav.py` | in-app walking navigation and the AR turn arrow (mock router) |
 | `st.py` | scene still: inset, overlay, side-by-side export |
+| `v7.py` | place links, report link, voice (mock speech), trip download with a real service worker + offline reload, conquest card |
 | `clean.py <lang>` | clean screenshots for sharing; `og.py` renders the social preview image |

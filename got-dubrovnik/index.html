@@ -320,6 +320,10 @@ body.nav-on #navBar{display:block}body.nav-on #mapTop,body.nav-on #near,body.nav
 .navmain b{display:block;font-size:19px;line-height:1.15}.navmain span{display:block;font-size:13px;opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .navic{flex:none;width:44px;height:44px;display:grid;place-items:center}.navflag{font-size:28px}
 #navAR{flex:none;height:34px;padding:0 10px;border-radius:17px;border:0;background:#fff;color:#1f6fd1;font-weight:900;font-size:13px;cursor:pointer}
+#navV{flex:none;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.22);font-size:15px;cursor:pointer;padding:0}
+.tripstep{display:flex;gap:10px;align-items:flex-start;margin-top:12px}.tripstep>b{flex:none;width:26px;height:26px;border-radius:50%;background:var(--gold2);color:#fff;display:grid;place-items:center;font-size:13px}
+.tripok{font-weight:700;color:#2f8f4e;font-size:14px}
+.lnk{flex:none;background:none;border:0;padding:0;font:inherit;font-weight:700;color:var(--crimson);cursor:pointer}
 #navX{flex:none;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.22);color:#fff;font-size:16px;font-weight:800;cursor:pointer}
 .navsub{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-top:0;border-radius:0 0 16px 16px;padding:8px 12px;font-size:13px;box-shadow:var(--shadow)}
 .navsub b{white-space:nowrap}
@@ -1213,6 +1217,12 @@ Object.assign(UI.es,{"arNativeFail": "No pude abrir el AR en este dispositivo"})
 Object.assign(UI.de,{"arNativeFail": "AR ließ sich auf diesem Gerät nicht öffnen"});
 Object.assign(UI.fr,{"arNativeFail": "Impossible d'ouvrir la RA sur cet appareil"});
 Object.assign(UI.it,{"arNativeFail": "Non riesco ad aprire l'AR su questo dispositivo"});
+Object.assign(UI.pt,{"shareLocBtn": "Compartilhar", "reportBtn": "Avisar erro", "reportAbout": "Achou algo errado ou desatualizado?", "listen": "Ouvir", "stopListen": "Parar", "voiceIn": "Em {0} metros, {1}", "voiceOn": "Voz ligada", "voiceOff": "Voz desligada", "voiceArr": "Você chegou: {0}", "a_voice": "Voz", "tripTitle": "Preparar para a viagem", "tripP": "Faça isto no Wi-Fi antes de sair: o mapa, as rotas a pé e o guia inteiro ficam no aparelho e funcionam sem internet.", "tripDl": "Baixar mapa e guia", "tripAgain": "Baixar de novo", "tripDling": "Baixando… {0}%", "tripDone": "Mapa e guia salvos neste aparelho ({0})", "tripFail": "Não deu para baixar tudo. Confira a internet e tente de novo.", "tripInstallT": "Colocar na tela inicial", "tripInstalled": "Já está na tela inicial", "tripInApp": "Você está no navegador de dentro de outro app, que não guarda nada. Abra o link no Safari ou no Chrome.", "tripCopy": "Copiar link", "tripIOS": "No Safari, toque em Compartilhar (o quadrado com seta) e depois em “Adicionar à Tela de Início”.", "tripIOSNote": "No iPhone o ícone guarda os dados separado do Safari: abra pelo ícone e baixe por lá. Fotos tiradas no Safari não aparecem no ícone.", "tripInstallBtn": "Instalar o app", "tripAndroid": "No menu do navegador (⋮), toque em “Instalar app” ou “Adicionar à tela inicial”.", "cqHead": "Eu andei por", "cqPlaces": "locações de Game of Thrones visitadas", "cqMissions": "missões de foto", "cqPhotos": "fotos", "cqQuiz": "quiz", "cqEmpty": "A conquista começa em Dubrovnik", "cqBtn": "Cartão de conquista", "cqSave": "Salvar imagem"});
+Object.assign(UI.en,{"shareLocBtn": "Share", "reportBtn": "Report a mistake", "reportAbout": "Found something wrong or out of date?", "listen": "Listen", "stopListen": "Stop", "voiceIn": "In {0} metres, {1}", "voiceOn": "Voice on", "voiceOff": "Voice off", "voiceArr": "You have arrived: {0}", "a_voice": "Voice", "tripTitle": "Get ready for the trip", "tripP": "Do this on Wi-Fi before you leave: the map, the walking routes and the whole guide stay on your phone and work without internet.", "tripDl": "Download map and guide", "tripAgain": "Download again", "tripDling": "Downloading… {0}%", "tripDone": "Map and guide saved on this device ({0})", "tripFail": "Couldn't download everything. Check your connection and try again.", "tripInstallT": "Add to your home screen", "tripInstalled": "Already on your home screen", "tripInApp": "You're in another app's built-in browser, which keeps nothing. Open the link in Safari or Chrome.", "tripCopy": "Copy link", "tripIOS": "In Safari, tap Share (the square with an arrow), then “Add to Home Screen”.", "tripIOSNote": "On iPhone the icon keeps its data apart from Safari: open it from the icon and download there. Photos taken in Safari won't show up in the icon.", "tripInstallBtn": "Install the app", "tripAndroid": "In the browser menu (⋮), tap “Install app” or “Add to Home screen”.", "cqHead": "I walked through", "cqPlaces": "Game of Thrones locations visited", "cqMissions": "photo missions", "cqPhotos": "photos", "cqQuiz": "quiz", "cqEmpty": "The conquest starts in Dubrovnik", "cqBtn": "Conquest card", "cqSave": "Save image"});
+Object.assign(UI.es,{"shareLocBtn": "Compartir", "reportBtn": "Avisar de un error", "reportAbout": "¿Has visto algo mal o desactualizado?", "listen": "Escuchar", "stopListen": "Parar", "voiceIn": "En {0} metros, {1}", "voiceOn": "Voz activada", "voiceOff": "Voz desactivada", "voiceArr": "Has llegado: {0}", "a_voice": "Voz", "tripTitle": "Preparar el viaje", "tripP": "Hazlo con wifi antes de salir: el mapa, las rutas a pie y toda la guía se quedan en el móvil y funcionan sin internet.", "tripDl": "Descargar mapa y guía", "tripAgain": "Descargar de nuevo", "tripDling": "Descargando… {0}%", "tripDone": "Mapa y guía guardados en este dispositivo ({0})", "tripFail": "No se pudo descargar todo. Revisa la conexión e inténtalo de nuevo.", "tripInstallT": "Añadir a la pantalla de inicio", "tripInstalled": "Ya está en la pantalla de inicio", "tripInApp": "Estás en el navegador interno de otra app, que no guarda nada. Abre el enlace en Safari o Chrome.", "tripCopy": "Copiar enlace", "tripIOS": "En Safari, toca Compartir (el cuadrado con flecha) y luego “Añadir a pantalla de inicio”.", "tripIOSNote": "En iPhone el icono guarda sus datos aparte de Safari: ábrelo desde el icono y descarga allí. Las fotos hechas en Safari no aparecen en el icono.", "tripInstallBtn": "Instalar la app", "tripAndroid": "En el menú del navegador (⋮), toca “Instalar aplicación” o “Añadir a pantalla de inicio”.", "cqHead": "Yo caminé por", "cqPlaces": "localizaciones de Game of Thrones visitadas", "cqMissions": "misiones de foto", "cqPhotos": "fotos", "cqQuiz": "quiz", "cqEmpty": "La conquista empieza en Dubrovnik", "cqBtn": "Tarjeta de conquista", "cqSave": "Guardar imagen"});
+Object.assign(UI.de,{"shareLocBtn": "Teilen", "reportBtn": "Fehler melden", "reportAbout": "Etwas falsch oder veraltet?", "listen": "Anhören", "stopListen": "Stopp", "voiceIn": "In {0} Metern {1}", "voiceOn": "Sprache an", "voiceOff": "Sprache aus", "voiceArr": "Du bist da: {0}", "a_voice": "Sprache", "tripTitle": "Für die Reise vorbereiten", "tripP": "Mach das im WLAN, bevor du losgehst: Karte, Fußwege und der ganze Guide bleiben auf dem Handy und funktionieren ohne Internet.", "tripDl": "Karte und Guide laden", "tripAgain": "Erneut laden", "tripDling": "Lädt… {0}%", "tripDone": "Karte und Guide auf diesem Gerät gespeichert ({0})", "tripFail": "Nicht alles konnte geladen werden. Verbindung prüfen und erneut versuchen.", "tripInstallT": "Zum Home-Bildschirm hinzufügen", "tripInstalled": "Schon auf dem Home-Bildschirm", "tripInApp": "Du bist im eingebauten Browser einer anderen App, der nichts speichert. Öffne den Link in Safari oder Chrome.", "tripCopy": "Link kopieren", "tripIOS": "Tippe in Safari auf Teilen (Quadrat mit Pfeil) und dann auf „Zum Home-Bildschirm“.", "tripIOSNote": "Auf dem iPhone speichert das Symbol getrennt von Safari: über das Symbol öffnen und dort laden. In Safari gemachte Fotos erscheinen dort nicht.", "tripInstallBtn": "App installieren", "tripAndroid": "Tippe im Browsermenü (⋮) auf „App installieren“ oder „Zum Startbildschirm hinzufügen“.", "cqHead": "Ich lief durch", "cqPlaces": "Game-of-Thrones-Drehorte besucht", "cqMissions": "Foto-Missionen", "cqPhotos": "Fotos", "cqQuiz": "Quiz", "cqEmpty": "Die Eroberung beginnt in Dubrovnik", "cqBtn": "Eroberungskarte", "cqSave": "Bild speichern"});
+Object.assign(UI.fr,{"shareLocBtn": "Partager", "reportBtn": "Signaler une erreur", "reportAbout": "Une erreur ou une info périmée ?", "listen": "Écouter", "stopListen": "Arrêter", "voiceIn": "Dans {0} mètres, {1}", "voiceOn": "Voix activée", "voiceOff": "Voix désactivée", "voiceArr": "Vous êtes arrivé : {0}", "a_voice": "Voix", "tripTitle": "Préparer le voyage", "tripP": "À faire en Wi-Fi avant de partir : la carte, les itinéraires à pied et tout le guide restent sur le téléphone et marchent sans internet.", "tripDl": "Télécharger la carte et le guide", "tripAgain": "Télécharger à nouveau", "tripDling": "Téléchargement… {0}%", "tripDone": "Carte et guide enregistrés sur cet appareil ({0})", "tripFail": "Tout n'a pas pu être téléchargé. Vérifiez la connexion et réessayez.", "tripInstallT": "Ajouter à l'écran d'accueil", "tripInstalled": "Déjà sur l'écran d'accueil", "tripInApp": "Vous êtes dans le navigateur intégré d'une autre appli, qui ne garde rien. Ouvrez le lien dans Safari ou Chrome.", "tripCopy": "Copier le lien", "tripIOS": "Dans Safari, touchez Partager (le carré avec une flèche), puis « Sur l'écran d'accueil ».", "tripIOSNote": "Sur iPhone, l'icône garde ses données à part de Safari : ouvrez depuis l'icône et téléchargez là. Les photos prises dans Safari n'y apparaissent pas.", "tripInstallBtn": "Installer l'appli", "tripAndroid": "Dans le menu du navigateur (⋮), touchez « Installer l'application » ou « Ajouter à l'écran d'accueil ».", "cqHead": "J'ai marché dans", "cqPlaces": "lieux de tournage de Game of Thrones visités", "cqMissions": "missions photo", "cqPhotos": "photos", "cqQuiz": "quiz", "cqEmpty": "La conquête commence à Dubrovnik", "cqBtn": "Carte de conquête", "cqSave": "Enregistrer l'image"});
+Object.assign(UI.it,{"shareLocBtn": "Condividi", "reportBtn": "Segnala un errore", "reportAbout": "Hai trovato qualcosa di sbagliato o non aggiornato?", "listen": "Ascolta", "stopListen": "Ferma", "voiceIn": "Tra {0} metri, {1}", "voiceOn": "Voce attiva", "voiceOff": "Voce disattivata", "voiceArr": "Sei arrivato: {0}", "a_voice": "Voce", "tripTitle": "Prepararsi al viaggio", "tripP": "Fallo con il Wi-Fi prima di partire: la mappa, i percorsi a piedi e tutta la guida restano sul telefono e funzionano senza internet.", "tripDl": "Scarica mappa e guida", "tripAgain": "Scarica di nuovo", "tripDling": "Download… {0}%", "tripDone": "Mappa e guida salvate su questo dispositivo ({0})", "tripFail": "Non è stato possibile scaricare tutto. Controlla la connessione e riprova.", "tripInstallT": "Aggiungi alla schermata Home", "tripInstalled": "Già nella schermata Home", "tripInApp": "Sei nel browser interno di un'altra app, che non salva nulla. Apri il link in Safari o Chrome.", "tripCopy": "Copia link", "tripIOS": "In Safari tocca Condividi (il quadrato con la freccia), poi “Aggiungi alla schermata Home”.", "tripIOSNote": "Su iPhone l'icona tiene i dati separati da Safari: apri dall'icona e scarica lì. Le foto fatte in Safari non compaiono nell'icona.", "tripInstallBtn": "Installa l'app", "tripAndroid": "Nel menu del browser (⋮), tocca “Installa app” o “Aggiungi a schermata Home”.", "cqHead": "Ho camminato per", "cqPlaces": "location di Game of Thrones visitate", "cqMissions": "missioni foto", "cqPhotos": "foto", "cqQuiz": "quiz", "cqEmpty": "La conquista comincia a Dubrovnik", "cqBtn": "Carta della conquista", "cqSave": "Salva immagine"});
 /* ============ i18n: conteúdo traduzido ============ */
 const TRB={};
 TRB.en={
@@ -2209,13 +2219,13 @@ function navBuild(){const n=NAV,c=[0];for(let i=1;i<n.line.length;i++)c.push(c[i
  n.xy=n.line.map(q=>xy(q[1],q[0]));for(const s of n.steps){let bi=0,bd=1e12;const p=xy(s.p[1],s.p[0]);n.xy.forEach((q,i)=>{const d=(q[0]-p[0])**2+(q[1]-p[1])**2;if(d<bd){bd=d;bi=i}});s.at=c[bi]}}
 function startNav(id){let l=LBY[id];if(!S.pos){openLocModal();return}if(id==='lokrum')l=LBY.oldport;
  if(dist(S.pos,l)>8000||AIR[l.id]&&l.id!=='srd'){toast('🚌 '+t('navFar'),4200);return}
- closeSheet();S.guiding=false;S.route=null;go('mapa');NAV={id:l.id,line:[[S.pos.lon,S.pos.lat],[l.lon,l.lat]],steps:[],real:false,off:0,last:0,along:0,snap:null};navBuild();
+ closeSheet();S.guiding=false;S.route=null;go('mapa');NAV={id:l.id,line:[[S.pos.lon,S.pos.lat],[l.lon,l.lat]],steps:[],real:false,off:0,last:0,along:0,snap:null};navBuild();if(VOICE.on&&VOICE.ok&&!NATIVE){try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}}
  document.body.classList.add('nav-on');S.follow=true;RM.head=RM.on&&S.headingSrc==='live';styleZMe();keepAwake(true);renderMapTop();navTick();centerOn(S.pos.lat,S.pos.lon,RM.on?z2s(17):1.6,true);navFetch()}
 async function navFetch(){const n=NAV;if(!n||FRAMED||!navigator.onLine)return;n.last=Date.now();const l=LBY[n.id];
  try{const res=await fetch(ROUTER+`${S.pos.lon.toFixed(5)},${S.pos.lat.toFixed(5)};${l.lon.toFixed(5)},${l.lat.toFixed(5)}?overview=full&geometries=geojson&steps=true`);const js=await res.json();if(NAV!==n)return;
   if(js.code!=='Ok'||!js.routes||!js.routes[0])throw 0;const r=js.routes[0];if(r.distance>dist(S.pos,l)*6+300||r.geometry.coordinates.length<2)throw 0;
   n.line=r.geometry.coordinates;n.steps=r.legs[0].steps.filter(s=>s.maneuver.type!=='depart').map(s=>({p:s.maneuver.location,ty:s.maneuver.type,mod:s.maneuver.modifier||'straight',name:s.name||''}));n.real=true;n.off=0;navBuild();navTick()}catch(e){}}
-function endNav(arrived){if(!NAV)return;const l=LBY[NAV.id];NAV=null;document.body.classList.remove('nav-on');$('#navBar').innerHTML='';if(!CAM.on)keepAwake(false);RM.head=false;if(RM.on)RM.map.easeTo({bearing:0,duration:400});styleZMe();drawRoute(true);drawMe();renderMapTop();
+function endNav(arrived){if(!NAV)return;const l=LBY[NAV.id];NAV=null;if(arrived)sayQ([t('voiceArr',l.name)]);else if(VOICE.on)sayStop();document.body.classList.remove('nav-on');$('#navBar').innerHTML='';if(!CAM.on)keepAwake(false);RM.head=false;if(RM.on)RM.map.easeTo({bearing:0,duration:400});styleZMe();drawRoute(true);drawMe();renderMapTop();
  if(arrived){toast('🏁 '+t('navArrived',`<b>${esc(l.name)}</b>`),4200);try{navigator.vibrate&&navigator.vibrate([80,50,80])}catch(e){}setTimeout(()=>openLoc(l.id),700)}}
 function navTick(){const n=NAV;if(!n||!S.pos)return;const l=LBY[n.id];if(dist(S.pos,l)<25){endNav(true);return}
  const p=xy(S.pos.lat,S.pos.lon);let bd=1e12,bal=0,bpt=null,bi=0;
@@ -2226,12 +2236,96 @@ function navTick(){const n=NAV;if(!n||!S.pos)return;const l=LBY[n.id];if(dist(S.
  const arrow=(deg)=>`<svg viewBox="-20 -20 40 40" width="44" height="44"><g transform="rotate(${deg})"><path d="M0 -15 L11 3 H4 V15 H-4 V3 H-11Z" fill="#fff"/></g></svg>`;
  if(n.real){const s=n.steps.find(s=>s.at>bal+4);
   if(!s||s.ty==='arrive'){const d=s?s.at-bal:rest;ic='<div class="navflag">🏁</div>';txt=fmtD(d);sub=esc(l.name)}
-  else{ic=arrow(NAVROT[s.mod]??0);txt=`${fmtD(s.at-bal)} · ${t(NAVKEY[s.mod]||'nav_st')}`;sub=esc(s.name||l.name)}}
+  else{ic=arrow(NAVROT[s.mod]??0);txt=`${fmtD(s.at-bal)} · ${t(NAVKEY[s.mod]||'nav_st')}`;sub=esc(s.name||l.name);navVoice(n,s,s.at-bal)}}
  else{const b=bearing(S.pos,l);ic=arrow(S.heading!=null?angDiff(b,S.heading):b);txt=`${fmtD(rest)} · ${card(b)}`;sub=t(S.heading!=null?'navFollow':'navStraight')}
- $('#navBar').innerHTML=`<div class="navmain"><div class="navic">${ic}</div><div style="flex:1;min-width:0"><b>${txt}</b><span>${sub}</span></div>${FRAMED?'':`<button id="navAR" aria-label="AR">AR</button>`}<button id="navX" aria-label="${t('navStop')}">✕</button></div><div class="navsub"><span class="badge" style="background:var(--c-${l.cat});width:22px;height:22px;font-size:11px">${l.n}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l.name)}</span><b>${fmtD(rest)} · ${t('walkMin',walk(rest))}</b></div>`;
- $('#navX').onclick=()=>endNav(false);{const ab=$('#navAR');if(ab)ab.onclick=()=>NATIVE?navAR():openCam(null,true)}drawRoute(true);drawMe();if(S.follow&&cur==='mapa')centerOn(S.pos.lat,S.pos.lon,null,true)}
+ $('#navBar').innerHTML=`<div class="navmain"><div class="navic">${ic}</div><div style="flex:1;min-width:0"><b>${txt}</b><span>${sub}</span></div>${VOICE.can?`<button id="navV" aria-label="${t('a_voice')}">${VOICE.on?'🔊':'🔇'}</button>`:''}${FRAMED?'':`<button id="navAR" aria-label="AR">AR</button>`}<button id="navX" aria-label="${t('navStop')}">✕</button></div><div class="navsub"><span class="badge" style="background:var(--c-${l.cat});width:22px;height:22px;font-size:11px">${l.n}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l.name)}</span><b>${fmtD(rest)} · ${t('walkMin',walk(rest))}</b></div>`;
+ $('#navX').onclick=()=>endNav(false);{const vb=$('#navV');if(vb)vb.onclick=toggleVoice}{const ab=$('#navAR');if(ab)ab.onclick=()=>NATIVE?navAR():openCam(null,true)}drawRoute(true);drawMe();if(S.follow&&cur==='mapa')centerOn(S.pos.lat,S.pos.lon,null,true)}
 const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
 function navAR(){if(!NAV||!NATIVE)return;const fb=()=>{toast(t('arNativeFail'));openCam(null,true)};const o={points:navRest().map(q=>[q[1],q[0]]),name:LBY[NAV.id].name,hint:LANG};try{const P=Capacitor.Plugins&&Capacitor.Plugins.ArNav;(P?P.start(o):Capacitor.nativePromise('ArNav','start',o)).catch(fb)}catch(e){fb()}}
+/* ============ link por locação, avisar erro, voz ============ */
+const ISSUES='https://github.com/danzaio/danzaio.github.io/issues/new';
+function shareLoc(id){const l=LBY[id],url=HOSTED_URL+'?lang='+LANG+'&loc='+id,title=l.name+' — '+l.got.split(' · ')[0];
+ try{if(navigator.share&&!FRAMED){navigator.share({title,text:title,url}).catch(()=>{});return}}catch(e){}
+ try{navigator.clipboard.writeText(url).then(()=>toast('🔗 '+t('linkCopied')),()=>toast(url))}catch(e){toast(url)}}
+const reportURL=id=>ISSUES+'?title='+encodeURIComponent('[GoT Dubrovnik] '+(id?LBY[id].name:''))+'&body='+encodeURIComponent(`Place: ${id||'-'}\nLanguage: ${LANG}\nApp: ${NATIVE?'android':'web'}\n\nWhat is wrong or out of date?\n\n`);
+const VOICE={on:!!store.get('voice',false),listen:null,ok:'speechSynthesis' in window&&'SpeechSynthesisUtterance' in window};VOICE.can=VOICE.ok||NATIVE;
+const NSAY=(fn,o)=>{const P=Capacitor.Plugins&&Capacitor.Plugins.ArNav;return P&&P[fn]?P[fn](o||{}):Capacitor.nativePromise('ArNav',fn,o||{})};
+function sayStop(){try{if(NATIVE)NSAY('stopSpeak').catch(()=>{});else if(VOICE.ok)speechSynthesis.cancel()}catch(e){}}
+function sayQ(parts,force,onend){if(!force&&!VOICE.on)return;const ps=parts.filter(Boolean);if(!ps.length)return;
+ if(NATIVE){try{NSAY('speak',{parts:ps,lang:LOCALE[LANG]}).then(r=>{if(onend&&!(r&&r.interrupted))onend()},()=>{onend&&onend()})}catch(e){}return}
+ if(!VOICE.ok)return;try{speechSynthesis.cancel();ps.forEach((p,i)=>{const u=new SpeechSynthesisUtterance(p);u.lang=LOCALE[LANG];if(onend&&i===ps.length-1)u.onend=onend;speechSynthesis.speak(u)})}catch(e){}}
+const plain=s=>String(s).replace(/<[^>]+>/g,'').replace(/[“”"«»„]/g,'');
+function listenDone(){VOICE.listen=null;const b=$('#listenB');if(b)b.textContent='🔊 '+t('listen')}
+function stopListen(){if(!VOICE.listen)return;listenDone();sayStop()}
+function listenLoc(id){if(VOICE.listen===id){stopListen();return}const l=LBY[id];VOICE.listen=id;const b=$('#listenB');if(b)b.textContent='⏹ '+t('stopListen');
+ sayQ([l.name+'. '+l.got+'.',...(S.spoil?[]:l.scenes.map(s=>plain(s[3]))),plain(l.real),...l.curios.map(plain)],true,()=>{if(VOICE.listen===id)listenDone()})}
+// voz da navegação: avisa ao entrar num trecho e de novo em cima da virada
+function navVoice(n,s,d){if(!VOICE.on)return;const k=n.steps.indexOf(s),ins=t(NAVKEY[s.mod]||'nav_st');
+ if(d<=22){if(n.vNow!==k){n.vNow=k;n.vFar=k;sayQ([ins.charAt(0).toUpperCase()+ins.slice(1)])}}
+ else if(d>35&&n.vFar!==k){n.vFar=k;sayQ([t('voiceIn',Math.max(10,Math.round(d/10)*10),ins)])}}
+function toggleVoice(){VOICE.on=!VOICE.on;store.set('voice',VOICE.on);if(NAV){NAV.vFar=NAV.vNow=null}if(VOICE.on)sayQ([t('voiceOn')],true);else sayStop();toast((VOICE.on?'🔊 ':'🔇 ')+t(VOICE.on?'voiceOn':'voiceOff'),1600);if(NAV)setTimeout(navTick,VOICE.on?1400:0)}
+/* ============ preparar para a viagem: baixar tudo e instalar ============ */
+let _bip=null,TRIPP=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_bip=e;tripUI()});window.addEventListener('appinstalled',()=>{_bip=null;tripUI()});
+const UA=navigator.userAgent||'',IS_IOS=/iPad|iPhone|iPod/.test(UA)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),
+ IN_APP=!NATIVE&&/Instagram|FBAN|FBAV|FB_IAB|Line\/|Twitter|Reddit|Snapchat|TikTok|musical_ly|; wv\)/i.test(UA);
+const isStandalone=()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}};
+function tileList(tpl){const t2x=(lon,z)=>Math.floor((lon+180)/360*2**z),t2y=(lat,z)=>{const r=lat*toR;return Math.floor((1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*2**z)};
+ const urls=[];const box=(w,s,e,n,z0,z1)=>{for(let z=z0;z<=z1;z++)for(let x=t2x(w,z);x<=t2x(e,z);x++)for(let y=t2y(n,z);y<=t2y(s,z);y++)urls.push(tpl.replace('{z}',z).replace('{x}',x).replace('{y}',y))};
+ box(17.94,42.60,18.17,42.73,9,12);box(18.07,42.615,18.15,42.665,13,14);box(17.96,42.704,17.99,42.721,13,14);return urls}
+async function offlineDownload(onp){try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+ const urls=new Set();if(!NATIVE)['./','index.html','manifest.webmanifest','lib/maplibre-gl.js','lib/maplibre-gl.css','icon-192.png'].forEach(u=>urls.add(new URL(u,location.origin+location.pathname).href));
+ try{const st=await (await fetch(RM_STYLE)).json();urls.add(RM_STYLE);const sid=st.sources.openmaptiles?'openmaptiles':Object.keys(st.sources).find(k=>st.sources[k].type==='vector');let src=st.sources[sid];
+  if(src&&!src.tiles&&src.url){urls.add(src.url);src=await (await fetch(src.url)).json()}
+  if(src&&src.tiles)tileList(src.tiles[0]).forEach(u=>urls.add(u));
+  if(st.glyphs){const fs=new Set();st.layers.forEach(l=>{const f=l.layout&&l.layout['text-font'];if(Array.isArray(f)&&typeof f[0]==='string')fs.add(f.join(','))});
+   fs.forEach(f=>['0-255','256-511','8192-8447'].forEach(r=>urls.add(st.glyphs.replace('{fontstack}',f).replace('{range}',r))))}
+  (typeof st.sprite==='string'?[st.sprite]:(st.sprite||[]).map(x=>x.url)).forEach(s=>['.json','.png','@2x.json','@2x.png'].forEach(x=>urls.add(s+x)))}catch(e){}
+ const list=[...urls];let i=0,ok=0,done=0;
+ const w=async()=>{while(i<list.length){const u=list[i++];try{const r=await fetch(u);if(r.ok)ok++}catch(e){}done++;onp&&onp(done,list.length)}};
+ await Promise.all([w(),w(),w(),w(),w()]);try{await loadRoutes()}catch(e){}
+ const cached=!('serviceWorker' in navigator)?false:!!navigator.serviceWorker.controller;
+ const good=list.length>12&&ok>=list.length*0.9&&cached;if(good){store.set('offlineAt',Date.now());store.set('tilesWarm',Date.now())}return good}
+function tripUI(){const el=$('#tripCard');if(!el)return;const at=store.get('offlineAt',0),pct=TRIPP,st=isStandalone(),iosFirst=IS_IOS&&!st&&!IN_APP&&!NATIVE;let s2='';
+ if(NATIVE)s2='';
+ else if(st)s2=`<div class="tripok">✓ ${t('tripInstalled')}</div>`;
+ else if(IN_APP)s2=`<div class="small" style="color:var(--crimson);font-weight:600">${t('tripInApp')}</div><button class="btn sm" id="tripCopy" style="margin-top:6px">🔗 ${t('tripCopy')}</button>`;
+ else if(IS_IOS)s2=`<div class="small">${t('tripIOS')}</div><div class="small muted" style="margin-top:4px">${t('tripIOSNote')}</div>`;
+ else if(_bip)s2=`<button class="btn" id="tripInst">📲 ${t('tripInstallBtn')}</button>`;
+ else s2=`<div class="small">${t('tripAndroid')}</div>`;
+ if(s2&&!st)s2=`<div style="font-weight:700;margin-bottom:4px">${t('tripInstallT')}</div>`+s2;
+ const dl=pct!=null?`<div class="prog"><i style="width:${pct}%"></i></div><div class="small muted" style="margin-top:4px">${t('tripDling',pct)}</div>`:`${at?`<div class="tripok">✓ ${t('tripDone',new Date(at).toLocaleDateString(LOCALE[LANG]))}</div>`:''}<button class="btn ${at?'sm':'gold'}" id="tripDl" style="${at?'margin-top:6px':'width:100%'}">⬇️ ${t(at?'tripAgain':'tripDl')}</button>`;
+ el.innerHTML=`<h2>✈️ ${t('tripTitle')}</h2><p class="small muted" style="margin-top:0">${t('tripP')}</p>`+(iosFirst||IN_APP?[s2,dl]:[dl,s2]).filter(Boolean).map((s,i)=>`<div class="tripstep"><b>${i+1}</b><div style="flex:1;min-width:0">${s}</div></div>`).join('');
+ const d=$('#tripDl');if(d)d.onclick=async()=>{if(!navigator.onLine){toast(t('tripFail'),3500);return}TRIPP=0;tripUI();let last=0;
+  const ok=await offlineDownload((a,n)=>{const p=Math.min(99,Math.round(a/n*100));if(p!==last){last=p;TRIPP=p;tripUI()}});TRIPP=null;tripUI();toast(ok?'✓ '+t('tripDone',new Date().toLocaleDateString(LOCALE[LANG])):t('tripFail'),4200)};
+ const c=$('#tripCopy');if(c)c.onclick=()=>{const u=HOSTED_URL+'?lang='+LANG;try{navigator.clipboard.writeText(u).then(()=>toast('🔗 '+t('linkCopied')),()=>toast(u))}catch(e){toast(u)}};
+ const ib=$('#tripInst');if(ib)ib.onclick=async()=>{try{_bip.prompt();await _bip.userChoice}catch(e){}_bip=null;tripUI()}}
+/* ============ cartão de conquista ============ */
+async function makeConquest(){try{await document.fonts.load('900 60px Cinzel');await document.fonts.load('700 30px Inter')}catch(e){}
+ const ld=u=>new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=u});
+ const all=(await DB.all()).sort((a,b)=>b.ts-a.ts),done=new Set(all.map(o=>o.ph)),mis=PH.filter(p=>done.has(p.id)).length,qb=store.get('quizBest',null);
+ const W=1080,H=1350,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+ const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,'#3a1010');g.addColorStop(.55,'#1c0b08');g.addColorStop(1,'#120806');x.fillStyle=g;x.fillRect(0,0,W,H);
+ x.strokeStyle='#d6ae45';x.lineWidth=5;x.strokeRect(28,28,W-56,H-56);x.lineWidth=1.5;x.strokeRect(42,42,W-84,H-84);
+ x.textAlign='center';x.fillStyle='#d6ae45';x.font='700 30px Inter, sans-serif';x.fillText(t('cqHead').toUpperCase().split('').join(' '),W/2,124,W-160);
+ x.fillStyle='#fff6e2';x.font='900 84px Cinzel, serif';x.fillText(t('brandTitle').toUpperCase(),W/2,222,W-150);
+ x.fillStyle='#e9dcc2';x.font='600 32px Inter, sans-serif';x.fillText('Dubrovnik · '+new Date().getFullYear(),W/2,276);
+ x.fillStyle='#e3b55a';x.font='900 190px Cinzel, serif';x.fillText(S.visited.size+'/'+L.length,W/2,470);
+ x.fillStyle='#fff6e2';x.font='700 36px Inter, sans-serif';x.fillText(t('cqPlaces'),W/2,530,W-160);
+ const stats=[[mis+'/'+PH.length,t('cqMissions')],[String(all.length),t('cqPhotos')]];if(qb!=null)stats.push([qb+'/'+QUIZ.length,t('cqQuiz')]);
+ const sw=(W-160)/stats.length;stats.forEach((s,i)=>{const cx=80+sw*i+sw/2;x.fillStyle='#e3b55a';x.font='900 58px Cinzel, serif';x.fillText(s[0],cx,640);x.fillStyle='#cdb68a';x.font='600 26px Inter, sans-serif';x.fillText(s[1],cx,680,sw-20)});
+ const top=724,bh=H-top-150,pics=all.slice(0,6);
+ if(pics.length){const cols=pics.length<=1?1:pics.length<=4?2:3,rows=Math.ceil(pics.length/cols),gap=14,cw=(W-160-gap*(cols-1))/cols,ch=(bh-gap*(rows-1))/rows;
+  for(let i=0;i<pics.length;i++){try{const im=await ld(urlOf(pics[i])),X=80+(i%cols)*(cw+gap),Y=top+Math.floor(i/cols)*(ch+gap),k=Math.max(cw/im.width,ch/im.height),a=cw/k,b=ch/k;x.drawImage(im,(im.width-a)/2,(im.height-b)/2,a,b,X,Y,cw,ch);x.strokeStyle='#d6ae45';x.lineWidth=3;x.strokeRect(X,Y,cw,ch)}catch(e){}}}
+ else{const names=L.filter(l=>S.visited.has(l.id)).map(l=>l.name.replace(/ \(.*\)/,''));x.font='600 30px Inter, sans-serif';
+  if(!names.length){x.fillStyle='#cdb68a';x.fillText(t('cqEmpty'),W/2,top+bh/2,W-200)}
+  else{x.fillStyle='#f3e6c4';const show=names.slice(0,14),per=Math.ceil(show.length/2);show.forEach((nm,i)=>x.fillText('✓ '+nm,W/4+30+Math.floor(i/per)*(W/2-60),top+56+(i%per)*58,W/2-110));if(names.length>14){x.fillStyle='#cdb68a';x.fillText('+'+(names.length-14),W/2,top+56+per*58)}}}
+ const rank=qb==null?'':(qb>=9?t('rank1'):qb>=6?t('rank2'):qb>=3?t('rank3'):t('rank4'));
+ if(rank){x.fillStyle='#e3b55a';x.font='700 32px Inter, sans-serif';x.fillText(rank,W/2,H-112,W-160)}
+ x.fillStyle='#cdb68a';x.font='600 26px Inter, sans-serif';x.fillText(HOSTED_URL.replace('https://','').replace(/\/$/,''),W/2,H-66);
+ return new Promise(res=>c.toBlob(res,'image/jpeg',.92))}
+async function openConquest(){let b;try{b=await makeConquest()}catch(e){toast(t('badImage'));return}const u=URL.createObjectURL(b);
+ modal(`<h2 style="font-size:18px">📜 ${t('cqBtn')}</h2><img src="${u}" alt="" style="width:100%;border-radius:12px;margin:10px 0;display:block"><button class="btn gold" id="cqSave" style="width:100%">💾 ${t('cqSave')}</button><p class="small muted" style="margin:8px 0 0">${t('holdToSave')}</p>`);
+ $('#cqSave').onclick=()=>saveBlob(b,'kings-landing-conquest.jpg')}
 function navAhead(m){const n=NAV;if(!n)return null;const tgt=Math.min(n.tot,(n.along||0)+m);for(let i=(n.seg||0);i<n.cum.length-1;i++){if(n.cum[i+1]>=tgt){const u=(tgt-n.cum[i])/((n.cum[i+1]-n.cum[i])||1);return {lat:n.line[i][1]+u*(n.line[i+1][1]-n.line[i][1]),lon:n.line[i][0]+u*(n.line[i+1][0]-n.line[i][0])}}}const q=n.line[n.line.length-1];return {lat:q[1],lon:q[0]}}
 function arNavDraw(proj,W,H){const el=$('#arNav');if(!el)return;if(!NAV||!CAM.ar||!S.pos||!headOK()){el.style.display='none';return}
  const a=NAV.real?navAhead(22):LBY[NAV.id],b=bearing(S.pos,a),r=angDiff(b,S.heading),pp=proj(b,-14);const txt=($('#navBar .navmain b')||{}).textContent||'';
@@ -2466,7 +2560,7 @@ window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h&&h
 
 /* ============ sheet de detalhes ============ */
 function openSheet(html){$('#sheetBody').innerHTML=html;$('#sheetBody').scrollTop=0;$('#sheet').classList.add('open');$('#scrim').classList.add('on')}
-function closeSheet(){if(PLM){try{PLM.remove()}catch(e){}PLM=null}$('#sheet').classList.remove('open');$('#scrim').classList.remove('on');if(S.sel){S.sel=null;drawMarkers()}}
+function closeSheet(){stopListen();if(PLM){try{PLM.remove()}catch(e){}PLM=null}$('#sheet').classList.remove('open');$('#scrim').classList.remove('on');if(S.sel){S.sel=null;drawMarkers()}}
 $('#scrim').onclick=closeSheet;
 (()=>{let y0=null,dy=0;const g=$('#grab'),sh=$('#sheet');g.addEventListener('pointerdown',e=>{y0=e.clientY;dy=0;sh.style.transition='none';try{g.setPointerCapture(e.pointerId)}catch(_){ }});
  g.addEventListener('pointermove',e=>{if(y0==null)return;dy=Math.max(0,e.clientY-y0);sh.style.transform=`translateY(${dy}px)`});
@@ -2475,7 +2569,7 @@ const gmaps=(lat,lon)=>`https://www.google.com/maps/dir/?api=1&destination=${lat
 const amaps=(lat,lon,n)=>`https://maps.apple.com/?daddr=${lat},${lon}&dirflg=w&q=${encodeURIComponent(n||'')}`;
 const epTag=s=>s[0]?t('epTag',s[0],s[1]):'★';
 function locMeta(l){if(!S.pos)return '';const d=dist(S.pos,l),b=bearing(S.pos,l);return `<span class="chip">${arrowSVG(b,14)} ${fmtD(d)} · ${card(b)}</span><span class="chip">🚶 ~${walk(d)} min</span>`}
-function openLoc(id){const l=LBY[id];if(!l)return;S.sel=id;drawMarkers();
+function openLoc(id){const l=LBY[id];if(!l)return;if(VOICE.listen&&VOICE.listen!==id)stopListen();S.sel=id;drawMarkers();
  if(cur==='mapa'&&id!=='trsteno')centerOn(l.lat,l.lon,Math.max(MAP.s,1.1));
  const v=S.visited.has(id);const phs=PH.filter(p=>p.loc===id);
  const seasons=[...new Set(l.scenes.filter(s=>s[0]).map(s=>s[0]))].sort((a,b)=>a-b);
@@ -2489,6 +2583,7 @@ function openLoc(id){const l=LBY[id];if(!l)return;S.sel=id;drawMarkers();
   <button onclick="setTarget('${id}')">${IC.comp}${t('tabCompass')}</button>
   <button class="${v?'on':''}" onclick="toggleVisit('${id}')">${IC.check}${v?t('visited'):t('iVisited')}</button>
  </div>
+ <div class="row" style="margin-top:6px">${VOICE.can?`<button class="btn sm" id="listenB" style="flex:1" onclick="listenLoc('${id}')">${VOICE.listen===id?'⏹ '+t('stopListen'):'🔊 '+t('listen')}</button>`:''}<button class="btn sm" style="flex:1" onclick="shareLoc('${id}')">📤 ${t('shareLocBtn')}</button></div>
  ${id==='jesuit'?`<button class="btn sm red" style="width:100%;margin-top:6px" onclick="shameBell()">🔔 ${t('bellBtn')}</button>`:''}
  <h3 class="serif" style="font-size:15px;margin:14px 0 4px">${t('inShow')}</h3>
  ${l.scenes.map(s=>`<div class="scene"><span class="ep ${s[0]?'':'n'}">${epTag(s)}</span><div class="spoil" onclick="this.classList.add('rev')">${s[0]?`<em>“${esc(s[2])}”</em><br>`:''}${esc(s[3])}${s[0]?`<div class="scl" onclick="event.stopPropagation()"><a href="${sceneImg(l,s)}" target="_blank" rel="noopener">🎬 ${t('seeTake')}</a><a href="${sceneVid(l,s)}" target="_blank" rel="noopener">▶ ${t('seeClip')}</a></div>`:''}</div></div>`).join('')}
@@ -2499,12 +2594,13 @@ function openLoc(id){const l=LBY[id];if(!l)return;S.sel=id;drawMarkers();
  <div class="sep"></div>
  <div class="row"><button class="btn sm" onclick="copyCoords(${l.lat},${l.lon})">${i16(IC.copy)} ${l.lat.toFixed(5)}, ${l.lon.toFixed(5)}</button>
  <button class="btn sm" onclick="setManualPos(LBY['${id}'],LBY['${id}'].name)">${i16(IC.pin)} ${t('iAmHere')}</button>
+ <a class="btn sm" href="${reportURL(id)}" target="_blank" rel="noopener">⚠️ ${t('reportBtn')}</a>
  ${cur!=='mapa'?`<button class="btn sm" onclick="closeSheet();go('mapa');setTimeout(()=>openLoc('${id}'),60)">${i16(IC.map)} ${t('seeOnMap')}</button>`:''}</div>`)}
 // sino sintetizado (sem áudio externo) + “Vergonha!” na voz do aparelho, no idioma escolhido
 let actx=null;function shameBell(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.resume)actx.resume();const t0b=actx.currentTime;
  for(let k=0;k<2;k++)[1,2.76,5.40,8.93].forEach((m,i)=>{const o=actx.createOscillator(),g=actx.createGain(),t0=t0b+k*1.1;o.type='sine';o.frequency.value=470*m;
   g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(0.32/(i+1),t0+0.008);g.gain.exponentialRampToValueAtTime(0.0001,t0+2.2/(1+i*0.7));o.connect(g);g.connect(actx.destination);o.start(t0);o.stop(t0+2.4)})}catch(e){}
- setTimeout(()=>{try{const u=new SpeechSynthesisUtterance(t('shame'));u.lang=LOCALE[LANG];u.rate=0.75;u.pitch=0.6;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}},420);toast('🔔 '+t('shame')+' '+t('shame'),1800)}
+ setTimeout(()=>{if(NATIVE){sayQ([t('shame')],true);return}try{const u=new SpeechSynthesisUtterance(t('shame'));u.lang=LOCALE[LANG];u.rate=0.75;u.pitch=0.6;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}},420);toast('🔔 '+t('shame')+' '+t('shame'),1800)}
 function copyCoords(a,b){const s=a.toFixed(6)+', '+b.toFixed(6);try{navigator.clipboard.writeText(s).then(()=>toast(t('coordsCopied')),()=>toast(s))}catch(e){toast(s)}}
 function toggleVisit(id){if(S.visited.has(id))S.visited.delete(id);else{S.visited.add(id);toast(t('conquered',LBY[id].name,S.visited.size,L.length))}store.set('visited',[...S.visited]);drawMarkers();if(cur==='locais')renderList();openLoc(id)}
 function setTarget(id){S.target=id;store.set('target',id);closeSheet();go('bussola')}
@@ -2514,7 +2610,7 @@ function renderList(){const el=$('#v-locais');let items=L.slice();
  if(S.filter!=='all'&&S.filter!=='todo')items=items.filter(l=>l.cat===S.filter);if(S.filter==='todo')items=items.filter(l=>!S.visited.has(l.id));
  if(S.pos)items.sort((a,b)=>dist(S.pos,a)-dist(S.pos,b));
  const pct=Math.round(S.visited.size/L.length*100);
- el.innerHTML=`<div class="wrap" style="padding-bottom:0"><div class="card" style="margin-bottom:4px"><div style="display:flex;justify-content:space-between;align-items:baseline"><h2 style="font-size:16px">${t('conquest')}</h2><b>${S.visited.size}/${L.length}</b></div><div class="prog" style="margin-top:8px"><i style="width:${pct}%"></i></div><div class="small muted" style="margin-top:6px">${S.pos?t('sortedNear'):t('setPosHint')}</div></div></div>
+ el.innerHTML=`<div class="wrap" style="padding-bottom:0"><div class="card" style="margin-bottom:4px"><div style="display:flex;justify-content:space-between;align-items:baseline"><h2 style="font-size:16px">${t('conquest')}</h2><b>${S.visited.size}/${L.length}</b></div><div class="prog" style="margin-top:8px"><i style="width:${pct}%"></i></div><div class="small muted" style="margin-top:6px;display:flex;gap:8px;align-items:baseline"><span style="flex:1;min-width:0">${S.pos?t('sortedNear'):t('setPosHint')}</span><button class="lnk" onclick="openConquest()">📜 ${t('cqBtn')}</button></div></div></div>
  <div class="seg">${[['all',t('fAll')],['cidade',t('catS_cidade')],['muralhas',t('catS_muralhas')],['arredores',t('catS_arredores')],['excursao',t('catS_excursao')],['todo',t('fTodo')]].map(([k,v])=>`<button class="${S.filter===k?'on':''}" data-f="${k}">${v}</button>`).join('')}</div>
  ${items.map(l=>{const d=S.pos?dist(S.pos,l):null,b=S.pos?bearing(S.pos,l):0;const seasons=[...new Set(l.scenes.filter(s=>s[0]).map(s=>s[0]))];
   return `<div class="loc ${S.visited.has(l.id)?'done':''}" data-id="${l.id}"><span class="badge" style="background:var(--c-${l.cat})">${l.n}</span><div class="info"><div class="nm">${esc(l.name)}</div><div class="al">${esc(l.got)}</div><div class="meta">${seasons.map(s=>`<span class="chip s" style="height:22px;font-size:11px">${t('sAbbr')}${s}</span>`).join('')}${PH.some(p=>p.loc===l.id)?`<span class="chip" style="height:22px;font-size:11px">📷 ${t('photoChip')}</span>`:''}</div></div>${d!=null?`<div class="dist">${arrowSVG(b,20)}${fmtD(d)}<br><span style="font-weight:600">${walk(d)} min</span></div>`:''}</div>`}).join('')}`;
@@ -2842,6 +2938,7 @@ function renderMais(){const el=$('#v-mais');const m=zMonth();const low=[11,12,1,
  const tk=[['tk1','€40'],['tk2','€15'],['tk3','€40'],['tk4','€15'],['tk5','€15'],['tk6','€20'],['tk7','€30'],['tk8','€27–30'],['tk9','€10'],['tk10',t('free')]];
  el.innerHTML=`<div class="wrap">
  <div class="card" style="background:linear-gradient(135deg,var(--paper),var(--paper2));border-color:var(--gold2)"><div style="display:flex;gap:12px;align-items:center"><div style="font-size:30px">🗺️</div><div style="flex:1"><h2 style="font-size:16px;margin:0">${t('shareCardT')}</h2><div class="small muted">${t('shareCardP')}</div></div></div><div class="row" style="margin-top:10px"><button class="btn gold" id="shareBtn" style="flex:1">📤 ${t('shareBtn')}</button><button class="btn" id="langBtn2">🌐 ${LANGS[LANG]}</button></div></div>
+ ${FRAMED?'':'<div class="card" id="tripCard"></div>'}
  <div class="card"><h2>${t('routes')}</h2><p class="small muted" style="margin-top:0">${t('routesHint')}</p>
  ${ROUTES.map(r=>`<details ${r.id==='vergonha'?'open':''}><summary>${esc(r.name)} <span class="chip" style="margin-left:auto;margin-right:8px">${esc(r.time)}</span></summary><p class="small" style="margin:4px 0 8px">${esc(r.desc)}</p>${routeStops(r)}<div class="row" style="margin-top:8px"><button class="btn gold sm" onclick="guide('${r.id}',0)">▶ ${t('guidedMode')}</button><button class="btn sm" onclick="showRoute('${r.id}')">🗺️ ${t('seeOnMap')}</button></div></details>`).join('')}</div>
  <div class="card"><h2>${t('ticketsTitle')}</h2>
@@ -2854,7 +2951,7 @@ function renderMais(){const el=$('#v-mais');const m=zMonth();const low=[11,12,1,
  <div class="card" id="quizCard"></div>
  <div class="card"><h2>${t('settings')}</h2><div class="row" style="margin-top:8px"><button class="btn sm gold" id="tourBtn">🎓 ${t('replayTour')}</button><button class="btn sm" id="langBtn">🌐 ${t('language')}: ${LANGS[LANG]}</button><button class="btn sm" id="themeBtn2">🌓 ${t('theme')}: ${t('theme_'+S.theme)}</button>${FRAMED?'':`<button class="btn sm" id="mapBtn">🗺️ ${t('mapMode')}: ${store.get('mapMode','real')==='drawn'?t('mapDrawn'):t('mapReal')}</button>`}<button class="btn sm" id="simBtn">🧪 ${t('simTitle')}: ${S.sim?t('onW'):t('offW')}</button><button class="btn sm" id="spBtn">${S.spoil?'🙈':'👀'} ${t('noSpoilers')}: ${S.spoil?t('onW'):t('offW')}</button><button class="btn sm" id="rsBtn">${t('resetConq')}</button></div></div>
  <div class="card" id="ajuda"><h2>${t('helpTitle')}</h2><ul class="clean small">${FRAMED?`<li>${t('helpFramed',`<a href="${HOSTED_URL}?lang=${LANG}" target="_blank" rel="noopener">${HOSTED_URL}</a>`)}</li>`:''}${t('helpHTML')}</ul></div>
- <div class="card"><h2>${t('aboutTitle')}</h2><p class="small" style="margin-top:0">${t('aboutP')}</p><p class="small muted">${t('sourcesP')} · v6</p></div>
+ <div class="card"><h2>${t('aboutTitle')}</h2><p class="small" style="margin-top:0">${t('aboutP')}</p><p class="small muted">${t('sourcesP')} · v7</p><p class="small" style="margin-bottom:0">${t('reportAbout')} <a href="${reportURL(null)}" target="_blank" rel="noopener">${t('reportBtn')} ↗</a></p></div>
  </div>`;
  $('#shareBtn').onclick=shareApp;{const mb=$('#mapBtn');if(mb)mb.onclick=()=>{setMapMode(store.get('mapMode','real')==='drawn'?'real':'drawn');renderMais();toast('🗺️ '+t('mapMode')+': '+(store.get('mapMode','real')==='drawn'?t('mapDrawn'):t('mapReal')))}}$('#langBtn').onclick=openLangModal;$('#langBtn2').onclick=openLangModal;
  $('#tourBtn').onclick=()=>{go('mapa');setTimeout(()=>startTour(0),120)};
@@ -2862,7 +2959,7 @@ function renderMais(){const el=$('#v-mais');const m=zMonth();const low=[11,12,1,
  $('#simBtn').onclick=()=>{const on=!S.sim;go('mapa');setSim(on,'pile');if(on)setTimeout(()=>centerOn(LBY.pile.lat,LBY.pile.lon,1.4,true),80)};
  $('#spBtn').onclick=()=>{S.spoil=!S.spoil;store.set('nospoil',S.spoil);document.body.classList.toggle('nospoil',S.spoil);renderMais()};
  $('#rsBtn').onclick=()=>{S.visited=new Set();store.set('visited',[]);drawMarkers();toast(t('conqReset'))};
- renderQuiz()}
+ renderQuiz();tripUI()}
 function routeStops(r){let h='';let tot=0,real=true;r.stops.forEach((id,i)=>{const l=LBY[id];if(i>0){const w=legDist(r,i),d=w!=null?w:dist(LBY[r.stops[i-1]],l);if(w==null)real=false;tot+=d;h+=`<div class="leg">↓ ${t(w!=null?'legWalk':'legLine',fmtD(d),walk(d))}</div>`}
   h+=`<div class="stop" onclick="openLoc('${id}')"><span class="badge" style="background:var(--c-${l.cat});width:28px">${l.n}</span><div><b>${esc(l.name)}</b><div class="small" style="color:var(--gold);font-style:italic">${esc(l.got)}</div></div></div>`});
  return h+`<div class="small muted" style="margin-top:4px">${t(real?'totalWalk':'totalLine',fmtD(tot))}</div>`}
@@ -2887,7 +2984,7 @@ function guideArrive(rid,i){const r=ROUTES.find(x=>x.id===rid);const id=r.stops[
  if(S.posSrc!=='gps')setManualPos(LBY[id],LBY[id].name,true);
  if(r.stops[i+1])guide(rid,i+1);else{S.guiding=false;keepAwake(false);closeSheet();toast('🏆 '+t('routeDone',esc(r.name)),4000)}}
 function renderQuiz(){const el=$('#quizCard');if(!el)return;if(!quizState){el.innerHTML=`<h2>${t('quizTitle')}</h2><p class="small muted" style="margin-top:0">${t('quizP',QUIZ.length)}</p><button class="btn gold" id="qStart">⚔️ ${t('start')}</button>`;$('#qStart').onclick=()=>{quizState={i:0,ok:0};renderQuiz()};return}
- const q=QUIZ[quizState.i];if(quizState.i>=QUIZ.length||!q){const sc=quizState.ok;const title=sc>=9?t('rank1'):sc>=6?t('rank2'):sc>=3?t('rank3'):t('rank4');
+ const q=QUIZ[quizState.i];if(quizState.i>=QUIZ.length||!q){const sc=quizState.ok;store.set('quizBest',Math.max(sc,store.get('quizBest',0)));const title=sc>=9?t('rank1'):sc>=6?t('rank2'):sc>=3?t('rank3'):t('rank4');
   el.innerHTML=`<h2>${t('result')}</h2><div class="cbig" style="margin:10px 0">${sc}/${QUIZ.length}</div><p style="text-align:center;margin:0">${title}</p><div style="text-align:center;margin-top:10px"><button class="btn gold" id="qAgain">${t('playAgain')}</button></div>`;$('#qAgain').onclick=()=>{quizState={i:0,ok:0};renderQuiz()};return}
  el.innerHTML=`<div style="display:flex;justify-content:space-between"><h2 style="font-size:16px">${t('questionN',quizState.i+1,QUIZ.length)}</h2><span class="chip">${t('hits',quizState.ok)}</span></div><p style="font-weight:600">${esc(q[0])}</p>${q[1].map((o,i)=>`<button class="qopt" data-i="${i}">${esc(o)}</button>`).join('')}<div id="qExp" class="small" style="margin-top:6px"></div>`;
  $$('.qopt',el).forEach(b=>b.onclick=()=>{if(quizState.ans!=null)return;const i=+b.dataset.i;quizState.ans=i;if(i===q[2])quizState.ok++;
@@ -2971,14 +3068,16 @@ fitBrand();
 window.addEventListener('resize',()=>{if(cur==='mapa')resizeMap()});
 updatePosUI();
 const initV=(location.hash||'').slice(1);
+const qLoc=(()=>{try{const q=new URLSearchParams(location.search).get('loc');return q&&LBY[q]?q:null}catch(e){return null}})();
 go(VIEWS.includes(initV)?initV:'mapa');
 requestAnimationFrame(()=>{resizeMap();fitOld()});
 // primeira visita: tutorial (o GPS é pedido no fim dele). Depois: GPS liga sozinho.
-if(!store.get('toured',false))setTimeout(()=>startTour(0),650);
+if(qLoc){setTimeout(()=>openLoc(qLoc),900);if(!FRAMED&&store.get('toured',false))setTimeout(()=>startGPS(false),600)}
+else if(!store.get('toured',false))setTimeout(()=>startTour(0),650);
 else if(!FRAMED)setTimeout(()=>startGPS(false),600);
 // app offline (só no site; dentro do Claude não há service worker)
-if(!FRAMED&&!window.Capacitor&&'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))
- window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})});
+if(!FRAMED&&'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))
+ window.addEventListener('load',()=>{try{navigator.serviceWorker.register(window.Capacitor?'sw.js?native=1':'sw.js').catch(()=>{})}catch(e){}});
 </script>
 </body>
 </html>

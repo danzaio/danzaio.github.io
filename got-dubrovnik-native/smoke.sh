@@ -18,10 +18,14 @@ tap 170 665 6          # "Skip tutorial"
 adb emu geo fix 18.10905 42.64112; sleep 10
 shot 2_map_gps
 tap 300 955 5; shot 3_places      # Places tab
-tap 400 330 6; shot 4_place_sheet # first place in the list
+tap 400 360 6; shot 4_place_sheet # first place in the list
 tap 500 340 12; shot 5_walk_nav   # "Walk there" button (y 0.32-0.36; 0.39 hit the Maps links and opened Chrome)
 tap 700 955 5; shot 6_photos      # Photos tab
 tap 900 955 5; shot 7_more        # More tab
+# second launch: the map now goes through the service worker (offline tile cache); it must still open
+adb shell am force-stop $P; sleep 2
+adb shell am start -n $P/.MainActivity; sleep 25
+shot 8_relaunch
 adb shell dumpsys activity exit-info $P | head -40 >> shots/emu_log.txt
 adb logcat -d -b crash | tail -60 >> shots/emu_log.txt
 adb logcat -d | grep -iE "FATAL|Process: $P|Capacitor|ArNav|render process|RenderProcessGone|chromium|cr_|libc  *: Fatal|DEBUG   :|lowmemory|am_kill|Killing .*gotdubrovnik" | grep -v "Expected value to be of type number" | tail -120 >> shots/emu_log.txt
