@@ -309,8 +309,52 @@ export function initWorkStage(root, scrollTo) {
   const urlEl = $("[data-wk-url]", stage);
   const nEl = $("[data-wk-n]", stage);
   const meter = $$(".wk-meter i", stage);
+  const sets = $$("[data-wk-notes]", stage).map((s) => $$("[data-wk-note]", s));
+  const stackEl = $("[data-wk-stack]", stage);
+  // labels keep inside the picture: long ones (PT, phones) get nudged back in from whichever edge they cross
+  const view = $(".wk-view", stage);
+  const fit = () => {
+    const vr = view.getBoundingClientRect();
+    if (!vr.width) return;
+    const pad = vr.width * 0.02;
+    sets.flat().forEach((el) => {
+      const s = el.lastElementChild;
+      s.style.removeProperty("--nx");
+      s.style.removeProperty("--ny");
+      const r = s.getBoundingClientRect();
+      const nx = r.right > vr.right - pad ? vr.right - pad - r.right : r.left < vr.left + pad ? vr.left + pad - r.left : 0;
+      const ny = r.bottom > vr.bottom - pad ? vr.bottom - pad - r.bottom : r.top < vr.top + pad ? vr.top + pad - r.top : 0;
+      if (nx) s.style.setProperty("--nx", `${nx.toFixed(1)}px`);
+      if (ny) s.style.setProperty("--ny", `${ny.toFixed(1)}px`);
+    });
+  };
+  new ResizeObserver(fit).observe(view);
+  document.fonts?.ready.then(fit);
   let st = null;
   let cur = 0;
+  let enter = 1;
+  let lastT = -1;
+  const lastA = new Map();
+  const setA = (el, v) => {
+    const r = Math.round(v * 100) / 100;
+    if (lastA.get(el) === r) return;
+    lastA.set(el, r);
+    el.style.setProperty("--a", r);
+  };
+  // a project's callouts draw while the stage holds on it and retract before the wipe; the stack types alongside
+  const settle = (f, k) => clamp((0.3 - Math.abs(f - k)) / 0.15, 0, 1) * (k === 0 ? enter : 1);
+  function notes(f) {
+    sets.forEach((set, k) => {
+      const s = settle(f, k);
+      set.forEach((el, j) => setA(el, clamp(s * 1.8 - j * 0.4, 0, 1)));
+    });
+    const len = stackEl.textContent.length || 1;
+    const t = Math.round(clamp(settle(f, cur) * 1.6 - 0.2, 0, 1) * len) / len;
+    if (t !== lastT) {
+      lastT = t;
+      stackEl.style.setProperty("--t", t);
+    }
+  }
 
   // pinned on every width (phones stack the stage above the project); textures load once the section gets near
   let eng = createWipe($("[data-wk-gl]", stage), items);
@@ -333,6 +377,8 @@ export function initWorkStage(root, scrollTo) {
     rows.forEach((r, k) => r.classList.toggle("on", k === i));
     nEl.textContent = String(i + 1).padStart(2, "0");
     scramble(urlEl, items[i].url, 0.5);
+    stackEl.textContent = items[i].stack;
+    lastT = -1;
     if (!eng?.live) img.src = "/assets/site/img/" + items[i].img;
   };
   // progress 0..1 -> f 0..n-1, with a little extra hold on the first and last project
@@ -345,8 +391,23 @@ export function initWorkStage(root, scrollTo) {
     eng?.live && eng.set(a, a + 1, p);
     meter.forEach((m, k) => m.style.setProperty("--f", clamp(f - k + 1, 0, 1).toFixed(3)));
     activate(p > 0.5 ? a + 1 : a);
+    notes(f);
   }
   st = ScrollTrigger.create({ trigger: track, start: "top top", end: "bottom bottom", onUpdate: update, onRefresh: update });
+  // the first project's callouts draw while the stage is still coming up
+  ScrollTrigger.create({
+    trigger: track,
+    start: "top bottom",
+    end: "top top",
+    onUpdate(self) {
+      enter = clamp((self.progress - 0.4) / 0.5, 0, 1);
+      notes(st ? fOf(st.progress) : 0); // repaint here too: on a fast scroll this can fire after the stage's own update
+    },
+    onRefresh(self) {
+      enter = clamp((self.progress - 0.4) / 0.5, 0, 1);
+      notes(st ? fOf(st.progress) : 0);
+    },
+  });
 
   // a row click (or keyboard focus inside a row) scrolls to that project's hold position
   const go = (i) => {

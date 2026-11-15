@@ -54,6 +54,7 @@ function top(c) {
     <div class="progress" aria-hidden="true"><i data-progress></i></div>
   </header>
   <nav class="dock" data-dock aria-label="Sections">${c.nav.map((n, i) => `<a href="${n.href}" data-nav aria-label="${esc(n.label)}"><b>${pad(i + 1)}</b><span>${esc(n.label)}</span></a>`).join("")}<a class="dock-go" href="#contact" data-nav aria-label="${esc(c.contactLabel)}"><b>06</b><span>${esc(c.contactLabel)}</span>${I.ur}</a></nav>
+  <a class="to-top" href="#top" data-to-top aria-label="${esc(c.footer.top)}" data-cursor="TOP">${I.up}</a>
   <div class="mobile-menu" id="mobile-menu" data-mobile-menu hidden>
     <nav aria-label="Mobile">${links.map((n, i) => `<a href="${n.href}" data-mm-link><span class="mm-n">${pad(i + 1)}</span>${esc(n.label)}</a>`).join("")}</nav>
     <div class="mm-foot">
@@ -208,11 +209,25 @@ function work(c) {
     }`;
     return `<li class="wk${i === 0 ? " on" : ""}" data-wk-item="${i}">
       <div class="wk-row"><span class="wk-n">${pad(i + 1)}</span><h3 class="wk-title">${esc(t.title)}</h3><span class="wk-kick">${esc(t.kicker)}</span></div>
-      <div class="wk-more"><div class="wk-more-in"><p class="wk-text">${esc(t.text)}</p><dl class="why"><dt>${esc(c.ui.why.toUpperCase())}</dt><dd>${esc(t.why)}</dd></dl><div class="wk-links">${links}</div></div></div>
+      <div class="wk-more"><div class="wk-more-in"><p class="wk-text">${esc(t.text)}</p><dl class="why"><dt>${esc(c.ui.why.toUpperCase())}</dt><dd>${esc(t.why)}</dd><dt>${esc(w.stackK.toUpperCase())}</dt><dd class="why-stack">${esc(p.stack)}</dd></dl><div class="wk-links">${links}</div></div></div>
       <a class="wk-shot" href="${p.live || p.repo}" ${ext} data-cursor="${esc(c.ui.open)}" tabindex="-1"><span class="frame${p.tall ? " is-tall" : ""}"><span class="frame-bar"><i></i><i></i><i></i><span class="url">${esc(p.url)}</span></span><span class="frame-body"><img src="/assets/site/img/${p.img}" width="${p.imgW}" height="${p.imgH}" alt="${esc(t.title)} screenshot" loading="lazy" decoding="async"/></span></span></a>
     </li>`;
   }).join("");
   const p0 = PROJECTS[0];
+  // callouts drawn onto the stage: a pin on the screenshot, a leader, a label from the project's own copy.
+  // Anchors are % of the 16:10 view; the view is a container, so 1cqi = 1% of its width and 1% of its height = .625cqi.
+  const notes = PROJECTS.map((p, i) => {
+    const set = p.notes
+      .map(([x, y, lx, ly], j) => {
+        const dx = lx - x;
+        const dy = (ly - y) * 0.625;
+        const len = Math.hypot(dx, dy).toFixed(2);
+        const ang = ((Math.atan2(dy, dx) * 180) / Math.PI).toFixed(1);
+        return `<span class="wk-note${dx < 0 ? " is-l" : ""}" data-wk-note style="left:${x}%;top:${y}%;--dx:${dx.toFixed(2)}cqi;--dy:${dy.toFixed(2)}cqi;--len:${len}cqi;--ang:${ang}deg"><i></i><b></b><span>${esc(w.items[i].notes[j])}</span></span>`;
+      })
+      .join("");
+    return `<span class="wk-notes" data-wk-notes="${i}">${set}</span>`;
+  }).join("");
   return `<section id="work" class="plate work" aria-labelledby="work-title">
     <div class="shell">${slug(c, w.num, w.label)}${secHead(w.title, w.lead, "work-title")}</div>
     <div class="wk-track" data-wk>
@@ -220,7 +235,8 @@ function work(c) {
         <div class="wk-left"><ol class="wk-list">${items}</ol><p class="wk-hint" aria-hidden="true">${I.down}${esc(w.hint)}</p></div>
         <div class="wk-stage cm" data-wk-stage aria-hidden="true">
           <span class="frame-bar"><i></i><i></i><i></i><span class="url" data-wk-url>${esc(p0.url)}</span><span class="wk-count"><b data-wk-n>01</b> / ${total}</span></span>
-          <span class="wk-view"><img data-wk-img src="/assets/site/img/${p0.img}" width="${p0.imgW}" height="${p0.imgH}" alt="" loading="lazy" decoding="async"/><canvas class="wipe-gl" data-wk-gl></canvas></span>
+          <span class="wk-view"><img data-wk-img src="/assets/site/img/${p0.img}" width="${p0.imgW}" height="${p0.imgH}" alt="" loading="lazy" decoding="async"/><canvas class="wipe-gl" data-wk-gl></canvas>${notes}</span>
+          <span class="wk-stack"><b>${esc(w.stackK)}</b><span class="wk-stack-v" data-wk-stack>${esc(p0.stack)}</span></span>
           <span class="wk-meter">${PROJECTS.map(() => "<i></i>").join("")}</span>
         </div>
       </div>
@@ -295,13 +311,47 @@ const SWATCH = [
   ["orange", "#FF5D2C"],
   ["lilac", "#C6BBEF"],
 ];
+// the stack assembles: four layers land in their slots, the boot log types, proof closes it, then the console takes over
 function bench(c) {
   const s = c.system;
+  const v = s.scene;
+  const n = s.stack.length;
   const chips = s.chips.map((x) => `<button type="button" class="chip" data-chip="${esc(x)}">${esc(x)}</button>`).join("");
-  const stack = s.stack.map((x, i) => `<li><span class="n">${pad(i + 1)}</span><div><b>${esc(x.t)}</b><span>${esc(x.d)}</span></div></li>`).join("");
   const sw = SWATCH.map(([k, hex], i) => `<button type="button" class="swatch sw-${k}" data-swatch="${hex}" aria-label="${esc(s.swatchNames[i])} ${hex}"><i></i><span>${esc(s.swatchNames[i])}</span><small>${hex}</small></button>`).join("");
-  return `<section id="bench" class="plate bench shell" aria-labelledby="bench-title">
-    ${slug(c, s.num, s.label)}${secHead(s.title, s.lead, "bench-title")}
+  const beats = s.stack.map((x, i) => beat(i, n, v.kick, x.t, x.d, "")).join("");
+  const plates = s.stack
+    .map((x, i) => `<div class="wb-slot" style="--i:${i}"><div class="wb-plate" data-wb-plate><span class="wb-n">${pad(i + 1)}</span><b>${esc(x.t)}</b><span class="wb-chips">${v.chips[i].map((ch) => `<i data-wb-chip>${esc(ch)}</i>`).join("")}</span></div></div>`)
+    .join("");
+  const ticks = s.stack.map((x, i) => `<b style="--i:${i}" data-wb-tick>✓</b>`).join("");
+  const log = v.log.map((x) => `<span class="wb-ln" data-wb-ln><span>${esc(x)}</span><i></i><b>${esc(v.ok)}</b></span>`).join("");
+  return `<section id="bench" class="plate bench" aria-labelledby="bench-title">
+    <div class="scene-track" data-scene="bench" style="--beats:4.4">
+      <div class="scene-sticky shell">
+        <div class="scene-left">
+          ${slug(c, s.num, s.label)}
+          <h2 id="bench-title" class="scene-title">${esc(s.title)}</h2>
+          <p class="scene-lead">${esc(s.lead)}</p>
+          <ol class="beats">${beats}</ol>
+          ${rail(n)}
+        </div>
+        <div class="scene-right">
+          <div class="ls wb" data-stage data-status="${esc(JSON.stringify(v.status))}" aria-hidden="true">
+            ${lsBar(v.file, v.demo, 3, v.status[2])}
+            <div class="ls-body wb-body">
+              <div class="wb-stack">${plates}<span class="wb-proof" data-wb-proof><i data-wb-rule></i>${ticks}</span></div>
+              <div class="wb-con" data-wb-con>
+                <span class="wb-ln wb-cmd" data-wb-ln><span><em>$</em> ${esc(v.cmd)}</span></span>
+                ${log}
+                <span class="wb-ln wb-ready" data-wb-ln><span>${esc(v.ready)} ↓</span><u class="caret"></u></span>
+                <span class="wb-bar"><i data-wb-bar></i></span>
+              </div>
+              <div class="ls-stamp wb-stamp" data-wb-stamp>${esc(v.stamp)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bench-con shell">
     <div class="bench-grid">
       <div class="term cm" data-terminal>
         <div class="term-bar"><span class="term-title">${I.term}<span>${esc(s.consoleTitle.toUpperCase())}</span></span><span class="term-path">${esc(s.consolePath)}</span></div>
@@ -313,11 +363,8 @@ function bench(c) {
           <button class="term-send" type="submit" aria-label="${esc(s.send)}">${I.up}</button>
         </form>
       </div>
-      <aside class="spec" aria-labelledby="stack-title">
-        <div class="spec-head"><h3 id="stack-title">${esc(s.stackTitle)}</h3><span>${pad(s.stack.length)} / ${pad(s.stack.length)}</span></div>
-        <ol class="spec-list">${stack}</ol>
-        <div class="cb"><p class="cb-hint">${esc(s.swatchHint)}</p><div class="swatches">${sw}</div></div>
-      </aside>
+      <div class="cb"><p class="cb-hint">${esc(s.swatchHint)}</p><div class="swatches">${sw}</div></div>
+    </div>
     </div>
   </section>`;
 }
@@ -379,9 +426,22 @@ function method(c) {
 }
 
 /* --------------------------------------------------------- plate 06: contact */
+// back to idea.txt: the loop's note returns, its sentence is erased, and the empty note waits for the visitor's
 function contact(c) {
   const k = c.contact;
+  const d = k.idea;
+  const l = c.loop;
+  const [ia, ib = ""] = l.idea.split(l.ideaMark);
   const fit = (82 / (k.big.length * 0.4)).toFixed(2); // first guess for no-JS; main.js measures and fits it to the row
+  const note = `<div class="idea" data-idea>
+                <label class="idea-k" for="idea-in"><span>${esc(d.k)}</span><span>${esc(d.file)}</span></label>
+                <div class="idea-field">
+                  <p class="idea-ghost" data-idea-ghost aria-hidden="true"><span>“${esc(ia)}</span><mark>${esc(l.ideaMark)}</mark><span>${esc(ib)}”</span></p>
+                  <i class="idea-caret" aria-hidden="true"></i>
+                  <textarea id="idea-in" class="idea-in" data-idea-input rows="3" maxlength="280" placeholder="${esc(d.ph)}" aria-label="${esc(d.aria)}" spellcheck="true"></textarea>
+                </div>
+                <p class="idea-copied" data-idea-copied role="status" data-msg="${esc(d.copied)}"></p>
+              </div>`;
   return `<section id="contact" class="plate contact" aria-labelledby="contact-title">
     <div class="shell">
       ${slug(c, k.num, k.label)}
@@ -395,7 +455,10 @@ function contact(c) {
               <p class="contact-note">${esc(k.note)}</p>
               <ul class="gh-stats" data-gh hidden></ul>
             </div>
-            <a class="cta-orb" href="${SITE.github}" ${ext} data-magnetic data-cursor="GO"><span class="cta-label">${esc(k.cta)}</span>${I.ur}</a>
+            <div class="contact-act">
+              ${note}
+              <a class="cta-orb" href="${SITE.github}" ${ext} data-magnetic data-cursor="GO" data-idea-go><span class="cta-label">${esc(k.cta)}</span>${I.ur}</a>
+            </div>
           </div>
         </div>
       </div>

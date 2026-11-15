@@ -95,12 +95,15 @@ function setMenu(open) {
 }
 menuBtn.addEventListener("click", () => setMenu(!menuOpen));
 
-const PINNED = ["#loop", "#services", "#method"];
-function goto(href) {
-  if (href === "#top") return scroller.to(0);
+const PINNED = ["#loop", "#services", "#bench", "#method"];
+// an absolute y, so Lenis (which subtracts the html scroll-padding for elements) and the native path agree:
+// pinned scenes land flush with the top, other sections leave room for the bar
+function goto(href, opts = {}) {
+  if (href === "#top") return scroller.to(0, opts);
   const el = $(href);
   if (!el) return;
-  scroller.to(el, { offset: PINNED.includes(href) ? 0 : -72 });
+  const y = el.getBoundingClientRect().top + scrollY - (PINNED.includes(href) ? 0 : 72);
+  scroller.to(Math.max(0, Math.round(y)), opts);
 }
 document.addEventListener("click", (e) => {
   const a = e.target.closest('a[href^="#"]');
@@ -110,7 +113,34 @@ document.addEventListener("click", (e) => {
   e.preventDefault();
   if (menuOpen) setMenu(false);
   goto(href);
+  // the address bar follows the jump, so a section link can be copied and shared
+  try {
+    history.replaceState(null, "", href === "#top" ? location.pathname + location.search : href);
+  } catch {}
 });
+
+/* back to top: appears after the cover, its ring fills with the page */
+{
+  const up = $("[data-to-top]");
+  // round controls that can scroll under its corner: it steps aside for them
+  const avoid = $$(".bw-arrow, [data-idea-go]");
+  if (up) {
+    let raf = 0;
+    const paint = () => {
+      raf = 0;
+      const max = document.documentElement.scrollHeight - innerHeight;
+      const b = up.getBoundingClientRect();
+      const clash = avoid.some((el) => {
+        const a = el.getBoundingClientRect();
+        return a.right > b.left - 12 && a.left < b.right + 12 && a.bottom > b.top - 12 && a.top < b.bottom + 12;
+      });
+      up.classList.toggle("on", scrollY > innerHeight * 1.1 && !clash);
+      up.style.setProperty("--p", max > 0 ? Math.min(1, scrollY / max).toFixed(3) : "0");
+    };
+    addEventListener("scroll", () => (raf ||= requestAnimationFrame(paint)), { passive: true });
+    paint();
+  }
+}
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && menuOpen) setMenu(false);
 });
@@ -156,6 +186,33 @@ $$("[data-spot]").forEach((el) => {
     el.style.setProperty("--my", e.clientY - r.top + "px");
   });
 });
+
+/* ----------------------------------------------------- contact: idea.txt takes the visitor's sentence */
+// "Start a project" opens the GitHub profile; a written idea goes along on the clipboard, and the note says so
+const idea = $("[data-idea]");
+const ideaIn = $("[data-idea-input]");
+const ideaGo = $("[data-idea-go]");
+if (idea && ideaIn && ideaGo) {
+  const msg = $("[data-idea-copied]", idea);
+  let msgT;
+  ideaGo.addEventListener("click", () => {
+    const t = ideaIn.value.trim();
+    if (!t || !navigator.clipboard) return;
+    navigator.clipboard.writeText(t).then(
+      () => {
+        msg.textContent = msg.dataset.msg;
+        clearTimeout(msgT);
+        msgT = setTimeout(() => (msg.textContent = ""), 5000);
+      },
+      () => {}
+    );
+  });
+  ideaIn.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" || e.shiftKey) return;
+    e.preventDefault();
+    if (ideaIn.value.trim()) ideaGo.click();
+  });
+}
 
 loadGitHub()
   .then((g) => {
@@ -370,6 +427,37 @@ if (rm) {
     }
   }
 
+  /* ----- idea.txt comes back: the loop's note flies in, its sentence is erased, the empty note waits */
+  if (idea) {
+    const ghost = $("[data-idea-ghost]", idea);
+    const parts = [...ghost.children];
+    const full = parts.map((p) => p.textContent);
+    const total = full.reduce((n, s) => n + s.length, 0);
+    const st = { n: total };
+    let shownN = -1;
+    const paint = () => {
+      const n = Math.round(st.n);
+      if (n !== shownN) {
+        shownN = n;
+        let left = n;
+        parts.forEach((p, i) => {
+          p.textContent = full[i].slice(0, Math.max(0, Math.min(full[i].length, left)));
+          left -= full[i].length;
+        });
+      }
+      idea.classList.toggle("is-ghost", n > 0 && !ideaIn.value);
+    };
+    ideaIn.addEventListener("input", paint);
+    const tl = gsap
+      .timeline({ paused: true })
+      .fromTo(idea, { scale: 0.55, rotation: -9, xPercent: -16, yPercent: 26, autoAlpha: 0 }, { scale: 1, rotation: -2, xPercent: 0, yPercent: 0, autoAlpha: 1, duration: 0.3, ease: "power3.out" }, 0)
+      .fromTo(st, { n: total }, { n: 0, duration: 0.36, ease: "none", onUpdate: paint }, 0.42)
+      .fromTo(ideaGo, { scale: 0.3, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.16, ease: "back.out(2)" }, 0.84)
+      .to({}, { duration: 0.02 }, 0.98);
+    paint();
+    ScrollTrigger.create({ trigger: idea.parentElement, start: "top 95%", end: "bottom 72%", scrub: 0.4, animation: tl }); // the wrapper never moves, so the trigger stays put
+  }
+
   /* ----- crop marks draw in as each plate arrives */
   $$(".cm").forEach((el) => {
     if (el === reel) return;
@@ -479,7 +567,21 @@ if (rm) {
     if (img) gsap.fromTo(img, { yPercent: -6, scale: 1.12 }, { yPercent: 6, scale: 1.12, ease: "none", scrollTrigger: { trigger: reel, start: "top bottom", end: "bottom top", scrub: true } });
   }
 
-  const refresh = () => ScrollTrigger.refresh();
+  /* arriving on /#section: the pins grow the page after the browser's own jump, so land again after each
+     layout refresh, until the visitor scrolls by hand */
+  let deep = /^#[\w-]+$/.test(location.hash) && $(location.hash) ? location.hash : null;
+  const own = () => (deep = null);
+  ["wheel", "touchstart", "keydown"].forEach((ev) => addEventListener(ev, own, { once: true, passive: true }));
+  const land = () => {
+    if (!deep) return;
+    scroller.lenis?.resize();
+    goto(deep, { immediate: true, force: true });
+  };
+  const refresh = () => {
+    ScrollTrigger.refresh();
+    land();
+  };
+  requestAnimationFrame(refresh);
   document.fonts?.ready.then(refresh);
   window.addEventListener("load", () => setTimeout(refresh, 150));
 }

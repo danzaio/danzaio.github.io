@@ -124,6 +124,7 @@ html.js:not(.rm) .beat h3{font-size:clamp(3.6rem,8.4vw,8.6rem);line-height:.86;l
 .sv-cur{position:absolute;left:0;top:0;z-index:9;width:3.4cqi;height:3.4cqi;pointer-events:none;opacity:0;--cx:50;--cy:70;transform:translate(calc(var(--cx) * 1cqi - .5cqi),calc(var(--cy) * 1cqi - .35cqi))}
 .sv-cur svg{display:block;width:100%;height:100%;fill:var(--paper-static);stroke:#151612;stroke-width:1.6;stroke-linejoin:round;transform-origin:20% 15%;filter:drop-shadow(.25cqi .35cqi 0 rgba(21,22,18,.35))}
 html.js:not(.rm) .scene-lead{display:none}
+html.js:not(.rm) .scene-left .slug .pn,html.js:not(.rm) .scene-left .slug .cbar{display:none} /* the plate number would run under the stage */
 @media (min-width:901px) and (min-height:860px){html.js:not(.rm) .scene-lead{display:block}}
 
 /* the last beat lands on the lime highlight, like the hero line */

@@ -166,12 +166,12 @@ export function initTerminal(root, api) {
     if (!getSelection().toString() && matchMedia("(hover:hover)").matches) input.focus({ preventScroll: true });
   });
 
-  // Boot sequence runs once, when the console scrolls into view.
+  // The workbench scene above already ran the boot; the console greets and runs its first command once it scrolls into view.
   async function boot() {
     if (started) return;
     started = true;
-    if (!rm) for (const l of T.boot) { line(l, "dim"); await sleep(220); }
     await type(T.welcome);
+    await run("neofetch");
   }
   const io = new IntersectionObserver(
     ([e]) => {

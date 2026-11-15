@@ -47,6 +47,16 @@
 .dock .dock-go .ico{width:14px;height:14px}
 html.js:not(.rm) .dock:not(.on){transform:translateY(calc(100% + 34px));opacity:0;pointer-events:none}
 
+/* ---------- back to top: shows after the cover; its ring is the reading progress ---------- */
+.to-top{position:fixed;right:max(18px,calc(var(--sar,0px) + 12px));bottom:calc(18px + var(--sab));z-index:55;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;color:var(--lime);background:var(--ink-static);border:1px solid rgba(247,244,235,.16);box-shadow:0 14px 34px rgba(10,10,8,.22);--p:0;transition:opacity .35s,transform .5s var(--ease),visibility 0s .35s,background-color .25s,color .25s;opacity:0;visibility:hidden;transform:translateY(16px) scale(.9)}
+.to-top::before{content:"";position:absolute;inset:3px;border-radius:50%;background:conic-gradient(var(--lime) calc(var(--p) * 360deg),rgba(247,244,235,.14) 0);-webkit-mask:radial-gradient(circle,transparent 18px,#000 18.5px);mask:radial-gradient(circle,transparent 18px,#000 18.5px)}
+.to-top .ico{position:relative;width:18px;height:18px;transition:transform .35s var(--ease)}
+.to-top.on{opacity:1;visibility:visible;transform:none;transition:opacity .35s,transform .5s var(--ease),visibility 0s,background-color .25s,color .25s}
+.to-top:hover{background:var(--lime);color:#151612}
+.to-top:hover::before{opacity:0}
+.to-top:hover .ico{transform:translateY(-3px)}
+:root[data-theme="ink"] .to-top{background:#25261f;border-color:var(--line)}
+
 /* ---------- mobile menu ------------------------------------------------ */
 .mobile-menu{position:fixed;inset:0;z-index:45;background:var(--paper);display:flex;flex-direction:column;justify-content:space-between;padding:calc(var(--top-h) + 36px + var(--sat)) var(--gutter) calc(22px + var(--sab))}
 .mobile-menu[hidden]{display:none}
@@ -100,6 +110,8 @@ html.js:not(.rm):not(.is-ready) [data-hero-in]{opacity:0;animation:unhide 0s 5s 
   .dock a[aria-current="true"] span{max-width:7.5em;opacity:1;margin-left:7px}
   .dock .dock-go{margin-left:2px}
   .dock .dock-go .ico{margin-left:6px}
+  .to-top{right:12px;bottom:calc(74px + var(--sab));width:44px;height:44px}
+  .to-top::before{-webkit-mask:radial-gradient(circle,transparent 16px,#000 16.5px);mask:radial-gradient(circle,transparent 16px,#000 16.5px)}
 }
 @media (hover:none){
   .icon-btn,.mm-lang,.mm-pal{transition:transform .18s var(--ease),background-color .25s,color .25s}

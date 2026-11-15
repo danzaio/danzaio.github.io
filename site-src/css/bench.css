@@ -1,10 +1,43 @@
 /* ==========================================================================
-   bench.css: plate 04, the workbench. A working console, the stack spec and the colour bar.
+   bench.css: plate 04, the workbench. A scene first: the product stack assembles (four layers land in
+   their slots, the boot log types, proof closes it), then the working console and the colour bar.
+   The CSS default is the final frame.
    ========================================================================== */
-.bench-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:clamp(24px,3vw,48px);align-items:stretch}
+.wb-body{background:var(--paper-deep)}
+.wb-stack{position:absolute;left:4cqi;top:4.6cqi;width:55cqi;height:50.8cqi;display:grid;grid-template-rows:repeat(4,minmax(0,1fr));gap:2.4cqi}
+.wb-slot{position:relative;border:1.5px dashed var(--line);border-radius:1.3cqi}
+.wb-plate{position:absolute;inset:-1.5px;display:grid;grid-template-columns:auto auto minmax(0,1fr);align-items:center;gap:1.4cqi;padding:0 1.8cqi;border:1.5px solid var(--ink);border-radius:1.3cqi;background:var(--surface);color:var(--ink);box-shadow:0 .8cqi 0 var(--ink)}
+.wb-slot:nth-child(2) .wb-plate{background:var(--lilac);color:#151612;border-color:#151612}
+.wb-slot:nth-child(4) .wb-plate{background:var(--ink-static);color:var(--paper-static);border-color:#151612}
+:root[data-theme="ink"] .wb-plate{box-shadow:0 .8cqi 0 var(--lime)}
+.wb-n{font:700 1.25cqi var(--font-mono);letter-spacing:.06em;opacity:.6}
+.wb-plate>b{font:800 2.9cqi/1 var(--font-display);letter-spacing:-.035em}
+.wb-chips{justify-self:end;display:flex;gap:.7cqi;min-width:0}
+.wb-chips i{padding:.5cqi 1cqi .45cqi;border:1px solid currentColor;border-radius:3cqi;font:600 1.2cqi var(--font-mono);font-style:normal;letter-spacing:.04em;white-space:nowrap}
+.wb-slot:nth-child(4) .wb-chips i{color:var(--lime)}
+/* proof: a lime rule down the stack, a tick at every layer */
+.wb-proof{position:absolute;left:calc(100% + 1.6cqi);top:0;bottom:0;width:.7cqi}
+.wb-proof>i{position:absolute;inset:0;border:1px solid #151612;border-radius:1cqi;background:var(--lime);transform-origin:50% 0}
+.wb-proof>b{position:absolute;left:50%;top:calc(var(--i) * 13.3cqi + 5.45cqi);translate:-50% -50%;display:grid;place-items:center;width:2.5cqi;height:2.5cqi;border-radius:50%;border:1px solid #151612;background:var(--lime);color:#151612;font-size:1.3cqi}
+/* the boot console */
+.wb-con{position:absolute;left:64.5cqi;right:4cqi;top:4.6cqi;bottom:4.6cqi;display:grid;align-content:start;gap:1.2cqi;padding:2cqi 2cqi 0;border:1.5px solid #151612;border-radius:1.4cqi;background:var(--ink-static);color:#cfccc0;font:500 1.35cqi/1.5 var(--font-mono);overflow:hidden}
+:root[data-theme="ink"] .wb-con{border-color:var(--line)}
+.wb-ln{display:flex;align-items:center;gap:.8cqi;white-space:nowrap}
+.wb-ln>i{flex:1;min-width:1cqi;border-top:1px dotted #5a5b50}
+.wb-ln>b{color:var(--lime);font-weight:700}
+.wb-cmd em{color:var(--lime);font-style:normal;font-weight:700}
+.wb-ready{margin-top:.8cqi;color:var(--lime);font-weight:700}
+.wb-ready .caret{text-decoration:none}
+.wb-bar{position:absolute;left:0;right:0;bottom:0;height:.9cqi;background:#2a2b24}
+.wb-bar i{display:block;height:100%;background:var(--lime);transform-origin:left}
+.wb-stamp{left:68cqi;top:34cqi;font-size:4.6cqi;border-color:var(--lime);color:var(--lime);background:var(--ink-static)}
+
+/* after the scene: the console goes interactive */
+.bench-con{padding-top:clamp(28px,3.4vw,56px)}
+.bench-grid{display:grid;gap:clamp(18px,2vw,28px)}
 
 /* console */
-.term{display:flex;flex-direction:column;min-height:540px;background:var(--ink-static);color:#e9e6da;border:1.5px solid #151612;box-shadow:12px 12px 0 var(--lime)}
+.term{display:flex;flex-direction:column;min-height:440px;background:var(--ink-static);color:#e9e6da;border:1.5px solid #151612;box-shadow:12px 12px 0 var(--lime)}
 :root[data-theme="ink"] .term{border-color:var(--line)}
 .term-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid #2f3029;font:600 .66rem var(--font-mono);letter-spacing:.08em;color:#cfccc0}
 .term-title{display:inline-flex;align-items:center;gap:10px}
@@ -32,19 +65,7 @@
 .term-send:hover{transform:scale(1.1) rotate(-8deg)}
 .term-send .ico{width:18px;height:18px}
 
-/* stack spec */
-.spec{display:flex;flex-direction:column;border-top:1.5px solid var(--ink)}
-.spec-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:16px 0 18px}
-.spec-head h3{font:800 clamp(1.7rem,2.5vw,2.5rem)/1 var(--font-display);letter-spacing:-.04em}
-.spec-head span{font:600 .66rem var(--font-mono);letter-spacing:.08em;color:var(--muted)}
-.spec-list li{display:grid;grid-template-columns:40px minmax(0,1fr);gap:6px;padding:16px 0;border-top:1px solid var(--line-soft);transition:padding-left .4s var(--ease)}
-.spec-list li:hover{padding-left:8px}
-.spec-list .n{font:600 .66rem var(--font-mono);padding-top:5px;color:var(--muted)}
-.spec-list b{display:block;font:600 1.08rem/1.2 var(--font-body)}
-.spec-list li div span{display:block;margin-top:4px;font-size:.92rem;color:var(--muted)}
-
-/* colour bar */
-.cb{margin-top:auto;padding-top:26px}
+/* colour bar: the printer's strip along the sheet */
 .cb-hint{margin-bottom:10px;font:600 .62rem var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .swatches{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1.5px solid var(--ink)}
 .swatch{display:grid;grid-template-rows:54px auto;text-align:left;border-left:1.5px solid var(--ink);transition:transform .35s var(--ease)}
@@ -59,8 +80,13 @@
 :root[data-theme="ink"] .swatches,:root[data-theme="ink"] .swatch,:root[data-theme="ink"] .swatch i{border-color:var(--line)}
 
 @media (max-width:900px){
-  .bench-grid{grid-template-columns:minmax(0,1fr)}
-  .term{min-height:470px;box-shadow:6px 6px 0 var(--lime);margin-right:6px}
+  .wb-plate>b{font-size:3.5cqi}
+  .wb-n{font-size:1.9cqi}
+  .wb-chips i{font-size:1.75cqi;padding:.6cqi 1.1cqi .5cqi}
+  .wb-chips i:nth-child(n+3){display:none}
+  .wb-con{grid-template-columns:minmax(0,1fr);font-size:1.65cqi;gap:1cqi}
+  .wb-proof>b{font-size:1.8cqi}
+  .term{min-height:440px;box-shadow:6px 6px 0 var(--lime);margin-right:6px}
   .term-prompt{display:none}
   .term-form input{font-size:16px}
 }

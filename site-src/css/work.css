@@ -42,6 +42,22 @@
 :root[data-theme="ink"] .wk-meter{border-color:var(--line)}
 .wk-meter i{position:relative;height:3px;border-radius:3px;background:var(--line-soft);overflow:hidden}
 .wk-meter i::after{content:"";position:absolute;inset:0;background:var(--ink);transform-origin:left;transform:scaleX(var(--f,0))}
+.why dd.why-stack{font:500 .8rem/1.6 var(--font-mono);letter-spacing:.02em}
+
+/* callouts on the stage: a pin on the screenshot, a leader, a label. One var, --a (0..1), set from the scroll
+   position, runs all three in order. The view is a container, so the parts scale with the stage. */
+.wk-view{container-type:inline-size}
+.wk-notes{position:absolute;inset:0;z-index:2;pointer-events:none}
+.wk-note{position:absolute;--a:0;--l:clamp(0,calc(var(--a) * 2.6 - 1.6),1)}
+.wk-note b{position:absolute;left:-.8cqi;top:-.8cqi;width:1.6cqi;height:1.6cqi;border-radius:50%;background:var(--lime);border:.25cqi solid #151612;box-shadow:0 0 0 .5cqi rgba(201,255,47,.32);transform:scale(clamp(0,calc(var(--a) * 4),1))}
+.wk-note i{position:absolute;left:0;top:-1px;width:var(--len);height:2px;background:#151612;box-shadow:0 0 0 1px rgba(247,244,235,.85);transform-origin:0 50%;transform:rotate(var(--ang)) scaleX(clamp(0,calc(var(--a) * 2.6 - .5),1))}
+.wk-note span{position:absolute;left:var(--dx);top:var(--dy);margin:var(--ny,0px) 0 0 var(--nx,0px);translate:0 -50%;padding:.6cqi 1.2cqi .55cqi;border:1px solid rgba(247,244,235,.5);border-radius:3cqi;background:#151612;color:#f7f4eb;font:600 1.3cqi var(--font-mono);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;box-shadow:.35cqi .35cqi 0 var(--lime);opacity:calc(var(--l) * 40);clip-path:inset(-30% calc((1 - var(--l)) * 100%) -40% calc(var(--l) * -10%))}
+.wk-note.is-l span{translate:-100% -50%;clip-path:inset(-30% calc(var(--l) * -20%) -40% calc((1 - var(--l)) * 100%))}
+/* the stack, typed under the picture */
+.wk-stack{display:flex;align-items:center;gap:12px;padding:9px 12px;border-top:1.5px solid var(--ink);font:600 .68rem var(--font-mono);letter-spacing:.04em;white-space:nowrap;overflow:hidden}
+:root[data-theme="ink"] .wk-stack{border-color:var(--line)}
+.wk-stack b{padding:3px 8px;border-radius:999px;background:var(--ink);color:var(--paper);font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:.6rem}
+.wk-stack-v{--t:1;clip-path:inset(-20% calc((1 - var(--t)) * 100%) -20% 0)}
 
 @media (min-width:901px){
   html.js:not(.rm) .wk-track{height:360svh}
@@ -81,5 +97,8 @@
   html.js:not(.rm) .wk-shot,html.js:not(.rm) .why{display:none}
   html.js:not(.rm) .wk-more-in{gap:14px;padding-top:12px}
   html.js:not(.rm) .wk-text{font-size:.98rem;line-height:1.45}
+  .wk-note span{font-size:2.3cqi;padding:.9cqi 1.8cqi .8cqi}
+  .wk-note b{left:-1.3cqi;top:-1.3cqi;width:2.6cqi;height:2.6cqi}
+  .wk-stack{padding:7px 10px;font-size:.62rem}
 }
 @keyframes wk-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}

@@ -299,8 +299,51 @@ function buildProcess(tl, $, track) {
   };
 }
 
+/* --------------------------------------------------------- plate 04: the stack assembles */
+const B_CUTS = [1.0, 2.0, 3.0];
+const B_LAND = [0.4, 1.3, 2.3, 3.25];
+const B_READY = 3.85;
+
+function buildBench(tl, $, track) {
+  const q = (s) => $(s, track);
+  const qq = (s) => $$(s, track);
+  const plates = qq("[data-wb-plate]");
+  const chips = plates.map((p) => $$("[data-wb-chip]", p));
+  const lines = qq("[data-wb-ln]"); // command, four layer lines, ready
+  const con = q("[data-wb-con]");
+  const rule = q("[data-wb-rule]");
+  const ticks = qq("[data-wb-tick]");
+  const bar = q("[data-wb-bar]");
+  const stamp = q("[data-wb-stamp]");
+  const type = (el, at, n) => tl.to(el, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.16, ease: `steps(${n})` }, at);
+
+  gsap.set(con, { clipPath: "inset(0% 0% 100% 0%)" });
+  gsap.set(lines, { clipPath: "inset(0% 100% 0% 0%)" });
+  gsap.set(plates, { autoAlpha: 0, yPercent: -60, scale: 1.04 });
+  gsap.set(chips.flat(), { autoAlpha: 0, y: 6 });
+  gsap.set(rule, { scaleY: 0 });
+  gsap.set(ticks, { autoAlpha: 0, scale: 0.3 });
+  gsap.set(bar, { scaleX: 0 });
+  gsap.set(stamp, { autoAlpha: 0, scale: 2.4, rotate: -22 });
+
+  // the console opens and the command runs; the build bar fills across the whole scene
+  tl.to(con, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.25, ease: "power2.inOut" }, 0.05).to(bar, { scaleX: 1, duration: B_READY - 0.3, ease: "none" }, 0.25);
+  type(lines[0], 0.2, 14);
+  // one layer per beat: it lands in its slot, its parts arrive, the log confirms it
+  plates.forEach((p, i) => {
+    tl.to(p, { autoAlpha: 1, yPercent: 0, scale: 1, duration: 0.26, ease: "back.out(1.4)" }, B_LAND[i]).to(chips[i], { autoAlpha: 1, y: 0, duration: 0.12, stagger: 0.05 }, B_LAND[i] + 0.18);
+    type(lines[i + 1], B_LAND[i] + 0.22, 20);
+  });
+  // proof closes it: the rule runs down the stack, every layer ticks, ready, stamped
+  tl.to(rule, { scaleY: 1, duration: 0.3, ease: "power1.inOut" }, 3.45).to(ticks, { autoAlpha: 1, scale: 1, duration: 0.1, stagger: 0.07, ease: "back.out(2.4)" }, 3.5);
+  type(lines[5], 3.7, 18);
+  tl.to(stamp, { autoAlpha: 1, scale: 1, rotate: -6, duration: 0.18, ease: "power4.in" }, B_READY).to({}, { duration: 0.15 }, B_READY + 0.2);
+}
+
 export function initScenes() {
   if (rm) return;
+  const wb = $('[data-scene="bench"]');
+  if (wb) scene(wb, { cuts: B_CUTS, build: buildBench, state: (t, b) => (t >= B_READY ? [3, 2] : b === 3 ? [1, 1] : [2, 0]) });
   const sv = $('[data-scene="services"]');
   if (sv) scene(sv, { cuts: S_CUTS, build: buildServices, state: (t, b) => (t >= S_SHEET + 0.15 ? [3, 4] : [t >= S_LIVE[b] ? 3 : 2, b]) });
   const pr = $('[data-scene="method"]');
