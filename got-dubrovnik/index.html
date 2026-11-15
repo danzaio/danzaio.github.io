@@ -298,6 +298,16 @@ table.t td:last-child{text-align:right;font-weight:700;white-space:nowrap}
 .aredge.l{left:8px}.aredge.r{right:66px}
 @media (min-width:760px){ .loc{max-width:700px;margin-left:auto;margin-right:auto} #sheet{max-width:620px;margin:0 auto} }
 
+.vfo{width:96px;height:120px;background:var(--paper2);border:1px solid var(--line);border-radius:10px;display:grid;place-items:center;overflow:hidden}
+.cmp{position:relative;margin:10px 0 8px;border-radius:12px;overflow:hidden}
+.cmpo{position:absolute;inset:0;pointer-events:none}.cmpo svg{width:100%;height:100%;display:block}
+.cmp>i{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:#fff;box-shadow:0 0 4px rgba(0,0,0,.6);pointer-events:none}
+.rcl{width:38px;height:38px;border-radius:50%;background:var(--crimson);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4),0 0 0 4px rgba(143,29,29,.22);display:grid;place-items:center;cursor:pointer}
+.rcl b{color:#fff;font:800 15px Inter,sans-serif}
+.still{display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding:10px;border:1px dashed var(--gold2);border-radius:12px;background:var(--paper2)}
+.still img{width:96px;border-radius:8px;display:block}
+#camStill{position:absolute;left:10px;top:118px;width:34vw;max-width:170px;border:2px solid #fff;border-radius:10px;background:#000 center/cover no-repeat;box-shadow:0 4px 14px rgba(0,0,0,.5);z-index:4;padding:0;transition:width .2s}
+#camStill.big{width:74vw;max-width:420px}
 /* mapa real */
 #rmap{position:absolute;inset:0;display:none;background:#efe9dc}
 body.rm-on #rmap{display:block}
@@ -379,6 +389,7 @@ body.rm-on #z3D,body.rm-on #zNorth.show{display:grid!important}
   <svg id="camOv" xmlns="http://www.w3.org/2000/svg"></svg>
   <div id="arLayer"></div>
   <div class="camTop"><div style="flex:1;min-width:0"><h3 class="serif" id="camTitle"></h3><div class="camTip" id="camTip"></div></div><button class="camBtn" id="camX" aria-label="Fechar câmera" data-i18n-aria="a_camx">✕</button></div>
+  <button id="camStill" style="display:none" aria-label="Scene"></button>
   <div class="camGuide" id="camGuide" style="display:none"></div>
   <div class="camRot" id="camRot" style="display:none">↻ Esta foto fica melhor na horizontal</div>
   <div class="camSide"><button id="camAR" aria-label="AR">AR</button><button id="camGrid" class="on" data-i18n="gridBtn">GRADE</button><button id="camGh" class="on" data-i18n="ghostBtn">GUIA</button><button id="camComp" aria-label="Bússola" data-i18n-aria="tabCompass">🧭</button></div>
@@ -1149,6 +1160,18 @@ Object.assign(UI.es,{mapMode:"Mapa",mapReal:"real",mapDrawn:"ilustrado",headOn:"
 Object.assign(UI.de,{mapMode:"Karte",mapReal:"echt",mapDrawn:"illustriert",headOn:"Die Karte dreht sich mit dir",a_north:"Norden oben",a_3d:"3D-Ansicht",mapOffline:"Offline: illustrierte Karte wird gezeigt",tour3p:"Zentriert die Karte auf dich. Mit GPS nochmal tippen, dann <b>folgt dir die Karte</b>; mit Kompass noch ein Tipp und sie <b>dreht sich mit dir</b>. Mit <b>3D</b> stehen die Gebäude auf."});
 Object.assign(UI.fr,{mapMode:"Carte",mapReal:"réelle",mapDrawn:"illustrée",headOn:"La carte tourne avec vous",a_north:"Nord en haut",a_3d:"Vue 3D",mapOffline:"Hors ligne : carte illustrée affichée",tour3p:"Centre la carte sur vous. GPS activé, touchez à nouveau et la carte <b>vous suit</b> ; boussole activée, encore une fois et elle <b>tourne avec vous</b>. Essayez la <b>3D</b> pour voir les bâtiments en relief."});
 Object.assign(UI.it,{mapMode:"Mappa",mapReal:"reale",mapDrawn:"illustrata",headOn:"La mappa ruota con te",a_north:"Nord in alto",a_3d:"Vista 3D",mapOffline:"Offline: mostro la mappa illustrata",tour3p:"Centra la mappa su di te. Con il GPS attivo, tocca di nuovo e la mappa <b>ti segue</b>; con la bussola attiva, un altro tocco e <b>ruota con te</b>. Prova il <b>3D</b> per vedere gli edifici in piedi."});
+Object.assign(UI.pt,{"compare": "Compare com o contorno", "useAsGuide": "Usar esta foto como guia na câmera", "guideRemove": "Remover o guia desta foto", "guideOn": "Pronto: na câmera, toque em GUIA para alternar entre o contorno e a sua foto", "guideLine": "Guia: contorno", "guidePhoto": "Guia: sua foto", "legWalk": "{0} a pé · ~{1} min", "totalWalk": "Total a pé: {0}", "routesHint": "O <b>modo guiado</b> leva você parada por parada, com a cena de cada lugar. A linha no mapa segue as ruas (sem internet, vira linha reta)."});
+Object.assign(UI.en,{"compare": "Compare with the outline", "useAsGuide": "Use this photo as a camera guide", "guideRemove": "Remove this photo guide", "guideOn": "Done: in the camera, tap GUIDE to switch between the outline and your photo", "guideLine": "Guide: outline", "guidePhoto": "Guide: your photo", "legWalk": "{0} on foot · ~{1} min", "totalWalk": "Total on foot: {0}", "routesHint": "<b>Guided mode</b> takes you stop by stop, with the scene at each place. The line on the map follows the streets (offline it falls back to straight lines)."});
+Object.assign(UI.es,{"compare": "Compara con el contorno", "useAsGuide": "Usar esta foto como guía en la cámara", "guideRemove": "Quitar la guía de esta foto", "guideOn": "Listo: en la cámara, toca GUÍA para alternar entre el contorno y tu foto", "guideLine": "Guía: contorno", "guidePhoto": "Guía: tu foto", "legWalk": "{0} a pie · ~{1} min", "totalWalk": "Total a pie: {0}", "routesHint": "El <b>modo guiado</b> te lleva parada a parada, con la escena de cada lugar. La línea del mapa sigue las calles (sin conexión, es una línea recta)."});
+Object.assign(UI.de,{"compare": "Mit dem Umriss vergleichen", "useAsGuide": "Dieses Foto als Kamera-Guide nutzen", "guideRemove": "Foto-Guide entfernen", "guideOn": "Fertig: tippe in der Kamera auf GUIDE, um zwischen Umriss und deinem Foto zu wechseln", "guideLine": "Guide: Umriss", "guidePhoto": "Guide: dein Foto", "legWalk": "{0} zu Fuß · ca. {1} Min.", "totalWalk": "Gesamt zu Fuß: {0}", "routesHint": "Der <b>geführte Modus</b> bringt dich Stopp für Stopp ans Ziel, mit der Szene an jedem Ort. Die Linie auf der Karte folgt den Straßen (offline als Luftlinie)."});
+Object.assign(UI.fr,{"compare": "Comparer avec le contour", "useAsGuide": "Utiliser cette photo comme guide dans la caméra", "guideRemove": "Retirer ce guide photo", "guideOn": "C'est fait : dans la caméra, touchez GUIDE pour alterner entre le contour et votre photo", "guideLine": "Guide : contour", "guidePhoto": "Guide : votre photo", "legWalk": "{0} à pied · ~{1} min", "totalWalk": "Total à pied : {0}", "routesHint": "Le <b>mode guidé</b> vous emmène étape par étape, avec la scène de chaque lieu. La ligne sur la carte suit les rues (hors ligne, elle devient droite)."});
+Object.assign(UI.it,{"compare": "Confronta con il contorno", "useAsGuide": "Usa questa foto come guida nella fotocamera", "guideRemove": "Rimuovi la guida di questa foto", "guideOn": "Fatto: nella fotocamera tocca GUIDA per passare dal contorno alla tua foto", "guideLine": "Guida: contorno", "guidePhoto": "Guida: la tua foto", "legWalk": "{0} a piedi · ~{1} min", "totalWalk": "Totale a piedi: {0}", "routesHint": "La <b>modalità guidata</b> ti porta tappa per tappa, con la scena di ogni luogo. La linea sulla mappa segue le strade (offline diventa una linea retta)."});
+Object.assign(UI.pt,{"stillTitle": "Take da cena", "stillHint": "Adicione um print da cena da série: ele aparece na câmera para você copiar o enquadramento e, depois, lado a lado com a sua foto. Fica só no seu celular.", "stillAdd": "Adicionar o take", "stillFind": "Procurar o take", "stillHave": "Take guardado. Na câmera ele aparece no canto; toque nele para ampliar.", "stillRemove": "Remover", "stillOn": "Take adicionado! Abra a câmera: ele fica no canto e GUIA sobrepõe o take na imagem", "guideStill": "Guia: take da cena por cima", "sideBySide": "Montar lado a lado com a cena", "saveSBS": "Salvar lado a lado", "sbsShow": "NA SÉRIE", "sbsMe": "EU, NO MESMO LUGAR"});
+Object.assign(UI.en,{"stillTitle": "Scene still", "stillHint": "Add a screenshot of the scene from the show: it appears in the camera so you can copy the framing, and afterwards side by side with your photo. It stays on your phone only.", "stillAdd": "Add the still", "stillFind": "Find the still", "stillHave": "Still saved. In the camera it sits in the corner; tap it to enlarge.", "stillRemove": "Remove", "stillOn": "Still added! Open the camera: it sits in the corner, and GUIDE overlays it on the picture", "guideStill": "Guide: scene still on top", "sideBySide": "Make a side-by-side with the scene", "saveSBS": "Save side-by-side", "sbsShow": "IN THE SHOW", "sbsMe": "ME, SAME SPOT"});
+Object.assign(UI.es,{"stillTitle": "Fotograma de la escena", "stillHint": "Añade una captura de la escena de la serie: aparece en la cámara para copiar el encuadre y, después, junto a tu foto. Se queda solo en tu móvil.", "stillAdd": "Añadir el fotograma", "stillFind": "Buscar el fotograma", "stillHave": "Fotograma guardado. En la cámara aparece en la esquina; tócalo para ampliarlo.", "stillRemove": "Quitar", "stillOn": "¡Fotograma añadido! Abre la cámara: queda en la esquina y GUÍA lo superpone a la imagen", "guideStill": "Guía: fotograma por encima", "sideBySide": "Montar el antes y después con la escena", "saveSBS": "Guardar comparación", "sbsShow": "EN LA SERIE", "sbsMe": "YO, EN EL MISMO SITIO"});
+Object.assign(UI.de,{"stillTitle": "Szenenbild", "stillHint": "Füge einen Screenshot der Szene aus der Serie hinzu: Er erscheint in der Kamera zum Nachstellen und danach neben deinem Foto. Er bleibt nur auf deinem Handy.", "stillAdd": "Szenenbild hinzufügen", "stillFind": "Szenenbild suchen", "stillHave": "Szenenbild gespeichert. In der Kamera liegt es in der Ecke; antippen zum Vergrößern.", "stillRemove": "Entfernen", "stillOn": "Szenenbild hinzugefügt! Öffne die Kamera: Es liegt in der Ecke, und GUIDE legt es über das Bild", "guideStill": "Guide: Szenenbild als Überlagerung", "sideBySide": "Vergleich mit der Szene erstellen", "saveSBS": "Vergleich speichern", "sbsShow": "IN DER SERIE", "sbsMe": "ICH, AM SELBEN ORT"});
+Object.assign(UI.fr,{"stillTitle": "Image de la scène", "stillHint": "Ajoutez une capture de la scène de la série : elle s'affiche dans la caméra pour copier le cadrage, puis côte à côte avec votre photo. Elle reste uniquement sur votre téléphone.", "stillAdd": "Ajouter l'image", "stillFind": "Chercher l'image", "stillHave": "Image enregistrée. Dans la caméra, elle est dans le coin ; touchez-la pour l'agrandir.", "stillRemove": "Retirer", "stillOn": "Image ajoutée ! Ouvrez la caméra : elle est dans le coin, et GUIDE la superpose à l'image", "guideStill": "Guide : image de la scène en surimpression", "sideBySide": "Créer un avant/après avec la scène", "saveSBS": "Enregistrer le montage", "sbsShow": "DANS LA SÉRIE", "sbsMe": "MOI, AU MÊME ENDROIT"});
+Object.assign(UI.it,{"stillTitle": "Fotogramma della scena", "stillHint": "Aggiungi uno screenshot della scena della serie: compare nella fotocamera per copiare l'inquadratura e poi accanto alla tua foto. Resta solo sul tuo telefono.", "stillAdd": "Aggiungi il fotogramma", "stillFind": "Cerca il fotogramma", "stillHave": "Fotogramma salvato. Nella fotocamera sta nell'angolo; toccalo per ingrandirlo.", "stillRemove": "Rimuovi", "stillOn": "Fotogramma aggiunto! Apri la fotocamera: sta nell'angolo e GUIDA lo sovrappone all'immagine", "guideStill": "Guida: fotogramma in sovrimpressione", "sideBySide": "Crea il confronto con la scena", "saveSBS": "Salva il confronto", "sbsShow": "NELLA SERIE", "sbsMe": "IO, NELLO STESSO POSTO"});
 /* ============ i18n: conteúdo traduzido ============ */
 const TRB={};
 TRB.en={
@@ -2046,8 +2069,8 @@ $('#zLayer').onclick=()=>{S.showPhotos=!S.showPhotos;drawPhotos();$('#zLayer').s
 function drawMe(onlyTransform){if(!onlyTransform)rmMe();const g=$('#gMe');if(!S.pos){g.innerHTML='';return}const p=xy(S.pos.lat,S.pos.lon);const k=1/MAP.s;
  const acc=S.pos.acc&&S.posSrc==='gps'?Math.min(S.pos.acc,400):0;const hd=S.heading;
  g.innerHTML=`${acc?`<circle class="me-acc" cx="${f1(p[0])}" cy="${f1(p[1])}" r="${acc}"/>`:''}<g transform="translate(${f1(p[0])},${f1(p[1])}) scale(${k.toFixed(4)})">${hd!=null?`<path class="me-cone" d="M0 0 L-16 -44 A46 46 0 0 1 16 -44Z" transform="rotate(${hd.toFixed(0)})"/>`:''}<circle class="me-dot" r="8"/></g>`}
-function drawRoute(){rmRoute();const g=$('#gRoute');if(!S.route){g.innerHTML='';renderMapTop();return}const r=ROUTES.find(x=>x.id===S.route);const pts=r.stops.map(id=>xy(LBY[id].lat,LBY[id].lon));
- g.innerHTML=`<path class="m-route" d="${pathL(pts,false)}" vector-effect="non-scaling-stroke"/>`;renderMapTop();fit(pts,56,($('#mapTop').offsetHeight||0)+10)}
+function drawRoute(keep){rmRoute();const g=$('#gRoute');if(!S.route){g.innerHTML='';renderMapTop();return}const r=ROUTES.find(x=>x.id===S.route);loadRoute(r);const pts=routeLine(r).map(q=>xy(q[1],q[0]));
+ g.innerHTML=`<path class="m-route" d="${pathL(pts,false)}" vector-effect="non-scaling-stroke"/>`;renderMapTop();if(keep!==true)fit(pts,56,($('#mapTop').offsetHeight||0)+10)}
 function renderMapTop(){const el=$('#mapTop');let h='';
  if(S.placing)h+=`<span class="floatchip" style="background:var(--gold2);color:#fff">👆 ${t('tapWhere')} <b id="cancelPlace" style="margin-left:6px">✕</b></span>`;
  if(S.sim)h+=`<span class="floatchip" id="simChip" style="background:var(--c-excursao);color:#fff">🧪 ${t('simChip')} <b style="margin-left:6px">${t('exit')}</b></span>`;
@@ -2061,6 +2084,79 @@ function renderMapTop(){const el=$('#mapTop');let h='';
  $('#trChip').onclick=()=>openLoc('trsteno')}
 function renderLegend(){$('#legend').innerHTML=Object.keys(CATS).map(k=>`<span><i style="background:var(--c-${k})"></i>${t('catS_'+k)}</span>`).join('')}
 
+/* ============ contornos reais de cada foto (guia da câmera) ============ */
+// o:'v' = 90×120 (em pé) · 'h' = 120×90 (deitado). d = traço · dd = tracejado · pp = onde fica a pessoa
+const OUT={
+'p-torneio':{o:'h',d:'M0 31 Q28 17 58 23 T120 13 M46 53 V46 L120 35 M46 62 L120 60 M70 50 V42.5 M96 55 V38.5 h8 V54 M30 64 V46 Q37 42 46 46 V62 M30 46 Q38 50 46 46 M0 66 Q16 62 30 64 M0 83 h12 v-5 h9 v5 h12 v-5 h9 v5 h12 v-5 h9 v5 h12 v-5 h9 v5 h12 v-5 h9 v5 h6',dd:'M48 44.5 L120 33.6',pp:[[26,75]]},
+'p-redkeep':{o:'v',d:'M0 84 H90 M6 84 Q10 66 20 58 L26 46 L34 44 L58 44 L64 50 Q74 62 80 84 M26 46 V26 L44 20 L60 26 V44 M26 30 L44 24.5 L60 30 M36 38 v-5 h4 v5 M46 37 v-5 h4 v5 M60 34 L70 38 V50 M0 96 q6 -2 12 0 t12 0 M40 104 q6 -2 12 0 t12 0',pp:[[16,102]]},
+'p-bokar':{o:'h',d:'M0 40 H70 M70 44 Q76 36 84 34 L86 26 L92 22 L106 22 L112 28 L114 36 Q118 40 120 46 M86 26 h26 M92 22 v-6 l8 -3 l7 3 v6 M0 74 H120 M0 74 v-6 h10 v6 M22 74 v-6 h12 v6 M46 74 v-6 h12 v6 M70 74 v-6 h12 v6 M94 74 v-6 h12 v6 M60 50 q6 -2 12 0 t12 0 M20 56 q6 -2 12 0 t12 0',pp:[[16,62],[40,62]]},
+'p-purple':{o:'h',d:'M0 42 H40 M40 52 Q46 40 54 38 L56 30 L62 27 L74 27 L78 32 L80 40 Q84 46 86 52 M56 30 h22 M62 27 v-5 l6 -2 l6 2 v5 M86 50 L92 44 L120 40 M92 44 V50 M100 43 V36 h5 V42 M110 41.5 v-9 l3 -4 l3 4 v9 M0 60 Q30 54 60 58 T120 56 M0 8 Q20 16 34 10 Q50 4 64 12 Q80 18 96 9 Q108 4 120 10 M10 11 l-3 7 M26 12 l2 8 M46 8 l-2 7 M70 14 l3 6 M90 11 l-2 7 M108 7 l2 7',pp:[[30,74]]},
+'p-pile':{o:'v',d:'M10 120 L34 78 M80 120 L56 78 M22 120 L38 78 M68 120 L52 78 M12 78 V40 H78 V78 Z M12 40 v-4 h6 v4 M24 40 v-4 h6 v4 M36 40 v-4 h6 v4 M48 40 v-4 h6 v4 M60 40 v-4 h6 v4 M72 40 v-4 h6 v4 M34 78 V60 a11 11 0 0 1 22 0 V78 M41 52 v-7 a4 4 0 0 1 8 0 v7 z M0 66 L12 62 M90 66 L78 62',pp:[[45,100]]},
+'p-roofs':{o:'h',d:'M0 27 H120 M4 27 Q16 19 34 23 Q40 25 44 27 M0 44 l8 -6 l8 6 l9 -7 l9 7 l8 -5 l8 5 l10 -7 l10 7 l8 -6 l8 6 l9 -6 l9 6 l8 -5 M0 58 l10 -7 l10 7 l11 -8 l11 8 l10 -6 l10 6 l12 -8 l12 8 l10 -6 l10 6 l4 -3 M0 74 l12 -8 l12 8 l13 -9 l13 9 l12 -7 l12 7 l14 -9 l14 9 l12 -7 l6 4 M76 37 v-9 a5 5 0 0 1 10 0 v9 M81 23 v-3 M98 39 V24 l2.5 -4 l2.5 4 V39 M52 38 v-8 l3 -3 l3 3 v8',pp:[[100,86]]},
+'p-stradun':{o:'v',d:'M0 6 L37 37 V56 L0 112 M90 6 L53 37 V56 L90 112 M37 56 H53 M41 56 V26 h8 V56 M41 26 l4 -7 l4 7 M43.5 33 a1.5 1.5 0 1 0 3 0 a1.5 1.5 0 1 0 -3 0 M8 30 V86 M18 38 V74 M28 46 V64 M82 30 V86 M72 38 V74 M62 46 V64',pp:[[45,88]]},
+'p-shame1':{o:'v',d:'M24 34 V12 H66 V34 M24 12 L45 3 L66 12 M40 34 V22 a5 5 0 0 1 10 0 V34 M30 18 h6 M54 18 h6 M22 34 H68 M20 42 Q45 36 70 42 M17 51 Q45 44 73 51 M13 61 Q45 53 77 61 M9 72 Q45 63 81 72 M5 84 Q45 74 85 84 M1 97 Q45 86 89 97 M0 111 Q45 99 90 111 M22 34 Q14 60 1 97 M68 34 Q76 60 89 97',pp:[[45,58]]},
+'p-shame2':{o:'v',d:'M0 118 Q45 108 90 118 M4 104 Q45 95 86 104 M9 92 Q45 84 81 92 M14 82 Q45 75 76 82 M19 74 Q45 68 71 74 M23 67 Q45 62 67 67 M26 61 H64 M0 118 Q14 84 26 61 M90 118 Q76 84 64 61 M26 61 V30 L0 14 M64 61 V30 L90 14 M26 30 H64 M30 30 l7 -6 l7 6 l8 -7 l8 7 M34 61 v-10 h8 v10 M50 61 v-11 h8 v11',pp:[[45,100]]},
+'p-market':{o:'v',d:'M0 0 L34 34 V70 L0 120 M90 0 L56 34 V70 L90 120 M34 70 H56 M34 34 H56 M38 70 V52 a7 7 0 0 1 14 0 V70 M30 79 H60 M25 89 H65 M19 100 H71 M10 20 V102 M22 30 V88 M80 20 V102 M68 30 V88',pp:[[45,86]]},
+'p-ploce':{o:'v',d:'M8 120 V44 a37 37 0 0 1 74 0 V120 M14 120 V46 a31 31 0 0 1 62 0 V120 M14 92 H76 M24 92 L36 70 H54 L66 92 M36 70 V58 M54 70 V58 M30 58 H60 M34 58 V44 h22 V58 M34 44 v-3 h4 v3 M43 44 v-3 h4 v3 M52 44 v-3 h4 v3',pp:[[45,98]]},
+'p-arena':{o:'h',d:'M0 30 H120 M14 70 a46 34 0 0 1 92 0 M24 70 a36 26 0 0 1 72 0 M34 70 a26 18 0 0 1 52 0 M44 70 a16 10 0 0 1 32 0 M14 70 H106 M0 82 H120 M50 82 V74 h20 V82',pp:[]},
+'p-throne':{o:'v',d:'M28 112 V78 H62 V112 M24 78 H66 M28 78 V50 H62 V78 M22 96 H28 M62 96 H68 M22 96 V80 M68 96 V80 M45 50 V10 M39 50 L32 16 M51 50 L58 16 M34 50 L20 26 M56 50 L70 26 M30 52 L12 40 M60 52 L78 40 M42 14 h6 M30 19 l5 -1 M55 18 l5 1',pp:[[45,72]]},
+'p-olenna':{o:'h',d:'M0 20 H120 M0 26 H120 M10 26 V80 M16 26 V80 M40 26 V80 M45 26 V80 M75 26 V80 M80 26 V80 M104 26 V80 M110 26 V80 M0 80 H120 M16 46 H40 M45 46 H75 M80 46 H104 M55 46 q3 -10 5 -14 q2 4 5 14',pp:[[54,78],[66,78]]},
+'p-srd':{o:'h',d:'M0 20 H120 M6 30 Q20 22 40 27 Q46 30 40 34 Q22 38 8 34 Z M0 56 Q20 52 34 58 L40 50 L52 44 L74 44 L86 50 L90 60 L84 70 L62 76 L44 72 L36 64 Z M52 44 v-4 h4 v4 M86 50 l4 -3 M44 58 L82 54 M56 46 L60 74 M68 45 L72 73 M90 60 Q104 58 120 66',pp:[]}
+};
+const outBox=p=>{const o=OUT[p.id];return o&&o.o==='h'?[120,90]:[90,120]};
+// desenho do contorno: col = cor do traço, sw = espessura (em unidades do viewBox), halo = sombra para ler sobre a câmera
+function outlineInner(p,col,sw,halo){const o=OUT[p.id];if(!o)return '';const pth=(c,w,op)=>`<path d="${o.d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" opacity="${op}"/>${o.dd?`<path d="${o.dd}" fill="none" stroke="${c}" stroke-width="${w}" stroke-dasharray="${w*2.2} ${w*2.2}" opacity="${op}"/>`:''}`;
+ const per=o.pp.map(([x,y])=>`<g transform="translate(${x},${y})"><circle cy="-11" r="3" style="fill:#e3b55a" stroke="${halo?'#000':'none'}" stroke-width="${halo?sw*.6:0}"/><path d="M-4.2 0 L0 -7.4 L4.2 0z" style="fill:#e3b55a" stroke="${halo?'#000':'none'}" stroke-width="${halo?sw*.6:0}"/></g>`).join('');
+ return (halo?pth('#000',sw*2.6,.45):'')+pth(col,sw,1)+per}
+function outlineSVG(p,w,h,col,sw){const b=outBox(p);return `<svg viewBox="0 0 ${b[0]} ${b[1]}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid meet">${outlineInner(p,col,sw,false)}</svg>`}
+// guia feito de uma foto sua: detecta as bordas e guarda só o traço (fica leve, cabe no aparelho)
+const refGet=id=>store.get('ref_'+id,null);
+async function makeRef(blob){const im=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=URL.createObjectURL(blob)});
+ const W=300,H=Math.max(40,Math.round(W*im.height/im.width)),c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});x.filter='blur(1px)';x.drawImage(im,0,0,W,H);
+ const src=x.getImageData(0,0,W,H).data,g=new Float32Array(W*H);for(let i=0;i<W*H;i++)g[i]=src[i*4]*.3+src[i*4+1]*.59+src[i*4+2]*.11;
+ const mag=new Float32Array(W*H);for(let y=1;y<H-1;y++)for(let X=1;X<W-1;X++){const i=y*W+X;const gx=-g[i-W-1]-2*g[i-1]-g[i+W-1]+g[i-W+1]+2*g[i+1]+g[i+W+1],gy=-g[i-W-1]-2*g[i-W]-g[i-W+1]+g[i+W-1]+2*g[i+W]+g[i+W+1];mag[i]=Math.hypot(gx,gy)}
+ const s=Array.from(mag).sort((a,b)=>a-b),th=Math.max(40,s[Math.floor(s.length*.86)]);const out=x.createImageData(W,H);
+ for(let i=0;i<W*H;i++){const a=mag[i]>th?Math.min(255,(mag[i]-th)*3+120):0;out.data[i*4]=255;out.data[i*4+1]=255;out.data[i*4+2]=255;out.data[i*4+3]=a}
+ x.filter='none';x.putImageData(out,0,0);return {u:c.toDataURL('image/png'),w:W,h:H}}
+/* ============ take da cena: a pessoa traz o print da série; fica só no aparelho (o app não inclui imagens da série) ============ */
+const stillGet=id=>store.get('still_'+id,null);
+const phScene=p=>{const l=LBY[p.loc];return l.scenes.find(s=>s[0])||null};
+const stillSearch=p=>{const sc=phScene(p),l=LBY[p.loc];return 'https://www.google.com/search?tbm=isch&q='+encodeURIComponent('Game of Thrones '+(sc?`S${sc[0]}E${sc[1]} "${sc[2]}" `:'')+LBY[p.loc].hr+' Dubrovnik scene')};
+function pickStill(id){const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=async()=>{const f=inp.files&&inp.files[0];if(!f)return;
+  try{const im=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=URL.createObjectURL(f)});const k=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+   store.set('still_'+id,{u:c.toDataURL('image/jpeg',.82),w:c.width,h:c.height});if(!stillGet(id))throw 0;CAM.ghost=1;stillUI(id);toast('🎬 '+t('stillOn'),3400)}catch(e){toast(t('badImage'))}};inp.click()}
+function stillUI(id){const el=$('#st-'+id);if(!el)return;const p=PH.find(x=>x.id===id),s=stillGet(id);
+ el.innerHTML=s?`<img src="${s.u}" alt=""><div style="flex:1;min-width:0"><b>🎬 ${t('stillTitle')}</b><div class="small muted">${t('stillHave')}</div><button class="btn sm" style="margin-top:6px" onclick="store.set('still_${id}',null);stillUI('${id}')">✕ ${t('stillRemove')}</button></div>`
+  :`<div style="flex:1;min-width:0"><b>🎬 ${t('stillTitle')}</b><div class="small muted">${t('stillHint')}</div><div class="row" style="margin-top:8px"><button class="btn sm gold" onclick="pickStill('${id}')">＋ ${t('stillAdd')}</button><a class="btn sm" href="${stillSearch(p)}" target="_blank" rel="noopener">🔎 ${t('stillFind')}</a></div></div>`}
+// lado a lado: take em cima, sua foto embaixo
+async function makeSBS(o,p){const s=stillGet(p.id),ld=u=>new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=u});
+ try{await document.fonts.load('900 40px Cinzel');await document.fonts.load('700 30px Inter')}catch(e){}
+ const a=await ld(s.u),b=await ld(urlOf(o)),W=1080,P=28,iw=W-P*2,ar=Math.max(.5,Math.min(1.5,a.height/a.width)),ih=Math.round(iw*ar),H=P*3+ih*2+150;
+ const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.fillStyle='#16100c';x.fillRect(0,0,W,H);
+ const cover=(im,X,Y,w,h)=>{const k=Math.max(w/im.width,h/im.height),sw=w/k,sh=h/k;x.drawImage(im,(im.width-sw)/2,(im.height-sh)/2,sw,sh,X,Y,w,h)};
+ cover(a,P,P,iw,ih);cover(b,P,P*2+ih,iw,ih);x.strokeStyle='#d6ae45';x.lineWidth=4;x.strokeRect(P,P,iw,ih);x.strokeRect(P,P*2+ih,iw,ih);
+ const tag=(txt,X,Y)=>{x.font='700 28px Inter, sans-serif';const w=x.measureText(txt).width+32;x.fillStyle='rgba(16,10,6,.78)';x.fillRect(X,Y,w,48);x.fillStyle='#f3e6c4';x.textAlign='left';x.fillText(txt,X+16,Y+34)};
+ const sc=phScene(p),l=LBY[p.loc];tag(t('sbsShow')+(sc?' · '+t('epTag',sc[0],sc[1]):''),P+14,P+14);tag(t('sbsMe')+' · '+new Date(o.ts).getFullYear(),P+14,P*2+ih+14);
+ x.textAlign='center';x.fillStyle='#f6e7bf';x.font='900 40px Cinzel, serif';x.fillText(l.got.split(' · ')[0].toUpperCase(),W/2,H-92,W-80);x.fillStyle='#d6ae45';x.font='600 28px Inter, sans-serif';x.fillText(l.name+' · Dubrovnik',W/2,H-46,W-80);
+ return new Promise(res=>c.toBlob(res,'image/jpeg',.9))}
+/* ============ rotas a pé pelas ruas (traçado buscado uma vez e guardado; sem internet = linha reta) ============ */
+const RT={},AIR={lokrum:1,srd:1,trsteno:1};
+const ROUTER='https://routing.openstreetmap.de/routed-foot/route/v1/foot/';
+function routeLine(r){const c=RT[r.id];return c?c.line:r.stops.map(id=>[LBY[id].lon,LBY[id].lat])}
+async function loadRoute(r){if(RT[r.id]||RT['_'+r.id]||FRAMED)return;const key='4|'+r.stops.join();const c=store.get('rt_'+r.id,null);if(c&&c.k===key){RT[r.id]=c;return}
+ if(!navigator.onLine)return;RT['_'+r.id]=1;
+ try{const line=[],legs=[];let i=0;const st=r.stops;
+  while(i<st.length-1){const a=LBY[st[i]],b=LBY[st[i+1]];
+   if(AIR[st[i]]||AIR[st[i+1]]){if(!line.length)line.push([a.lon,a.lat]);line.push([b.lon,b.lat]);legs.push(null);i++;continue}
+   let j=i+1;while(j<st.length-1&&!AIR[st[j+1]])j++;
+   const res=await fetch(ROUTER+st.slice(i,j+1).map(id=>LBY[id].lon.toFixed(5)+','+LBY[id].lat.toFixed(5)).join(';')+'?overview=full&geometries=geojson&continue_straight=false');
+   const js=await res.json();if(js.code!=='Ok'||!js.routes||!js.routes[0])throw 0;const rr=js.routes[0];
+   rr.legs.forEach((lg,n)=>{const sd=dist(LBY[st[i+n]],LBY[st[i+n+1]]);if(!(lg.distance>=0)||lg.distance>sd*6+250)throw 0;legs.push(Math.max(Math.round(lg.distance),Math.round(sd)))});
+   rr.geometry.coordinates.forEach(q=>line.push([+q[0].toFixed(5),+q[1].toFixed(5)]));i=j}
+  RT[r.id]={k:key,line,legs};store.set('rt_'+r.id,RT[r.id]);if(S.route===r.id)drawRoute(true)}catch(e){}
+ delete RT['_'+r.id]}
+function loadRoutes(){ROUTES.reduce((p,r)=>p.then(()=>loadRoute(r)),Promise.resolve())}
+const legDist=(r,i)=>{const c=RT[r.id];return c&&c.legs[i-1]!=null?c.legs[i-1]:null};
 /* ============ mapa real (MapLibre + OpenFreeMap; o desenhado fica de reserva) ============ */
 const RM={on:false,map:null,ready:false,tried:false,mk:{},ph:{},me:null,head:false,lastB:0,warm:false,tok:0,terr:0};
 const RM_STYLE='https://tiles.openfreemap.org/styles/liberty';
@@ -2097,7 +2193,7 @@ async function initReal(){if(RM.tried||!wantReal())return;RM.tried=true;
   if(S.sim){clearTimeout(S.simT);S.simT=setTimeout(()=>setManualPos(p,null,true),300)}});
  map.on('dblclick',()=>clearTimeout(S.simT));
  map.on('dragstart',()=>{if(S.follow){S.follow=false;RM.head=false;styleZMe()}});
- map.on('zoom',rmZoomCls);map.on('rotate',rmNorth);map.on('pitch',rmNorth);
+ map.on('zoom',rmZoomCls);map.on('zoomend',rmCluster);map.on('rotate',rmNorth);map.on('pitch',rmNorth);
  map.on('moveend',()=>{MAP.s=z2s(map.getZoom())})}
 window.addEventListener('online',()=>{if(!RM.on&&!RM.map&&wantReal()){RM.tried=false;initReal()}});
 function realFail(){if(RM.map){try{RM.map.remove()}catch(e){}}RM.map=null;RM.on=false;RM.ready=false;RM.mk={};RM.ph={};RM.me=null;document.body.classList.remove('rm-on');
@@ -2120,7 +2216,16 @@ function rmPin(l){const v=S.visited.has(l.id);return `<svg viewBox="-16 -40 32 4
 function rmMarkers(){if(!RM.on)return;const m=RM.map;
  for(const l of L){let mk=RM.mk[l.id];if(!mk){const el=document.createElement('div');el.className='rmk';el.dataset.id=l.id;
    el.addEventListener('click',e=>{e.stopPropagation();openLoc(l.id)});mk=RM.mk[l.id]=new maplibregl.Marker({element:el,anchor:'bottom'}).setLngLat([l.lon,l.lat]).addTo(m)}
-  const el=mk.getElement();el.innerHTML=rmPin(l);el.classList.toggle('sel',S.sel===l.id);el.classList.toggle('vis',S.visited.has(l.id));el.style.zIndex=S.sel===l.id?5:'';el.setAttribute('aria-label',l.n+'. '+l.name)}}
+  const el=mk.getElement();el.innerHTML=rmPin(l);el.classList.toggle('sel',S.sel===l.id);el.classList.toggle('vis',S.visited.has(l.id));el.style.zIndex=S.sel===l.id?5:'';el.setAttribute('aria-label',l.n+'. '+l.name)}rmCluster()}
+function rmCluster(){if(!RM.on)return;const m=RM.map;(RM.cl||[]).forEach(c=>c.remove());RM.cl=[];RM.clOf={};
+ if(m.getZoom()>=15.4){for(const l of L)RM.mk[l.id].getElement().style.display='';return}
+ const pts=L.map(l=>({l,p:m.project([l.lon,l.lat])})),used=new Set();
+ for(const a of pts){if(used.has(a.l.id))continue;const g=[a];used.add(a.l.id);for(const b of pts){if(!used.has(b.l.id)&&Math.hypot(a.p.x-b.p.x,a.p.y-b.p.y)<32){g.push(b);used.add(b.l.id)}}
+  if(g.length===1){RM.mk[a.l.id].getElement().style.display='';continue}
+  const el=document.createElement('div');el.className='rcl';el.innerHTML=`<b>${g.length}</b>`;el.setAttribute('aria-label',g.map(x=>x.l.name).join(', '));
+  const lon=g.reduce((s,x)=>s+x.l.lon,0)/g.length,lat=g.reduce((s,x)=>s+x.l.lat,0)/g.length;
+  el.addEventListener('click',e=>{e.stopPropagation();rmFit(g.map(x=>x.l),70,0)});
+  g.forEach(x=>{RM.mk[x.l.id].getElement().style.display='none';RM.clOf[x.l.id]=el});RM.cl.push(new maplibregl.Marker({element:el}).setLngLat([lon,lat]).addTo(m))}}
 function rmPhotos(){if(!RM.on)return;const m=RM.map,src=m.getSource('rm-fan');
  if(!S.showPhotos){Object.values(RM.ph).forEach(x=>x.remove());RM.ph={};src&&src.setData(FC([]));return}
  const feats=[];for(const p of PH){if(!p.stand)continue;feats.push({type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[sectorPoly(p.stand[0],p.stand[1],p.dir,20,42)]}});
@@ -2135,10 +2240,10 @@ function rmMe(){if(!RM.on)return;const m=RM.map,src=m.getSource('rm-acc');
  const acc=S.pos.acc&&S.posSrc==='gps'?Math.min(S.pos.acc,400):0;src&&src.setData(FC(acc>4?[{type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[circlePoly(S.pos.lat,S.pos.lon,acc)]}}]:[]));
  if(RM.head&&S.follow&&hd!=null){const now=performance.now();if(now-RM.lastB>90){RM.lastB=now;m.jumpTo({bearing:hd,center:[S.pos.lon,S.pos.lat]})}}}
 function rmRoute(){if(!RM.on)return;const src=RM.map.getSource('rm-route');if(!src)return;const r=S.route&&ROUTES.find(x=>x.id===S.route);
- src.setData(FC(r?[{type:'Feature',properties:{},geometry:{type:'LineString',coordinates:r.stops.map(id=>[LBY[id].lon,LBY[id].lat])}}]:[]))}
+ src.setData(FC(r?[{type:'Feature',properties:{},geometry:{type:'LineString',coordinates:routeLine(r)}}]:[]))}
 function rmFit(lls,pad,top,instant){const m=RM.map;if(!lls.length)return;let a=[1e9,1e9],b=[-1e9,-1e9];lls.forEach(p=>{a=[Math.min(a[0],p.lon),Math.min(a[1],p.lat)];b=[Math.max(b[0],p.lon),Math.max(b[1],p.lat)]});
  const H=m.getContainer().clientHeight,W=m.getContainer().clientWidth,pd=Math.min(pad,W/5);
- try{m.fitBounds([a,b],{padding:{top:pd+top,bottom:pd+(S.pos?70:40),left:pd,right:pd+52},maxZoom:17.2,duration:instant?0:600,bearing:m.getBearing()})}catch(e){m.jumpTo({center:[(a[0]+b[0])/2,(a[1]+b[1])/2]})}}
+ try{m.fitBounds([a,b],{padding:{top:pd+top,bottom:pd+(S.pos?70:40),left:pd,right:pd+52},maxZoom:17.2,duration:instant?0:600,linear:false,bearing:m.getBearing()})}catch(e){m.jumpTo({center:[(a[0]+b[0])/2,(a[1]+b[1])/2]})}}
 function rmCenter(lat,lon,minS,noOffset,instant){const m=RM.map,H=m.getContainer().clientHeight;const z=Math.max(m.getZoom(),minS?Math.min(18,s2z(minS)):0);
  const o={center:[lon,lat],zoom:z,offset:[0,noOffset?0:-H*0.18]};if(RM.head&&S.heading!=null)o.bearing=S.heading;instant?m.jumpTo(o):m.easeTo(Object.assign(o,{duration:550}))}
 function styleZMe(){const b=$('#zMe');b.style.background=S.follow?'var(--blue)':'';b.style.color=S.follow?'#fff':'';b.classList.toggle('head',!!(S.follow&&RM.head))}
@@ -2386,7 +2491,7 @@ function lightBox(p){const L1=lightFor(p.dir);const ic=L1.k==='night'||L1.k==='b
  return `<div class="light">${ic}<div><b>${L1.t}</b>${p.dir!=null?` · ${t('camTo',Math.round(p.dir),card(p.dir))}`:''}<br><span class="muted">${L1.d}</span>${bwt?`<br><span style="color:var(--gold);font-weight:600">${bwt}</span>`:''}</div></div>`}
 function photoCard(p,full){const l=LBY[p.loc];const st=p.stand?{lat:p.stand[0],lon:p.stand[1]}:l;const d=S.pos?dist(S.pos,st):null;
  const ic=(s,n)=>s.replace('<svg',`<svg width="${n}" height="${n}"`);
- return `<div class="card" id="pc-${p.id}"><div class="ph"><div class="vf">${sketch(p.sk)}</div><div style="min-width:0"><h2 style="font-size:16px">${esc(p.title)}</h2><div class="alias" style="font-size:13px">${esc(l.name)} · ${esc(l.got)}</div>
+ return `<div class="card" id="pc-${p.id}"><div class="ph"><div class="vf">${OUT[p.id]?`<div class="vfo">${outlineSVG(p,96,120,"var(--ink2,#5a4a36)",1.5)}</div>`:sketch(p.sk)}</div><div style="min-width:0"><h2 style="font-size:16px">${esc(p.title)}</h2><div class="alias" style="font-size:13px">${esc(l.name)} · ${esc(l.got)}</div>
  <div class="chips" style="margin-top:6px"><span class="chip g" id="done-${p.id}" style="display:none;background:var(--ok)">✓ ${t('done')}</span><span class="chip">${esc(p.lens)}</span><span class="chip">${esc(p.orient)}</span>${d!=null?`<span class="chip">${fmtD(d)}</span>`:''}${p.dir!=null?`<span class="chip">${arrowSVG(p.dir,13,'var(--gold)')} ${card(p.dir)}</span>`:''}</div></div></div>
  <div class="ltb" data-ph="${p.id}">${lightBox(p)}</div>
  ${full&&p.stand&&p.dir!=null?`<div class="planner"><h3 class="serif" style="font-size:15px;margin:14px 0 4px">${t('plannerTitle')}</h3><div class="small muted">${t('plannerHint')}</div>
@@ -2394,10 +2499,10 @@ function photoCard(p,full){const l=LBY[p.loc];const st=p.stand?{lat:p.stand[0],l
   <div style="display:flex;align-items:center;gap:8px;margin-top:8px"><div class="seg2" id="plLens">${[t('lens05'),'1×','2×'].map((tx,i)=>`<button data-l="${i}" class="${i===1?'on':''}">${tx}</button>`).join('')}</div><span class="small muted" id="plDate" style="margin-left:auto"></span></div>
   <input type="range" id="plT" style="width:100%;margin-top:10px;accent-color:var(--gold2)" aria-label="${t('timeOfDay')}"><div id="plLbl" style="font-weight:700;font-size:14px"></div></div>`:''}
  <div class="kv" style="margin-top:10px"><b>${t('kWhere')}</b><span>${esc(p.where)}</span><b>${t('kFrame')}</b><span>${esc(p.how)}</span><b>${t('kLight')}</b><span>${esc(p.best)}</span><b>${t('kRecreate')}</b><span>${esc(p.recreate)}</span></div>
- <div class="row" style="margin-top:12px"><button class="btn gold sm" onclick="openCam('${p.id}')">${ic(IC.cam,18)} ${t('camGuide')}</button><button class="btn sm" onclick="takePhoto('${p.id}',false)">${ic(IC.img,18)} ${t('fromGallery')}</button>
+ ${full?`<div class="still" id="st-${p.id}"></div>`:''}<div class="row" style="margin-top:12px"><button class="btn gold sm" onclick="openCam('${p.id}')">${ic(IC.cam,18)} ${t('camGuide')}</button><button class="btn sm" onclick="takePhoto('${p.id}',false)">${ic(IC.img,18)} ${t('fromGallery')}</button>
  <a class="btn sm" href="${gmaps(st.lat,st.lon)}" target="_blank" rel="noopener">${ic(IC.nav,16)} ${t('goToSpot')}</a>${full?'':`<button class="btn sm" onclick="showPhotoOnMap('${p.id}')">${ic(IC.map,16)} ${t('tabMap')}</button>`}</div>
  <div class="thumbs" id="th-${p.id}"></div></div>`}
-function openPhoto(id){const p=PH.find(x=>x.id===id);if(!p)return;openSheet(`<div class="shead"><span class="badge" style="background:var(--gold)">📷</span><div style="flex:1"><h2>${t('photoStudio')}</h2><div class="small muted">${t('photoStudioHint')}</div></div><button class="iconbtn" onclick="closeSheet()" aria-label="${t('close')}">✕</button></div>${photoCard(p,true)}`);fillThumbs(p.id);initPlanner(p)}
+function openPhoto(id){const p=PH.find(x=>x.id===id);if(!p)return;openSheet(`<div class="shead"><span class="badge" style="background:var(--gold)">📷</span><div style="flex:1"><h2>${t('photoStudio')}</h2><div class="small muted">${t('photoStudioHint')}</div></div><button class="iconbtn" onclick="closeSheet()" aria-label="${t('close')}">✕</button></div>${photoCard(p,true)}`);fillThumbs(p.id);stillUI(p.id);initPlanner(p)}
 /* --- planejador: mini-mapa com cone da lente e sol por horário --- */
 const FOV=[104,66,36];
 function initPlanner(p){const r=$('#plT');if(!r)return;const ds=tripDS(),sd=sunDay(ds),base=dayBase(ds);
@@ -2461,7 +2566,7 @@ const DB={mem:[],db:null,ok:true,
 let pendingPh=null;
 function takePhoto(id,cam){pendingPh=id;const inp=cam?$('#fCam'):$('#fGal');inp.value='';inp.click()}
 /* --- câmera ao vivo: guia de enquadramento + Radar AR --- */
-const CAM={on:false,stream:null,ph:null,facing:'environment',grid:true,ghost:true,frame:null,ar:false,lensF:1,lastTick:0};
+const CAM={on:false,stream:null,ph:null,facing:'environment',grid:true,ghost:1,frame:null,ar:false,lensF:1,lastTick:0};
 const ALT={gradac:30,lovr:42,pilebay:2,pile:10,minceta:45,walls:14,bokar:16,stradun:5,rupe:15,jesuit:16,bosk:20,reitor:8,domst:8,domsteps:10,ploce:9,oldport:2,lokrum:20,belvedere:40,srd:405,trsteno:60};
 async function openCam(id,ar){const p=id?PH.find(x=>x.id===id):null;if(id&&!p)return;
  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){if(p)takePhoto(id,true);else toast(t('noLiveCam'));return}
@@ -2500,16 +2605,22 @@ function closeCam(){if(S.headingSrc==='drag'){S.headingSrc=null;S.heading=null;d
 let wakeL=null;async function keepAwake(on){try{if(on){if(!wakeL&&navigator.wakeLock){wakeL=await navigator.wakeLock.request('screen');wakeL.addEventListener('release',()=>{wakeL=null})}}else if(wakeL){await wakeL.release();wakeL=null}}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&(CAM.on||S.guiding))keepAwake(true)});
 function camOverlay(){const W=innerWidth,H=innerHeight,p=CAM.ph;const svg=$('#camOv');svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
- if(!p){CAM.frame=null;svg.innerHTML=`<g id="camLevel" transform="translate(${W/2},${H/2})"></g>`;$('#camRot').style.display='none';$('#camAR').classList.toggle('on',CAM.ar);camTick();return}
+ if(!p){$('#camStill').style.display='none';CAM.frame=null;svg.innerHTML=`<g id="camLevel" transform="translate(${W/2},${H/2})"></g>`;$('#camRot').style.display='none';$('#camAR').classList.toggle('on',CAM.ar);camTick();return}
  const vert=p.vert,portrait=H>=W;let fw=W,fh=H;
  if(vert!==portrait){if(portrait){fw=W*0.94;fh=fw*2/3}else{fh=H*0.9;fw=fh*0.8}}
  const fx=(W-fw)/2,fy=(H-fh)/2;CAM.frame={fx,fy,fw,fh};let s='';
  if(vert!==portrait)s+=`<path d="M0 0H${W}V${H}H0Z M${fx} ${fy}v${fh}h${fw}v-${fh}Z" fill="rgba(0,0,0,.5)" fill-rule="evenodd"/><rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="6 5"/>`;
  if(CAM.grid)for(const t of [1/3,2/3])s+=`<line x1="${fx+fw*t}" y1="${fy}" x2="${fx+fw*t}" y2="${fy+fh}" stroke="rgba(255,255,255,.6)" stroke-width="1"/><line x1="${fx}" y1="${fy+fh*t}" x2="${fx+fw}" y2="${fy+fh*t}" stroke="rgba(255,255,255,.6)" stroke-width="1"/>`;
- if(CAM.ghost)s+=`<g id="camGhost" opacity=".8" transform="translate(${fx},${fy}) scale(${fw/80},${fh/100})">${sketch(p.sk,true)}</g>`;
+ const ref=refGet(p.id),stl=stillGet(p.id);if(CAM.ghost===2&&!ref)CAM.ghost=1;if(CAM.ghost===3&&!stl)CAM.ghost=1;
+ {const cs=$('#camStill');cs.style.display=stl?'block':'none';if(stl){cs.style.backgroundImage=`url(${stl.u})`;cs.style.aspectRatio=stl.w+'/'+stl.h;cs.classList.toggle('big',!!CAM.stillBig)}}
+ if(CAM.ghost===3){const k=Math.min(fw/stl.w,fh/stl.h),rw=stl.w*k,rh=stl.h*k;s+=`<image id="camGhost" href="${stl.u}" x="${fx+(fw-rw)/2}" y="${fy+(fh-rh)/2}" width="${rw}" height="${rh}" opacity=".45"/>`}
+ else 
+ if(CAM.ghost===2){const k=Math.min(fw/ref.w,fh/ref.h),rw=ref.w*k,rh=ref.h*k;s+=`<image id="camGhost" href="${ref.u}" x="${fx+(fw-rw)/2}" y="${fy+(fh-rh)/2}" width="${rw}" height="${rh}" opacity=".9" style="filter:drop-shadow(0 0 1.5px #000)"/>`}
+ else if(CAM.ghost&&OUT[p.id]){const b=outBox(p),k=Math.min(fw/b[0],fh/b[1]);s+=`<g id="camGhost" opacity=".92" transform="translate(${fx+(fw-b[0]*k)/2},${fy+(fh-b[1]*k)/2}) scale(${k})">${outlineInner(p,'#fff',2.6/k,true)}</g>`}
+ else if(CAM.ghost)s+=`<g id="camGhost" opacity=".8" transform="translate(${fx},${fy}) scale(${fw/80},${fh/100})">${sketch(p.sk,true)}</g>`;
  s+=`<g id="camLevel" transform="translate(${W/2},${H/2})"></g>`;svg.innerHTML=s;
  $('#camRot').style.display=vert===portrait?'none':'block';$('#camRot').textContent='↻ '+(vert?t('rotVert'):t('rotHoriz'));
- $('#camGrid').classList.toggle('on',CAM.grid);$('#camGh').classList.toggle('on',CAM.ghost);$('#camAR').classList.toggle('on',CAM.ar);camTick()}
+ $('#camGrid').classList.toggle('on',CAM.grid);$('#camGh').classList.toggle('on',!!CAM.ghost);$('#camAR').classList.toggle('on',CAM.ar);camTick()}
 const headOK=()=>(S.headingSrc==='live'||S.headingSrc==='drag')&&S.heading!=null;
 function camTick(){if(!CAM.on)return;const p=CAM.ph,g=$('#camGuide');let html='',ok=false;
  if(!p){if(!S.pos)html='📍 '+t('arNeedPos');else if(!headOK())html=FRAMED?t('arDragFramed'):'🧭 '+t('arNeedCompass')}
@@ -2573,7 +2684,8 @@ async function camLastThumb(o){const im=$('#camLast');if(!o){const all=(await DB
  if(o){im.src=urlOf(o);im.dataset.f=o.id;im.style.visibility='visible'}else{im.removeAttribute('src');im.style.visibility='hidden'}}
 $('#camX').onclick=closeCam;$('#camShot').onclick=camShot;
 $('#camFlip').onclick=async()=>{CAM.facing=CAM.facing==='environment'?'user':'environment';CAM.deviceId=null;CAM.lensF=1;try{await camStart()}catch(e){toast(t('flipFail'))}};
-$('#camGrid').onclick=()=>{CAM.grid=!CAM.grid;camOverlay()};$('#camGh').onclick=()=>{CAM.ghost=!CAM.ghost;camOverlay()};
+$('#camGrid').onclick=()=>{CAM.grid=!CAM.grid;camOverlay()};$('#camGh').onclick=()=>{const id=CAM.ph&&CAM.ph.id,opts=[1].concat(id&&stillGet(id)?[3]:[],id&&refGet(id)?[2]:[],[0]);CAM.ghost=opts[(opts.indexOf(CAM.ghost)+1)%opts.length];camOverlay();if(CAM.ghost)toast(CAM.ghost===3?'🎬 '+t('guideStill'):CAM.ghost===2?'🖼️ '+t('guidePhoto'):'✏️ '+t('guideLine'),1600)};
+$('#camStill').onclick=()=>{CAM.stillBig=!CAM.stillBig;$('#camStill').classList.toggle('big',CAM.stillBig)};
 $('#camAR').onclick=()=>{CAM.ar=!CAM.ar;$('#camAR').classList.toggle('on',CAM.ar);if(CAM.ar&&!headOK())toast(t('arEnableHint'))};
 $('#camComp').onclick=()=>startCompass(false).then(ok=>{if(ok){toast('🧭 '+t('compassOn'));camTick()}});
 $('#camLast').onclick=()=>{const id=$('#camLast').dataset.f;if(id){closeCam();viewFoto(id)}};
@@ -2592,11 +2704,16 @@ async function renderAlbum(){const el=$('#album');if(!el)return;const all=(await
  $$('img',el).forEach(i=>i.onclick=()=>viewFoto(i.dataset.f))}
 async function viewFoto(fid){const o=(await DB.all()).find(x=>x.id===fid);if(!o)return;const p=PH.find(x=>x.id===o.ph),l=LBY[o.loc];
  modal(`<h2 style="font-size:18px">${esc(p?p.title:l.name)}</h2><div class="small muted">${esc(l.name)} · ${new Date(o.ts).toLocaleString(LOCALE[LANG])}</div>
- <img id="vfImg" src="${urlOf(o)}" style="width:100%;border-radius:12px;margin:10px 0;display:block">
+ <div class="cmp"><img id="vfImg" src="${urlOf(o)}" style="width:100%;border-radius:12px;display:block">${p&&OUT[p.id]?`<div class="cmpo" id="cmpO"><svg viewBox="0 0 ${outBox(p)[0]} ${outBox(p)[1]}" preserveAspectRatio="xMidYMid meet">${outlineInner(p,'#fff',.6,true)}</svg></div><i id="cmpL"></i>`:''}</div>
+ ${p&&OUT[p.id]?`<label class="small muted" style="display:flex;align-items:center;gap:8px;margin:0 0 8px">✏️ <input type="range" id="cmpR" min="0" max="100" value="50" style="flex:1"> ${t('compare')}</label>`:''}
  <div class="grid2"><button class="btn gold" id="mkPost">🖼️ ${t('makePostal')}</button><button class="btn" id="svOrig">⬇️ ${t('saveOrig')}</button></div>
- <div class="grid2" style="margin-top:8px"><button class="btn red" id="delF">${t('delete')}</button><button class="btn" data-close>${t('close')}</button></div><div class="small muted" id="dlNote" style="margin-top:8px"></div>`);
+ ${p&&stillGet(p.id)?`<button class="btn gold" id="sbsB" style="width:100%;margin-top:8px">🎬 ${t('sideBySide')}</button>`:''}${p?`<button class="btn" id="refB" style="width:100%;margin-top:8px"></button>`:''}<div class="grid2" style="margin-top:8px"><button class="btn red" id="delF">${t('delete')}</button><button class="btn" data-close>${t('close')}</button></div><div class="small muted" id="dlNote" style="margin-top:8px"></div>`);
  $('#mkPost').onclick=async()=>{const b=await makePostal(o);const u=URL.createObjectURL(b);$('#vfImg').src=u;$('#mkPost').textContent='💾 '+t('savePostal');$('#mkPost').onclick=()=>saveBlob(b,`kings-landing-${l.id}.jpg`)};
  $('#svOrig').onclick=()=>saveBlob(o.blob,`dubrovnik-${l.id}-${o.id}.jpg`);
+ const sb=$('#sbsB');if(sb)sb.onclick=async()=>{try{const b=await makeSBS(o,p);$('#vfImg').src=URL.createObjectURL(b);const co=$('#cmpO');if(co){co.style.display='none';$('#cmpL').style.display='none'}sb.textContent='💾 '+t('saveSBS');sb.onclick=()=>saveBlob(b,`kings-landing-${l.id}-scene.jpg`)}catch(e){toast(t('badImage'))}};
+ const cr=$('#cmpR');if(cr){const up=()=>{$('#cmpO').style.clipPath=`inset(0 ${100-cr.value}% 0 0)`;$('#cmpL').style.left=cr.value+'%'};cr.oninput=up;up()}
+ const rb=$('#refB');if(rb){const lab=()=>{rb.textContent=refGet(p.id)?'✕ '+t('guideRemove'):'🎯 '+t('useAsGuide')};lab();
+  rb.onclick=async()=>{if(refGet(p.id)){store.set('ref_'+p.id,null);lab();return}try{store.set('ref_'+p.id,await makeRef(o.blob));CAM.ghost=2;lab();toast('🎯 '+t('guideOn'),3200)}catch(e){toast(t('badImage'))}}}
  $('#delF').onclick=async()=>{await DB.del(fid);closeModal();renderAlbum();if(p)fillThumbs(p.id);toast(t('photoDeleted'))};
  if(!DL)$('#dlNote').textContent=t('holdToSave')}
 let DL=null;(async()=>{try{if(window.claude&&typeof window.claude.use==='function'){DL=await window.claude.use('downloads')}}catch(e){DL=null}})();
@@ -2646,7 +2763,7 @@ function renderMais(){const el=$('#v-mais');const m=zMonth();const low=[11,12,1,
  <div class="card" id="quizCard"></div>
  <div class="card"><h2>${t('settings')}</h2><div class="row" style="margin-top:8px"><button class="btn sm gold" id="tourBtn">🎓 ${t('replayTour')}</button><button class="btn sm" id="langBtn">🌐 ${t('language')}: ${LANGS[LANG]}</button><button class="btn sm" id="themeBtn2">🌓 ${t('theme')}: ${t('theme_'+S.theme)}</button>${FRAMED?'':`<button class="btn sm" id="mapBtn">🗺️ ${t('mapMode')}: ${store.get('mapMode','real')==='drawn'?t('mapDrawn'):t('mapReal')}</button>`}<button class="btn sm" id="simBtn">🧪 ${t('simTitle')}: ${S.sim?t('onW'):t('offW')}</button><button class="btn sm" id="spBtn">${S.spoil?'🙈':'👀'} ${t('noSpoilers')}: ${S.spoil?t('onW'):t('offW')}</button><button class="btn sm" id="rsBtn">${t('resetConq')}</button></div></div>
  <div class="card" id="ajuda"><h2>${t('helpTitle')}</h2><ul class="clean small">${FRAMED?`<li>${t('helpFramed',`<a href="${HOSTED_URL}?lang=${LANG}" target="_blank" rel="noopener">${HOSTED_URL}</a>`)}</li>`:''}${t('helpHTML')}</ul></div>
- <div class="card"><h2>${t('aboutTitle')}</h2><p class="small" style="margin-top:0">${t('aboutP')}</p><p class="small muted">${t('sourcesP')} · v4</p></div>
+ <div class="card"><h2>${t('aboutTitle')}</h2><p class="small" style="margin-top:0">${t('aboutP')}</p><p class="small muted">${t('sourcesP')} · v6</p></div>
  </div>`;
  $('#shareBtn').onclick=shareApp;{const mb=$('#mapBtn');if(mb)mb.onclick=()=>{setMapMode(store.get('mapMode','real')==='drawn'?'real':'drawn');renderMais();toast('🗺️ '+t('mapMode')+': '+(store.get('mapMode','real')==='drawn'?t('mapDrawn'):t('mapReal')))}}$('#langBtn').onclick=openLangModal;$('#langBtn2').onclick=openLangModal;
  $('#tourBtn').onclick=()=>{go('mapa');setTimeout(()=>startTour(0),120)};
@@ -2655,9 +2772,9 @@ function renderMais(){const el=$('#v-mais');const m=zMonth();const low=[11,12,1,
  $('#spBtn').onclick=()=>{S.spoil=!S.spoil;store.set('nospoil',S.spoil);document.body.classList.toggle('nospoil',S.spoil);renderMais()};
  $('#rsBtn').onclick=()=>{S.visited=new Set();store.set('visited',[]);drawMarkers();toast(t('conqReset'))};
  renderQuiz()}
-function routeStops(r){let h='';let tot=0;r.stops.forEach((id,i)=>{const l=LBY[id];if(i>0){const d=dist(LBY[r.stops[i-1]],l);tot+=d;h+=`<div class="leg">↓ ${t('legLine',fmtD(d),walk(d))}</div>`}
+function routeStops(r){let h='';let tot=0,real=true;r.stops.forEach((id,i)=>{const l=LBY[id];if(i>0){const w=legDist(r,i),d=w!=null?w:dist(LBY[r.stops[i-1]],l);if(w==null)real=false;tot+=d;h+=`<div class="leg">↓ ${t(w!=null?'legWalk':'legLine',fmtD(d),walk(d))}</div>`}
   h+=`<div class="stop" onclick="openLoc('${id}')"><span class="badge" style="background:var(--c-${l.cat});width:28px">${l.n}</span><div><b>${esc(l.name)}</b><div class="small" style="color:var(--gold);font-style:italic">${esc(l.got)}</div></div></div>`});
- return h+`<div class="small muted" style="margin-top:4px">${t('totalLine',fmtD(tot))}</div>`}
+ return h+`<div class="small muted" style="margin-top:4px">${t(real?'totalWalk':'totalLine',fmtD(tot))}</div>`}
 function showRoute(id){S.route=id;go('mapa');setTimeout(drawRoute,60)}
 /* modo guiado: uma parada por vez */
 function guide(rid,i){const r=ROUTES.find(x=>x.id===rid);const id=r.stops[i];const l=LBY[id];const nx=r.stops[i+1]?LBY[r.stops[i+1]]:null;
@@ -2692,7 +2809,7 @@ function openLangModal(){modal(`<h2 style="font-size:19px">🌐 ${t('language')}
 const TOUR=[
  {c:1,icon:'👑',k:0,next:'tourStart',langs:1},
  {sel:'#locPill',k:1,framedAlt:1},
- {sel:()=>RM.on&&RM.mk.jesuit?RM.mk.jesuit.getElement():$('#gMarkers .mk[data-id="jesuit"]'),pad:12,before:()=>{closeSheet();fitOld(true)},k:2},
+ {sel:()=>RM.on&&RM.mk.jesuit?(RM.clOf&&RM.clOf.jesuit&&RM.mk.jesuit.getElement().style.display==='none'?RM.clOf.jesuit:RM.mk.jesuit.getElement()):$('#gMarkers .mk[data-id="jesuit"]'),pad:12,before:()=>{closeSheet();fitOld(true)},k:2},
  {sel:'#zMe',k:3},
  {sel:'#zAR',k:4},
  {sel:'#zLayer',k:5},
@@ -2753,6 +2870,7 @@ buildMap();
 setLang(LANG,true);
 $('#langHdr').onclick=openLangModal;
 setTimeout(initReal,30);
+setTimeout(loadRoutes,3500);window.addEventListener('online',loadRoutes);
 // nome da cidade cabe no topo em qualquer idioma (encolhe a fonte se precisar)
 function fitBrand(){const b=$('.brand b');if(!b)return;b.style.fontSize='';b.style.letterSpacing='';let fs=parseFloat(getComputedStyle(b).fontSize),n=0;
  const tw=()=>{try{const r=document.createRange();r.selectNodeContents(b);return r.getBoundingClientRect().width}catch(e){return b.scrollWidth}};
