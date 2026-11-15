@@ -37,7 +37,12 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- fontes sem bloquear: com a folha normal, uma rede lenta segurava a tela e o script inteiro do app -->
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all';if(document.fonts)document.fonts.ready.then(function(){if(window.fitBrand)fitBrand()})">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+<!-- mapa real: baixar a biblioteca junto com a página e abrir a conexão com os tiles cedo -->
+<link rel="preload" href="lib/maplibre-gl.js" as="script">
+<link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
 <style>
 :root{
   --hdr:54px; --tab:62px;
@@ -432,8 +437,10 @@ const walk=m=>Math.max(1,Math.round(m*1.3/72));
 const angDiff=(a,b)=>{let d=((a-b)%360+540)%360-180;return d};
 let toastT;function toast(msg,ms=2600){const t=$('#toast');t.innerHTML=msg;t.classList.toggle('top',typeof CAM!=='undefined'&&CAM.on);t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),ms)}
 const TZ='Europe/Zagreb';
-const fmtT=d=>{try{return new Intl.DateTimeFormat(LOCALE[LANG],{timeZone:TZ,hour:'2-digit',minute:'2-digit'}).format(d)}catch(e){return d.toTimeString().slice(0,5)}};
-const zDate=d=>{try{return new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}).format(d)}catch(e){return d.toISOString().slice(0,10)}};
+// formatadores guardados: criar um Intl.DateTimeFormat custa caro, e o sol da aba Fotos chama zDate milhares de vezes
+const _dtf={},dtf=(k,loc,o)=>_dtf[k]||(_dtf[k]=new Intl.DateTimeFormat(loc,o));
+const fmtT=d=>{try{return dtf('t'+LANG,LOCALE[LANG],{timeZone:TZ,hour:'2-digit',minute:'2-digit'}).format(d)}catch(e){return d.toTimeString().slice(0,5)}};
+const zDate=d=>{try{return dtf('z','en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}).format(d)}catch(e){return d.toISOString().slice(0,10)}};
 const zMonth=()=>+zDate(new Date()).slice(5,7);
 // dentro do app do Claude a página roda num iframe protegido (sem GPS/câmera/sensores)
 const FRAMED=(()=>{try{return window.self!==window.top}catch(e){return true}})();
@@ -2100,7 +2107,7 @@ $('#zMe').onclick=()=>{if(!S.pos){openLocModal();return}
 $('#zNorth').onclick=()=>{if(!RM.on)return;RM.head=false;styleZMe();RM.map.easeTo({bearing:0,pitch:0,duration:450})};
 $('#z3D').onclick=()=>{if(!RM.on)return;const m=RM.map,on=m.getPitch()>10;m.easeTo({pitch:on?0:60,zoom:on?m.getZoom():Math.max(m.getZoom(),16.3),duration:700})};
 $('#zLayer').onclick=()=>{S.showPhotos=!S.showPhotos;drawPhotos();$('#zLayer').style.background=S.showPhotos?'var(--gold2)':'';toast(S.showPhotos?t('photoLayerOn'):t('photoLayerOff'))};
-function drawMe(onlyTransform){if(!onlyTransform)rmMe();const g=$('#gMe');if(!S.pos){g.innerHTML='';return}const p=xy(S.pos.lat,S.pos.lon);const k=1/MAP.s;
+function drawMe(onlyTransform){if(!onlyTransform)rmMe();if(RM.on)return;const g=$('#gMe');if(!S.pos){g.innerHTML='';return}const p=xy(S.pos.lat,S.pos.lon);const k=1/MAP.s;
  const acc=S.pos.acc&&S.posSrc==='gps'?Math.min(S.pos.acc,400):0;const hd=S.heading;
  g.innerHTML=`${acc?`<circle class="me-acc" cx="${f1(p[0])}" cy="${f1(p[1])}" r="${acc}"/>`:''}<g transform="translate(${f1(p[0])},${f1(p[1])}) scale(${k.toFixed(4)})">${hd!=null?`<path class="me-cone" d="M0 0 L-16 -44 A46 46 0 0 1 16 -44Z" transform="rotate(${hd.toFixed(0)})"/>`:''}<circle class="me-dot" r="8"/></g>`}
 function drawRoute(keep){rmRoute();const g=$('#gRoute');if(NAV){g.innerHTML=`<path class="m-route" style="stroke:#1f6fd1" d="${pathL(navRest().map(q=>xy(q[1],q[0])),false)}" vector-effect="non-scaling-stroke"/>`;return}if(!S.route){g.innerHTML='';renderMapTop();return}const r=ROUTES.find(x=>x.id===S.route);loadRoute(r);const pts=routeLine(r).map(q=>xy(q[1],q[0]));
@@ -2252,7 +2259,10 @@ async function initReal(){if(RM.tried||!wantReal())return;RM.tried=true;
  try{await loadMapLib()}catch(e){RM.tried=false;return}
  const c=ll(MAP.cx,MAP.cy);let map;
  try{map=new maplibregl.Map({container:'rmap',style:RM_STYLE,center:[c.lon,c.lat],zoom:Math.max(11,Math.min(18,s2z(MAP.s))),maxZoom:19.5,minZoom:9,maxPitch:70,
-  attributionControl:{compact:true},fadeDuration:120,dragRotate:true,touchPitch:true,pitchWithRotate:true})}catch(e){RM.tried=false;return}
+  attributionControl:{compact:true},fadeDuration:120,dragRotate:true,touchPitch:true,pitchWithRotate:true,
+   // trackResize:false: o tamanho é ajustado em resizeMap (aba Mapa); sem isso, cada troca de aba redesenhava o mapa escondido
+   // pixelRatio: celular de 2,6-3,5x desenha no máximo em 2x, ~40% menos pixels para a GPU
+   trackResize:false,pixelRatio:Math.min(2,window.devicePixelRatio||1)})}catch(e){RM.tried=false;return}
  RM.map=map;const to=setTimeout(()=>{if(!RM.ready)realFail()},15000);
  map.on('sourcedata',e=>{if(e.tile&&e.sourceId&&!/^rm-/.test(e.sourceId))RM.tok++});
  map.on('error',e=>{if(e&&e.tile&&e.sourceId&&!/^rm-/.test(e.sourceId))RM.terr++;if(RM.ready)return;const m=String((e&&e.error&&e.error.message)||'');if(/fetch|NetworkError|Failed|style/i.test(m))realFail()});
@@ -2278,7 +2288,7 @@ function rmZoomCls(){if(!RM.map)return;$('#rmap').classList.toggle('lbl',RM.map.
 function rmNorth(){const b=$('#zNorth');if(!b||!RM.map)return;const br=RM.map.getBearing(),pt=RM.map.getPitch();b.classList.toggle('show',Math.abs(br)>0.5||pt>1);
  const n=b.querySelector('svg');if(n)n.style.transform=`rotate(${(-br).toFixed(1)}deg)`;$('#z3D').classList.toggle('on',pt>10)}
 function rmFirstSymbol(){try{const l=RM.map.getStyle().layers.find(l=>l.type==='symbol');return l&&l.id}catch(e){return undefined}}
-function rmLayers(){const m=RM.map,b=rmFirstSymbol();
+function rmLayers(){const m=RM.map,b=rmFirstSymbol();RM.meKey=null;
  m.addSource('rm-acc',{type:'geojson',data:FC([])});m.addSource('rm-route',{type:'geojson',data:FC([])});m.addSource('rm-fan',{type:'geojson',data:FC([])});
  m.addLayer({id:'rm-fan',type:'fill',source:'rm-fan',paint:{'fill-color':'#d6ae45','fill-opacity':.38}},b);
  m.addLayer({id:'rm-fan-l',type:'line',source:'rm-fan',paint:{'line-color':'#a8801f','line-width':1.4}},b);
@@ -2307,13 +2317,16 @@ function rmPhotos(){if(!RM.on)return;const m=RM.map,src=m.getSource('rm-fan');
   if(!RM.ph[p.id]){const el=document.createElement('div');el.className='rph';el.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
    el.addEventListener('click',e=>{e.stopPropagation();openPhoto(p.id)});RM.ph[p.id]=new maplibregl.Marker({element:el}).setLngLat([p.stand[1],p.stand[0]]).addTo(m)}}
  src&&src.setData(FC(feats))}
+// só mexe no mapa quando algo mudou: setData redesenha o mapa inteiro, e a bússola chama isto ~60 vezes por segundo
 function rmMe(){if(!RM.on)return;const m=RM.map,src=m.getSource('rm-acc');
- if(!S.pos){if(RM.me){RM.me.remove();RM.me=null}src&&src.setData(FC([]));return}
+ if(cur!=='mapa'){RM.meKey=null;return}
+ if(!S.pos){if(RM.me){RM.me.remove();RM.me=null}if(RM.meKey!=='none'){RM.meKey='none';src&&src.setData(FC([]))}return}
  if(!RM.me){const el=document.createElement('div');el.className='rme';el.innerHTML='<svg viewBox="-32 -32 64 64" width="64" height="64"><defs><radialGradient id="rmeg" cx="0" cy="0" r="30" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#1f6fd1" stop-opacity=".55"/><stop offset="1" stop-color="#1f6fd1" stop-opacity="0"/></radialGradient></defs><path d="M0 0 L-17 -27 A32 32 0 0 1 17 -27Z" fill="url(#rmeg)"/></svg><b class="dot"></b>';
-  RM.me=new maplibregl.Marker({element:el,rotationAlignment:'map',pitchAlignment:'map'}).setLngLat([S.pos.lon,S.pos.lat]).addTo(m)}
- RM.me.setLngLat(NAV&&NAV.snap?NAV.snap:[S.pos.lon,S.pos.lat]);const hd=S.heading;RM.me.getElement().classList.toggle('nohd',hd==null);if(hd!=null)RM.me.setRotation(hd);
- const acc=S.pos.acc&&S.posSrc==='gps'?Math.min(S.pos.acc,400):0;src&&src.setData(FC(acc>4?[{type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[circlePoly(S.pos.lat,S.pos.lon,acc)]}}]:[]));
- if(RM.head&&S.follow&&hd!=null){const now=performance.now();if(now-RM.lastB>90){RM.lastB=now;m.jumpTo({bearing:hd,center:[S.pos.lon,S.pos.lat]})}}}
+  RM.me=new maplibregl.Marker({element:el,rotationAlignment:'map',pitchAlignment:'map'}).setLngLat([S.pos.lon,S.pos.lat]).addTo(m);RM.meKey=null;RM.meHd=NaN}
+ const at=NAV&&NAV.snap?NAV.snap:[S.pos.lon,S.pos.lat],acc=S.pos.acc&&S.posSrc==='gps'?Math.min(S.pos.acc,400):0,key=at[0]+','+at[1]+','+acc;
+ if(key!==RM.meKey){RM.meKey=key;RM.me.setLngLat(at);src&&src.setData(FC(acc>4?[{type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[circlePoly(S.pos.lat,S.pos.lon,acc)]}}]:[]))}
+ const hd=S.heading;RM.me.getElement().classList.toggle('nohd',hd==null);if(hd!=null&&!(Math.abs(angDiff(hd,RM.meHd))<0.5)){RM.meHd=hd;RM.me.setRotation(hd)}
+ if(RM.head&&S.follow&&hd!=null){const now=performance.now();if(now-RM.lastB>90&&(key!==RM.headKey||Math.abs(angDiff(hd,m.getBearing()))>=1.5)){RM.lastB=now;RM.headKey=key;m.jumpTo({bearing:hd,center:[S.pos.lon,S.pos.lat]})}}}
 function rmRoute(){if(!RM.on)return;const src=RM.map.getSource('rm-route');if(!src)return;try{RM.map.setPaintProperty('rm-route','line-color',NAV?'#1f6fd1':'#8f1d1d');RM.map.setPaintProperty('rm-route','line-dasharray',NAV?[1,0]:[1.6,1.2])}catch(e){}if(NAV){src.setData(FC([{type:'Feature',properties:{},geometry:{type:'LineString',coordinates:navRest()}}]));return}const r=S.route&&ROUTES.find(x=>x.id===S.route);
  src.setData(FC(r?[{type:'Feature',properties:{},geometry:{type:'LineString',coordinates:routeLine(r)}}]:[]))}
 function rmFit(lls,pad,top,instant){const m=RM.map;if(!lls.length)return;let a=[1e9,1e9],b=[-1e9,-1e9];lls.forEach(p=>{a=[Math.min(a[0],p.lon),Math.min(a[1],p.lat)];b=[Math.max(b[0],p.lon),Math.max(b[1],p.lat)]});
@@ -2427,7 +2440,7 @@ const SUN=(()=>{const dayMs=864e5,J1970=2440588,J2000=2451545,e=toR*23.4397;
 const tripDS=()=>{const t=zDate(new Date());return S.trip&&S.trip>=t?S.trip:t};
 const isToday=ds=>ds===zDate(new Date());
 const dayBase=ds=>new Date(ds+'T10:30:00Z').getTime();
-const fmtDay=ds=>{try{return new Intl.DateTimeFormat(LOCALE[LANG],{day:'2-digit',month:'short',timeZone:TZ}).format(new Date(dayBase(ds)))}catch(e){return ds}};
+const fmtDay=ds=>{try{return dtf('d'+LANG,LOCALE[LANG],{day:'2-digit',month:'short',timeZone:TZ}).format(new Date(dayBase(ds)))}catch(e){return ds}};
 function sunDay(ds){ds=ds||tripDS();const base=dayBase(ds);const out={};let prev=null;
  for(let t=base-14*36e5;t<base+14*36e5;t+=120000){const d=new Date(t);const a=SUN(d,LAT0,LON0).alt;
   if(prev!=null&&zDate(d)===ds){if(prev<-0.83&&a>=-0.83)out.rise=d;if(prev>=-0.83&&a<-0.83)out.set=d;if(prev<6&&a>=6)out.gEndAM=d;if(prev>=6&&a<6)out.gStartPM=d}prev=a}return out}
@@ -2447,7 +2460,7 @@ function bestWindow(dir,ds){if(dir==null)return null;ds=ds||tripDS();const base=
 let cur='mapa';const VIEWS=['mapa','locais','bussola','fotos','mais'];
 function go(v){if(!VIEWS.includes(v))v='mapa';cur=v;$$('.view').forEach(x=>x.classList.toggle('active',x.id==='v-'+v));$$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
  try{if(location.hash!=='#'+v)history.replaceState(null,'','#'+v)}catch(e){}
- if(v==='mapa')requestAnimationFrame(resizeMap);if(v==='locais')renderList();if(v==='bussola')renderCompass();if(v==='fotos')renderFotos();if(v==='mais')renderMais()}
+ if(v==='mapa')requestAnimationFrame(()=>{resizeMap();drawMe()});if(v==='locais')renderList();if(v==='bussola')renderCompass();if(v==='fotos')renderFotos();if(v==='mais')renderMais()}
 $$('#tabs button').forEach(b=>b.onclick=()=>{closeSheet();go(b.dataset.v)});
 window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h&&h!==cur)go(h)});
 
