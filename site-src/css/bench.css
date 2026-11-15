@@ -37,13 +37,15 @@
 .bench-grid{display:grid;gap:clamp(18px,2vw,28px)}
 
 /* console */
-.term{display:flex;flex-direction:column;min-height:440px;background:var(--ink-static);color:#e9e6da;border:1.5px solid #151612;box-shadow:12px 12px 0 var(--lime)}
+/* fixed height: output scrolls inside. With min-height the boot output grew the page ~110 px mid-scroll and every
+   ScrollTrigger below (process scene, contact) fired that far off */
+.term{display:flex;flex-direction:column;height:min(560px,calc(100svh - 32px));background:var(--ink-static);color:#e9e6da;border:1.5px solid #151612;box-shadow:12px 12px 0 var(--lime)}
 :root[data-theme="ink"] .term{border-color:var(--line)}
 .term-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid #2f3029;font:600 .66rem var(--font-mono);letter-spacing:.08em;color:#cfccc0}
 .term-title{display:inline-flex;align-items:center;gap:10px}
 .term-title .ico{width:17px;height:17px;color:var(--lime)}
 .term-path{color:#8f8c80}
-.term-body{flex:1;min-height:0;max-height:440px;overflow:auto;padding:20px 18px;font:500 clamp(.8rem,.95vw,.9rem)/1.7 var(--font-mono);color:var(--lime);scrollbar-width:thin;scrollbar-color:#3a3b33 transparent}
+.term-body{flex:1;min-height:0;overflow:auto;padding:20px 18px;font:500 clamp(.8rem,.95vw,.9rem)/1.7 var(--font-mono);color:var(--lime);scrollbar-width:thin;scrollbar-color:#3a3b33 transparent}
 .term-body .row{white-space:pre-wrap;word-break:break-word}
 .term-body .cmd{color:#e9e6da;margin-top:12px}
 .term-body .cmd .ps{color:var(--lime);font-weight:700}
@@ -52,6 +54,7 @@
 .term-body a{color:#e9e6da;text-decoration:underline;text-underline-offset:3px}
 .term-body .fetch{color:#e9e6da}
 .term-body .fetch b{color:var(--lime);font-weight:700}
+.term-body .nf{padding-left:8ch;text-indent:-8ch}
 .caret{display:inline-block;width:.6em;height:1.1em;background:var(--lime);vertical-align:-.2em;margin-left:2px;animation:blink 1s steps(1) infinite}
 .term-chips{display:flex;gap:8px;flex-wrap:wrap;padding:6px 18px 14px}
 .chip{font:500 .72rem var(--font-mono);color:#cfccc0;border:1px solid #3a3b33;border-radius:999px;padding:6px 13px;transition:background-color .2s,color .2s,border-color .2s,transform .3s var(--ease)}
@@ -79,6 +82,12 @@
 .sw-paper i{background:#f1eee4}.sw-ink i{background:#151612}.sw-lime i{background:#c9ff2f}.sw-orange i{background:#ff5d2c}.sw-lilac i{background:#c6bbef}
 :root[data-theme="ink"] .swatches,:root[data-theme="ink"] .swatch,:root[data-theme="ink"] .swatch i{border-color:var(--line)}
 
+/* the layer names are long ("Foundation", "Superfície"): at the loop's 8.4vw they ran under the stage from 1024 to
+   1680 px wide; the services scale fits them with room */
+@media (min-width:901px) and (min-height:501px){
+  html.js:not(.rm) [data-scene="bench"] .beat h3{font-size:clamp(3.2rem,6.6vw,7rem)}
+}
+
 @media (max-width:900px){
   .wb-plate>b{font-size:3.5cqi}
   .wb-n{font-size:1.9cqi}
@@ -86,7 +95,12 @@
   .wb-chips i:nth-child(n+3){display:none}
   .wb-con{grid-template-columns:minmax(0,1fr);font-size:1.65cqi;gap:1cqi}
   .wb-proof>b{font-size:1.8cqi}
-  .term{min-height:440px;box-shadow:6px 6px 0 var(--lime);margin-right:6px}
+  .term{height:min(560px,calc(100svh - 60px));box-shadow:6px 6px 0 var(--lime);margin-right:6px}
   .term-prompt{display:none}
-  .term-form input{font-size:16px}
+  .term-form input{font-size:16px;padding-block:12px}
+  /* touch: every control at least 44 px */
+  .chip{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;font-size:.78rem}
+  .term-send{width:44px;height:44px}
+  .cb-hint,.term-bar{font-size:.72rem}
+  .swatch span,.swatch small{font-size:.7rem}
 }

@@ -345,12 +345,15 @@ function buildBench(tl, $, track) {
   tl.to(stamp, { autoAlpha: 1, scale: 1, rotate: -6, duration: 0.18, ease: "power4.in" }, B_READY).to({}, { duration: 0.15 }, B_READY + 0.2);
 }
 
-export function initScenes() {
-  if (rm) return;
+// [track, build] pairs: main.js decides when each scene is built (off the critical path, see there)
+export function sceneBuilders() {
+  if (rm) return [];
   const wb = $('[data-scene="bench"]');
-  if (wb) scene(wb, { cuts: B_CUTS, build: buildBench, state: (t, b) => (t >= B_READY ? [3, 2] : b === 3 ? [1, 1] : [2, 0]) });
   const sv = $('[data-scene="services"]');
-  if (sv) scene(sv, { cuts: S_CUTS, build: buildServices, state: (t, b) => (t >= S_SHEET + 0.15 ? [3, 4] : [t >= S_LIVE[b] ? 3 : 2, b]) });
   const pr = $('[data-scene="method"]');
-  if (pr) scene(pr, { cuts: P_CUTS, build: buildProcess, state: (t, b) => (b === 0 ? [1, 0] : b === 1 ? [2, 1] : t < 2.92 ? [1, 0] : [3, 2]) });
+  return [
+    [wb, () => scene(wb, { cuts: B_CUTS, build: buildBench, state: (t, b) => (t >= B_READY ? [3, 2] : b === 3 ? [1, 1] : [2, 0]) })],
+    [sv, () => scene(sv, { cuts: S_CUTS, build: buildServices, state: (t, b) => (t >= S_SHEET + 0.15 ? [3, 4] : [t >= S_LIVE[b] ? 3 : 2, b]) })],
+    [pr, () => scene(pr, { cuts: P_CUTS, build: buildProcess, state: (t, b) => (b === 0 ? [1, 0] : b === 1 ? [2, 1] : t < 2.92 ? [1, 0] : [3, 2]) })],
+  ].filter(([el]) => el);
 }

@@ -5,7 +5,7 @@ import { scroller } from "./scroller.js";
 import { theme } from "./theme.js";
 import { initHeroGL } from "./gl.js";
 import { initLoop } from "./loop.js";
-import { initScenes } from "./scenes.js";
+import { sceneBuilders } from "./scenes.js";
 import { initReel, initWorkStage, scramble } from "./reel.js";
 import { initTerminal } from "./terminal.js";
 import { initPalette } from "./palette.js";
@@ -255,6 +255,9 @@ loadGitHub()
       ul.append(li);
     });
     ul.hidden = false;
+    // the chips land whenever the API answers, often after the last layout refresh: re-measure once, or the
+    // contact scene's triggers stay ~90 px short
+    requestAnimationFrame(() => ScrollTrigger.refresh());
   })
   .catch(() => {});
 
@@ -325,7 +328,8 @@ if (rm) {
       .add(() => reel.classList.add("cm-in"), 0.9);
   }
 
-  /* ----- preloader: counts up, then the lime sheet breaks into the dot screen */
+  /* ----- preloader: counts up, then the lime sheet breaks into the dot screen. Once per device per week
+     (it was every new session, 2.7 s with scrolling locked: Dan 15/11 "slow first load") */
   (function intro() {
     if (!root.classList.contains("intro")) return void gsap.delayedCall(0.05, entrance);
     const pl = $("[data-preloader]");
@@ -341,20 +345,21 @@ if (rm) {
           if (!menuOpen) scroller.start();
           try {
             sessionStorage.setItem("dz-intro", "1");
+            localStorage.setItem("dz-intro-at", String(Date.now()));
           } catch {}
         },
       })
       .to(o, {
         v: 100,
-        duration: 1.5,
+        duration: 0.8,
         ease: "power2.inOut",
         onUpdate() {
           cnt.textContent = String(Math.round(o.v)).padStart(3, "0");
           bar.style.transform = `scaleX(${o.v / 100})`;
         },
       })
-      .fromTo(pl, { "--pr": "19px" }, { "--pr": "0px", duration: 1.05, ease: "power2.inOut" }, "+=0.12")
-      .add(entrance, "-=0.8");
+      .fromTo(pl, { "--pr": "19px" }, { "--pr": "0px", duration: 0.65, ease: "power2.inOut" }, "+=0.05")
+      .add(entrance, "-=0.5");
   })();
 
   /* ----- "Ideas" turns solid under the pointer: the idea becomes executable where you touch it */
@@ -437,10 +442,41 @@ if (rm) {
     });
   }
 
-  initLoop();
-  initScenes();
-  gsap.delayedCall(root.classList.contains("intro") ? 3.4 : 1.6, () => initReel(reel));
-  initWorkStage($("#work"), (y) => scroller.to(y));
+  gsap.delayedCall(root.classList.contains("intro") ? 2.3 : 1.6, () => initReel(reel));
+
+  /* ----- the scroll scenes are built off the critical path: one per idle slot after the first paint, in page
+     order, and any scene the visitor gets near (1.2 screens) is built on the spot. Built up front they cost
+     ~0.8 s of main thread before the first frame on a 4x-throttled phone (style reads inside gsap.set). */
+  {
+    const jobs = [
+      [$("[data-loop]"), initLoop],
+      [$("#work"), () => initWorkStage($("#work"), (y) => scroller.to(y))],
+      ...sceneBuilders(),
+    ]
+      .filter(([el]) => el)
+      .sort(([a], [b]) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
+      .map(([el, fn]) => {
+        const job = { done: false };
+        const io = new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && job.run(), { rootMargin: "120% 0px" });
+        job.run = () => {
+          if (job.done) return;
+          job.done = true;
+          io.disconnect();
+          fn();
+        };
+        io.observe(el);
+        return job;
+      });
+    // 250 ms cap per slot: with 500 the queue was still building scenes during the first swipes on a slow phone
+    const idle = (cb) => (window.requestIdleCallback ? requestIdleCallback(cb, { timeout: 250 }) : setTimeout(cb, 40));
+    const next = () => {
+      const job = jobs.find((j) => !j.done);
+      if (!job) return;
+      job.run();
+      idle(next);
+    };
+    requestAnimationFrame(() => idle(next));
+  }
 
   /* ----- contact: the dot field returns for the close (created only when it gets near) */
   {

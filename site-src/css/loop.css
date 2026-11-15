@@ -132,7 +132,15 @@ html.js:not(.rm) .beat:last-child h3{justify-self:start;padding:0 .1em .04em;mar
 html.js:not(.rm) .beat.on:last-child h3{background-size:100% 84%;color:#151612}
 
 
-@media (max-width:900px){
+/* short screens (landscape phones): the desktop two-column frame, sized by height */
+@media (max-height:500px){
+  html.js:not(.rm) .scene-sticky{padding-top:calc(var(--sat) + 14px);padding-bottom:14px;gap:clamp(18px,3vw,40px)}
+  html.js:not(.rm) .beat h3{font-size:clamp(2.2rem,12svh,3.6rem)}
+  .scene-title{font-size:1rem}
+  .beat p{font-size:.92rem}
+  .ls{width:min(100%,calc((100svh - 74px) * 1.5))}
+}
+@media (max-width:900px) and (min-height:501px){
   .scene-sticky{display:flex;flex-direction:column;align-items:stretch;gap:16px}
   .scene-left{display:contents}
   .scene-left .slug{order:1}
@@ -150,7 +158,9 @@ html.js:not(.rm) .beat.on:last-child h3{background-size:100% 84%;color:#151612}
   .la-tag{font-size:2cqi}
   .beat p{font-size:.95rem}
   html.js:not(.rm) .scene-track{height:calc(var(--beats,4) * 105svh)}
-  html.js:not(.rm) .scene-sticky{justify-content:center;padding-top:calc(var(--header-h) + var(--sat) + 22px);padding-bottom:calc(72px + var(--sab))}
+  /* the top bar hides on the way down and the dock is gone: the frame gets the whole screen */
+  html.js:not(.rm) .scene-sticky{justify-content:center;padding-top:calc(var(--sat) + 20px);padding-bottom:calc(18px + var(--sab))}
+  .beat-tag{font-size:.72rem}
   html.js:not(.rm) .beats{min-height:168px}
   html.js:not(.rm) .beat h3{font-size:clamp(3rem,15vw,4.4rem)}
 }

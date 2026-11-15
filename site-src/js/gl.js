@@ -1,5 +1,7 @@
 ﻿import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { clamp } from "./util.js";
+import { scroller } from "./scroller.js";
 
 const VERT = `attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}`;
 const FRAG = `
@@ -94,6 +96,16 @@ export function initHeroGL(canvas, host, opts = {}) {
   gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
   let dpr = 1, w = 0, h = 0;
+  // page-relative box, read on layout changes only. Touch and scroll events read it from here: a
+  // getBoundingClientRect there ran after ScrollTrigger had written styles in the same event and forced a
+  // style recalc + layout (205 ms over one touch run on a 4x-throttled phone)
+  const box = { t: 0, l: 0, w: 1, h: 1 };
+  const place = (r) => {
+    box.t = r.top + scroller.y();
+    box.l = r.left;
+    box.w = r.width || 1;
+    box.h = r.height || 1;
+  };
   const m = { x: 0.7, y: 0.4, tx: 0.7, ty: 0.4, power: 0.0, tp: 0.0, last: 0 };
   let click = { x: 0, y: 0, t0: -1 };
   let visible = true;
@@ -106,6 +118,7 @@ export function initHeroGL(canvas, host, opts = {}) {
   };
   const resize = () => {
     const r = canvas.getBoundingClientRect();
+    place(r);
     // pixel budget: a full-screen field on a hi-DPI screen shaded 4-5 million fragments per frame
     dpr = Math.min(devicePixelRatio || 1, 1.5, Math.sqrt(MAX_PX / Math.max(1, r.width * r.height)));
     w = Math.max(2, Math.round(r.width * dpr));
@@ -143,37 +156,34 @@ export function initHeroGL(canvas, host, opts = {}) {
   const onTouch = (e) => {
     const t = e.touches[0];
     if (!t) return;
-    const r = canvas.getBoundingClientRect();
-    m.tx = (t.clientX - r.left) / r.width;
-    m.ty = (t.clientY - r.top) / r.height;
+    m.tx = (t.clientX - box.l) / box.w;
+    m.ty = (t.clientY - (box.t - scroller.y())) / box.h;
     m.tp = 1;
     m.last = performance.now();
   };
   host.addEventListener("touchstart", (e) => {
     onTouch(e);
     const t = e.touches[0];
-    if (t) {
-      const r = canvas.getBoundingClientRect();
-      click = { x: (t.clientX - r.left) / r.width, y: (t.clientY - r.top) / r.height, t0: performance.now() };
-    }
+    if (t) click = { x: (t.clientX - box.l) / box.w, y: (t.clientY - (box.t - scroller.y())) / box.h, t0: performance.now() };
   }, { passive: true });
   host.addEventListener("touchmove", onTouch, { passive: true });
   host.addEventListener("touchend", () => (m.tp = 0.35), { passive: true });
+  // the contact field moves down the page when content above it changes height
+  ScrollTrigger.addEventListener("refresh", () => place(canvas.getBoundingClientRect()));
 
   // Scroll nudges the field too: a quick flick sends a ripple through the dots.
-  let lastY = scrollY;
+  let lastY = scroller.y();
   let lastRipple = 0;
   const onScroll = () => {
-    const y = scrollY;
+    const y = scroller.y();
     const dy = Math.abs(y - lastY);
     lastY = y;
+    if (!visible) return;
     const now = performance.now();
     if (dy > 38 && now - lastRipple > 700) {
-      const r = canvas.getBoundingClientRect();
-      if (r.bottom > 0 && r.top < innerHeight) {
-        click = { x: 0.5, y: Math.min(0.9, Math.max(0.1, 0.5 - r.top / r.height * 0.5)), t0: now };
-        lastRipple = now;
-      }
+      const top = box.t - y;
+      click = { x: 0.5, y: Math.min(0.9, Math.max(0.1, 0.5 - (top / box.h) * 0.5)), t0: now };
+      lastRipple = now;
     }
   };
   if (matchMedia("(hover:none)").matches) window.addEventListener("scroll", onScroll, { passive: true });

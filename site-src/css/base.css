@@ -180,6 +180,9 @@ html.rm *,html.rm *::before,html.rm *::after{animation-duration:.001ms!important
 @media (max-width:900px){
   .sec-head{grid-template-columns:minmax(0,1fr);gap:16px}
   .slug .pn,.slug .cbar{display:none}
+  /* phones: mono labels at least ~11.5 px, buttons at least 44 px tall */
+  .slug{font-size:.72rem}
+  .btn-sm{height:44px}
 }
 @media (hover:none){
   .btn,.arrow-chip{transition:transform .18s var(--ease),translate .25s var(--ease),box-shadow .25s,background-color .25s,color .25s}

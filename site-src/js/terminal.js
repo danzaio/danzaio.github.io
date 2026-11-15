@@ -61,9 +61,16 @@ export function initTerminal(root, api) {
       `${nf.theme.padEnd(7)} ${api.theme.get()}`,
       `${nf.uptime.padEnd(7)} ${Math.max(1, Math.round((performance.now() - t0) / 60000))} min`,
     ];
+    // the logo sits beside the info only when every line still fits next to it; a narrow terminal (phones) gets the
+    // info alone, and a value that wraps hangs under its own column (it used to wrap back under the logo)
+    const cs = getComputedStyle(body);
+    const ctx = document.createElement("canvas").getContext("2d");
+    ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const cols = (body.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) / ctx.measureText("0").width;
+    const logo = cols >= 16 + Math.max(...info.map((s) => s.length));
     for (let i = 0; i < info.length; i++) {
-      const a = (ASCII[i] || "").padEnd(16, " ");
-      line(a + info[i], i < 5 && i > 1 ? "fetch" : "dim");
+      const a = logo ? (ASCII[i] || "").padEnd(16, " ") : "";
+      line(a + info[i], (i < 5 && i > 1 ? "fetch" : "dim") + " nf");
       if (!rm) await sleep(40);
     }
   }

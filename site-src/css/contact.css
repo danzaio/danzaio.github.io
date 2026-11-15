@@ -42,7 +42,9 @@
 .cta-orb:hover .ico{transform:rotate(45deg) scale(1.15)}
 
 .bigword{display:flex;align-items:flex-end;justify-content:space-between;gap:2vw;margin-top:clamp(40px,6vw,100px);padding-bottom:clamp(14px,2vw,28px)}
-.bw{--dr:.041em;font:800 calc(var(--fit,13) * 1vw)/.86 var(--font-display);letter-spacing:-.055em;white-space:nowrap;padding-bottom:.06em}
+/* padding-right: the negative tracking lets the last glyph overhang the box, and background-clip:text paints only
+   inside the box (the closing period was cut flat) */
+.bw{--dr:.041em;font:800 calc(var(--fit,13) * 1vw)/.86 var(--font-display);letter-spacing:-.055em;white-space:nowrap;padding:0 .06em .06em 0}
 html.js:not(.rm) .bw{--dr:.012em}
 .bw-arrow{display:grid;place-items:center;flex:none;width:clamp(48px,6vw,96px);aspect-ratio:1;margin-bottom:1.2vw;border:1.5px solid var(--ink);border-radius:50%;transition:background-color .3s,color .3s,transform .5s var(--ease)}
 .bw-arrow .ico{width:45%;height:45%}
@@ -55,4 +57,5 @@ html.js:not(.rm) .bw{--dr:.012em}
   .idea{box-shadow:6px 6px 0 var(--paper-static)}
   .contact-act .cta-orb{margin:-22px -4px 0 0}
   .bw-arrow{display:none}
+  .contact-note{font-size:.74rem}
 }

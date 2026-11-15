@@ -3,8 +3,10 @@ import { rm, $ } from "./util.js";
 
 // The native position, cached from scroll events (they run before rAF, while layout is clean). Reading
 // window.scrollY inside a frame after GSAP has written styles forces a style recalc + layout.
+// Only needed without Lenis (reduced motion): with Lenis this read ran after ScrollTrigger's callbacks had written
+// styles in the same scroll event and forced a style recalc + layout on touch scrolling.
 let nativeY = typeof scrollY === "number" ? scrollY : 0;
-addEventListener("scroll", () => (nativeY = scrollY), { passive: true });
+addEventListener("scroll", () => scroller.lenis || (nativeY = scrollY), { passive: true });
 
 // Thin wrapper so the rest of the code does not care whether smooth scrolling is on.
 export const scroller = {

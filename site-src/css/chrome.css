@@ -102,17 +102,19 @@ html.js:not(.rm):not(.is-ready) [data-hero-in]{opacity:0;animation:unhide 0s 5s 
   .lang-link,.contact-btn{display:none}
   .menu-btn{display:grid}
   .brand-name span{display:none}
-  /* phones: the dock stays, numbers only; the current plate opens up to show its name */
-  .dock{bottom:calc(12px + var(--sab));max-width:calc(100vw - 24px);padding:4px}
-  .dock a{gap:0;height:40px;padding:0 11px}
-  .dock a b{font-size:.68rem;opacity:.8}
-  .dock a span{display:inline-block;max-width:0;overflow:hidden;opacity:0;transition:max-width .45s var(--ease),opacity .3s,margin .45s var(--ease)}
-  .dock a[aria-current="true"] span{max-width:7.5em;opacity:1;margin-left:7px}
-  .dock .dock-go{margin-left:2px}
-  .dock .dock-go .ico{margin-left:6px}
-  .to-top{right:12px;bottom:calc(74px + var(--sab));width:44px;height:44px}
-  .to-top::before{-webkit-mask:radial-gradient(circle,transparent 16px,#000 16.5px);mask:radial-gradient(circle,transparent 16px,#000 16.5px)}
+  /* phones and tablets: no dock. The menu covers navigation, the browser has its own bottom bar, and a
+     floating pill sat over the scenes (Dan 15/11: "top bar or dock in the way") */
+  .dock{display:none}
+  /* back to top shows with the top bar only (on the way up), so it never sits on text while reading */
+  .to-top{right:12px;bottom:calc(14px + var(--sab))}
+  html.js .top.is-hidden ~ .to-top.on{opacity:0;visibility:hidden;transform:translateY(16px) scale(.9);transition:opacity .25s,transform .4s var(--ease),visibility 0s .25s}
+  .icon-btn{width:44px;height:44px}
+  .brand{min-height:44px}
+  .site-footer{padding-bottom:calc(28px + var(--sab))}
+  .foot-nav a{display:inline-block;padding-block:11px}
 }
+/* landscape phones: no room for a floating dock either */
+@media (max-height:500px) and (hover:none){.dock{display:none}}
 @media (hover:none){
   .icon-btn,.mm-lang,.mm-pal{transition:transform .18s var(--ease),background-color .25s,color .25s}
   .icon-btn:active,.mm-lang:active,.mm-pal:active{transform:scale(.95)}

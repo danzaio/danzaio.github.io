@@ -559,7 +559,7 @@ export function render(lang) {
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="preload" href="/assets/site/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/site/fonts/spacegrotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
-<script>(function(d){try{var t=localStorage.getItem("dz-theme");if(t==="ink"||t==="paper")d.dataset.theme=t}catch(e){}d.classList.add("js");var rm=matchMedia("(prefers-reduced-motion: reduce)").matches;if(rm)d.classList.add("rm");try{if(!rm&&!sessionStorage.getItem("dz-intro")&&!location.hash)d.classList.add("intro")}catch(e){}})(document.documentElement)</script>
+<script>(function(d){try{var t=localStorage.getItem("dz-theme");if(t==="ink"||t==="paper")d.dataset.theme=t}catch(e){}d.classList.add("js");var rm=matchMedia("(prefers-reduced-motion: reduce)").matches;if(rm)d.classList.add("rm");try{var seen=+localStorage.getItem("dz-intro-at")||0;if(!rm&&!sessionStorage.getItem("dz-intro")&&Date.now()-seen>6048e5&&!location.hash)d.classList.add("intro")}catch(e){}})(document.documentElement)</script>
 <link rel="stylesheet" href="/assets/site/main.css">
 <script type="application/ld+json">${json(ld)}</script>
 <script defer src="/assets/site/app.js"></script>
