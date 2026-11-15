@@ -1,0 +1,32 @@
+/* ==========================================================================
+   services.css: plate 03, a spec sheet. Hover (or scroll, on touch) prints a lime
+   dot screen out from the pointer until the dots merge into a solid fill.
+   ========================================================================== */
+.svc-list{border-bottom:1px solid var(--ink)}
+.svc{position:relative;isolation:isolate;display:grid;grid-template-columns:52px 50px minmax(0,1.05fr) minmax(0,1fr) minmax(140px,auto);gap:clamp(14px,2vw,34px);align-items:center;padding:clamp(24px,2.8vw,40px) clamp(10px,1.2vw,20px);border-top:1px solid var(--ink);scroll-margin-top:120px;transition:color .35s}
+.svc-n{font:600 .7rem var(--font-mono);letter-spacing:.06em}
+.svc-ico{display:grid;place-items:center;width:48px;height:48px;border:1.5px solid currentColor;border-radius:50%}
+.svc-ico .ico{width:20px;height:20px}
+.svc-title{font:800 clamp(1.9rem,3.5vw,3.7rem)/.95 var(--font-display);letter-spacing:-.045em;text-wrap:balance}
+.svc-text{max-width:46ch;color:var(--muted);line-height:1.5;transition:color .35s}
+.svc-tag{justify-self:end;display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid currentColor;border-radius:999px;font:600 .66rem var(--font-mono);letter-spacing:.08em;white-space:nowrap}
+.tag-arrow{width:18px;height:9px;flex:none}
+.svc-fill{position:absolute;inset:0;z-index:-1;pointer-events:none;background:var(--lime);
+  -webkit-mask-image:radial-gradient(circle,#000 var(--fr),transparent calc(var(--fr) + .5px)),radial-gradient(circle at var(--mx,0%) var(--my,50%),#000 var(--sp),transparent calc(var(--sp) + 22%));
+  mask-image:radial-gradient(circle,#000 var(--fr),transparent calc(var(--fr) + .5px)),radial-gradient(circle at var(--mx,0%) var(--my,50%),#000 var(--sp),transparent calc(var(--sp) + 22%));
+  -webkit-mask-size:14px 14px,100% 100%;mask-size:14px 14px,100% 100%;
+  -webkit-mask-composite:source-in;mask-composite:intersect;
+  transition:--fr .6s var(--ease),--sp .8s var(--ease)}
+.svc:hover .svc-fill,.svc.on .svc-fill,.svc:focus-within .svc-fill{--fr:10.5px;--sp:150%}
+.svc:hover,.svc.on,.svc:focus-within{color:#151612}
+.svc:hover .svc-text,.svc.on .svc-text,.svc:focus-within .svc-text{color:#151612}
+html.rm .svc-fill{display:none}
+
+@media (max-width:900px){
+  .svc{grid-template-columns:40px minmax(0,1fr);gap:10px 12px;padding:24px 4px}
+  .svc-n{align-self:start;padding-top:.7em}
+  .svc-ico{display:none}
+  .svc-title,.svc-text,.svc-tag{grid-column:2}
+  .svc-title{font-size:clamp(1.9rem,8.4vw,2.6rem)}
+  .svc-tag{justify-self:start;margin-top:4px}
+}

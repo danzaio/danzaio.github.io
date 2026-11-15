@@ -1,0 +1,36 @@
+/* ==========================================================================
+   contact.css: plate 06. The ink card with the dot field, then the closing word,
+   which prints from a fine screen to solid ink as it scrolls in.
+   ========================================================================== */
+.contact-card{position:relative;overflow:hidden;isolation:isolate;margin-top:clamp(26px,3vw,48px);border:1.5px solid #151612;background:var(--ink-static);color:var(--paper-static);padding:clamp(26px,4.4vw,76px) clamp(22px,4vw,68px)}
+.contact-card.cm{overflow:visible}
+.contact-clip{position:absolute;inset:0;overflow:hidden;z-index:-1;pointer-events:none}
+:root[data-theme="ink"] .contact-card{background:#0b0c09;border-color:var(--line)}
+.contact-clip::before{content:"";position:absolute;inset:0;background:radial-gradient(700px circle at var(--mx,80%) var(--my,10%),rgba(201,255,47,.14),transparent 60%)}
+/* the field lives on the right, behind the orb; it fades out before it reaches the copy */
+.contact-gl{position:absolute;inset:0;width:100%;height:100%;-webkit-mask-image:linear-gradient(100deg,transparent 32%,#000 68%);mask-image:linear-gradient(100deg,transparent 32%,#000 68%)}
+.contact-title{font:800 clamp(2rem,4.6vw,4.8rem)/1 var(--font-display);letter-spacing:-.045em;max-width:19ch;text-wrap:balance}
+.contact-cols{display:flex;justify-content:space-between;align-items:flex-end;gap:36px;flex-wrap:wrap;margin-top:clamp(28px,4vw,60px)}
+.contact-copy{max-width:50ch;color:#d9d6ca;font-size:clamp(1rem,1.2vw,1.15rem)}
+.contact-note{margin-top:20px;font:600 .68rem/1.6 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--lime)}
+.gh-stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.gh-stats[hidden]{display:none}
+.gh-stats li{font:500 .7rem var(--font-mono);letter-spacing:.03em;border:1px solid rgba(247,244,235,.25);border-radius:999px;padding:7px 13px;color:#d9d6ca}
+.cta-orb{position:relative;display:grid;place-content:center;justify-items:center;gap:8px;width:clamp(150px,14vw,210px);aspect-ratio:1;border-radius:50%;background:var(--lime);color:#151612;font:700 clamp(.95rem,1.15vw,1.12rem)/1.1 var(--font-display);text-align:center;padding:16px;transition:background-color .3s;will-change:transform}
+.cta-orb::before{content:"";position:absolute;inset:-9px;border:1.5px dashed var(--lime);border-radius:50%;animation:spin 24s linear infinite;opacity:.8}
+.cta-orb .ico{width:28px;height:28px;transition:transform .5s var(--ease)}
+.cta-orb:hover{background:var(--paper-static)}
+.cta-orb:hover .ico{transform:rotate(45deg) scale(1.15)}
+
+.bigword{display:flex;align-items:flex-end;justify-content:space-between;gap:2vw;margin-top:clamp(40px,6vw,100px);padding-bottom:clamp(14px,2vw,28px)}
+.bw{--dr:.041em;font:800 calc(var(--fit,13) * 1vw)/.86 var(--font-display);letter-spacing:-.055em;white-space:nowrap;padding-bottom:.06em}
+html.js:not(.rm) .bw{--dr:.012em}
+.bw-arrow{display:grid;place-items:center;flex:none;width:clamp(48px,6vw,96px);aspect-ratio:1;margin-bottom:1.2vw;border:1.5px solid var(--ink);border-radius:50%;transition:background-color .3s,color .3s,transform .5s var(--ease)}
+.bw-arrow .ico{width:45%;height:45%}
+.bigword:hover .bw-arrow{background:var(--lime);color:#151612;border-color:#151612;transform:rotate(45deg)}
+
+@media (max-width:900px){
+  .contact-gl{opacity:.6;-webkit-mask-image:linear-gradient(180deg,transparent 40%,#000 88%);mask-image:linear-gradient(180deg,transparent 40%,#000 88%)}
+  .contact-cols{align-items:flex-start}
+  .bw-arrow{display:none}
+}

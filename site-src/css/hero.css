@@ -1,0 +1,68 @@
+/* ==========================================================================
+   hero.css: cover plate, halftone headline, project reel, colour strip
+   ========================================================================== */
+.hero{position:relative;isolation:isolate;min-height:100svh;display:flex;padding:calc(var(--top-h) + var(--sat) + clamp(14px,1.6vw,26px)) 0 clamp(16px,1.8vw,28px)}
+.hero-gl{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;-webkit-mask-image:linear-gradient(to top,transparent 120px,#000 240px);mask-image:linear-gradient(to top,transparent 120px,#000 240px)}
+.hero.no-gl{background-image:radial-gradient(circle,color-mix(in srgb,var(--ink) 20%,transparent) 1.2px,transparent 1.6px);background-size:15px 15px}
+.hero-in{display:grid;grid-template-columns:minmax(0,1.32fr) minmax(0,1fr);grid-template-rows:auto 1fr auto;column-gap:clamp(28px,4.4vw,88px);row-gap:clamp(18px,2.2vw,34px)}
+.hero .slug{grid-column:1/-1}
+.hero-copy{grid-column:1;grid-row:2;align-self:center;display:grid;gap:clamp(20px,2.2vw,32px);justify-items:start}
+
+/* headline: "Ideas" is printed as a dot screen (still raw); the second line lands crisp */
+.hero-title{font:800 clamp(3rem,min(8.4vw,14.5svh),9.4rem)/.86 var(--font-display);letter-spacing:-.055em}
+.hero-title .l1,.hero-title .l2{display:block}
+.hero-title .l1{position:relative;width:max-content}
+.ht-solid{position:absolute;left:0;top:0;color:var(--ink);pointer-events:none;--sr:0px;-webkit-mask-image:radial-gradient(circle var(--sr) at var(--sx,50%) var(--sy,50%),#000 52%,transparent 100%);mask-image:radial-gradient(circle var(--sr) at var(--sx,50%) var(--sy,50%),#000 52%,transparent 100%)}
+.hero-title .wd{display:inline-block;overflow:hidden;vertical-align:top;white-space:nowrap;padding:.04em 0 .12em;margin:-.04em 0 -.12em}
+.hero-title.done .wd{overflow:visible}
+.hero-title .ch{display:inline-block}
+.hl{color:#151612;padding:0 .06em;margin-left:-.06em;background:linear-gradient(var(--lime),var(--lime)) no-repeat 0 58%/calc(var(--hl,1) * 100%) 74%;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.hero-sub{max-width:40ch;font-size:clamp(1.05rem,1.35vw,1.3rem);line-height:1.45;color:var(--muted)}
+.hero-sub b{color:var(--ink);font-weight:600}
+.hero-cta{display:flex;flex-wrap:wrap;gap:10px}
+
+/* the reel: four projects cycle through the halftone wipe */
+.reel{grid-column:2;grid-row:2;align-self:center;display:block;position:relative;border:1.5px solid var(--ink);background:var(--surface);box-shadow:12px 12px 0 var(--lime);transform-origin:50% 60%}
+:root[data-theme="ink"] .reel{border-color:var(--line)}
+.reel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;height:38px;padding:0 14px;background:var(--ink-static);color:#e9e6da;font:600 .64rem/1 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.reel-live{display:flex;align-items:center;gap:8px}
+.reel-live i{width:8px;height:8px;border-radius:50%;background:var(--orange);animation:blink 1.4s steps(1) infinite}
+.reel-head b{color:var(--lime);font-weight:700}
+.reel-img{position:relative;display:block;aspect-ratio:4/3;overflow:hidden;background:var(--paper-deep);border-bottom:1.5px solid var(--ink)}
+:root[data-theme="ink"] .reel-img{border-color:var(--line)}
+.reel-img img{width:100%;height:100%;object-fit:cover;object-position:50% 40%}
+.reel-foot{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 14px;padding:14px 14px 14px 16px}
+.reel-foot b{font:700 clamp(.95rem,1.15vw,1.12rem)/1.1 var(--font-mono);letter-spacing:.02em;white-space:nowrap;overflow:hidden}
+.reel-foot span{font:500 .64rem/1.2 var(--font-mono);letter-spacing:.1em;color:var(--muted);white-space:nowrap;overflow:hidden}
+.reel-foot .arrow-chip{grid-column:2;grid-row:1/3}
+.reel-bar{position:absolute;left:0;right:0;top:-1.5px;height:3px;background:var(--lime);transform-origin:left;transform:scaleX(0)}
+
+/* foot of the cover: who, what, with what */
+.hero-foot{grid-column:1/-1;grid-row:3;display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:20px clamp(20px,3vw,48px);align-items:end;padding-top:14px;border-top:1px solid var(--line-soft)}
+.hero-foot dt{font:600 .62rem var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.hero-foot dd{font:500 clamp(.86rem,.95vw,.98rem)/1.35 var(--font-body)}
+.hero-scroll{display:flex;align-items:center;gap:10px;font:600 .64rem var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);transition:color .2s}
+.hero-scroll:hover{color:var(--ink)}
+.hero-scroll .reg{width:22px;height:22px;color:var(--ink);animation:spin 9s linear infinite}
+
+/* ---------- strip: a straight ink band, words alternate crisp and screened */
+.strip{position:relative;overflow:hidden;background:var(--ink-static);color:var(--paper-static);border-block:1px solid #151612;margin-top:clamp(8px,1vw,16px)}
+:root[data-theme="ink"] .strip{border-color:var(--line-soft)}
+.strip-track{display:flex;width:max-content;will-change:transform}
+.strip-group{display:flex;align-items:center;flex:none}
+.st-item{font:800 clamp(2.2rem,5.4vw,5rem)/1 var(--font-display);letter-spacing:-.04em;padding:.22em .36em .28em;white-space:nowrap}
+.st-item.ht-word{--ink:var(--lime);--dr:.024em}
+.strip .reg{width:clamp(1.3rem,2.4vw,2.1rem);height:clamp(1.3rem,2.4vw,2.1rem);color:var(--orange);flex:none}
+
+@media (max-width:900px){
+  .hero{min-height:0}
+  .hero-in{grid-template-columns:minmax(0,1fr);grid-template-rows:none}
+  .hero-copy,.reel,.hero-foot{grid-column:1;grid-row:auto}
+  .hero-copy{padding-top:clamp(24px,6svh,56px)}
+  .reel{margin-top:14px}
+  .hero-title{font-size:14.2vw}
+  .reel{box-shadow:7px 7px 0 var(--lime);margin-right:7px}
+  .hero-foot{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .hero-foot>dl:nth-child(3){display:none}
+  .hero-scroll{display:none}
+}

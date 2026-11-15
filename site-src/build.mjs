@@ -1,14 +1,15 @@
 // Builds the home page (EN + PT-BR) from site-src/ into the repo root.
 //   node build.mjs           one-off build (minified)
 //   node build.mjs --watch   rebuild on change (unminified, with sourcemap for debugging)
-import { build } from "esbuild";
-import { mkdir, writeFile, watch } from "node:fs/promises";
+import { build, transform } from "esbuild";
+import { mkdir, readFile, writeFile, watch } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
 const watching = process.argv.includes("--watch");
+const CSS = ["base.css", "chrome.css", "hero.css", "loop.css", "work.css", "services.css", "bench.css", "process.css", "contact.css"];
 
 async function run() {
   const t0 = performance.now();
@@ -30,14 +31,10 @@ async function run() {
     legalComments: "none",
     logLevel: "warning",
   });
-  await build({
-    entryPoints: { main: path.join(here, "css/main.css") },
-    outdir: path.join(root, "assets/site"),
-    bundle: false,
-    minify: !watching,
-    loader: { ".css": "css" },
-    logLevel: "warning",
-  });
+  // CSS: one file per plate, concatenated in page order, then minified into assets/site/main.css
+  const css = (await Promise.all(CSS.map((f) => readFile(path.join(here, "css", f), "utf8")))).join("\n");
+  const out = await transform(css, { loader: "css", minify: !watching, logLevel: "warning" });
+  await writeFile(path.join(root, "assets/site/main.css"), out.code);
   console.log(`built in ${Math.round(performance.now() - t0)}ms`);
 }
 

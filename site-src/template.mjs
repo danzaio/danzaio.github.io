@@ -1,15 +1,15 @@
 ﻿import { CONTENT, PROJECTS, SITE } from "./content.mjs";
 
+// Home v4: a proof sheet. Every section is a plate with a slug line and crop marks.
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 const svg = (inner, cls = "ico", extra = "") =>
   `<svg class="${cls}" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"${extra}>${inner}</svg>`;
 
 const I = {
-  ur: svg('<path d="M7 17 17 7M8 7h9v9"/>'),
+  ur: svg('<path d="M7 17 17 7M8 7h9v9"/>', "ico ico-ur"),
   up: svg('<path d="M12 19V5M5 12l7-7 7 7"/>'),
   down: svg('<path d="M12 5v14M5 12l7 7 7-7"/>'),
-  star: svg('<path d="M12 2v20M2 12h20M5 5l14 14M19 5 5 19"/>', "ico ico-star"),
   moon: svg('<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>', "ico ico-moon"),
   sun: svg('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>', "ico ico-sun"),
   gh: svg('<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>'),
@@ -22,126 +22,117 @@ const I = {
   x: svg('<path d="M6 6l12 12M18 6 6 18"/>', "ico ico-x"),
   search: svg('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
 };
+// registration mark: the printer's target, used as the page's bullet
+const REG = `<svg class="reg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="6.5"/><path d="M12 .5v23M.5 12h23"/><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/></svg>`;
+const CBAR = `<span class="cbar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>`;
 
 const arrowInline = `<svg class="tag-arrow" viewBox="0 0 24 12" width="22" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 6h20M16 1l5 5-5 5"/></svg>`;
 const tagHtml = (parts) => parts.map(esc).join(arrowInline);
-
 const pad = (n) => String(n).padStart(2, "0");
-
-// --- service card illustrations (decorative) ---------------------------------
-const ART = {
-  saas: `<svg class="art art-saas" viewBox="0 0 200 120" aria-hidden="true"><g class="bars"><rect x="12" y="84" width="22" height="30" rx="3"/><rect x="48" y="66" width="22" height="48" rx="3"/><rect x="84" y="48" width="22" height="66" rx="3"/><rect x="120" y="30" width="22" height="84" rx="3"/><rect x="156" y="8" width="22" height="106" rx="3" class="hot"/></g><path class="trend" d="M12 78 48 60 84 42 120 24 156 4" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-  mobile: `<svg class="art art-mobile" viewBox="0 0 160 160" aria-hidden="true"><g class="rings"><circle cx="80" cy="80" r="26"/><circle cx="80" cy="80" r="26"/><circle cx="80" cy="80" r="26"/></g><rect x="56" y="30" width="48" height="100" rx="10" class="phone"/><rect x="64" y="44" width="32" height="6" rx="3" class="ln"/><rect x="64" y="58" width="32" height="22" rx="4" class="ln"/><rect x="64" y="88" width="20" height="5" rx="2.5" class="ln"/><circle cx="80" cy="118" r="5" class="knob"/></svg>`,
-  commerce: `<svg class="art art-commerce" viewBox="0 0 160 120" aria-hidden="true"><g class="coins"><ellipse cx="96" cy="96" rx="34" ry="10"/><ellipse cx="96" cy="84" rx="34" ry="10"/><ellipse cx="96" cy="72" rx="34" ry="10"/><ellipse cx="96" cy="60" rx="34" ry="10" class="top"/></g><path class="cart" d="M10 22h14l10 46h54M30 40h66" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="42" cy="82" r="5" class="wheel"/><circle cx="78" cy="82" r="5" class="wheel"/></svg>`,
-  ai: `<svg class="art art-ai" viewBox="0 0 360 360" aria-hidden="true"><circle class="o-ring" cx="220" cy="220" r="130"/><circle class="o-core" cx="220" cy="220" r="86"/><g class="orbit orbit-a"><circle cx="220" cy="90" r="9"/></g><g class="orbit orbit-b"><circle cx="350" cy="220" r="6"/></g><g class="orbit orbit-c"><circle cx="220" cy="350" r="5"/></g></svg>`,
-};
+const ext = `target="_blank" rel="noopener"`;
 const CAP_ICON = { saas: I.win, mobile: I.phone, commerce: I.bag, ai: I.bot };
 
-// --- sections -----------------------------------------------------------------
-function sectionHead(num, label, title, lead, id) {
-  return `<header class="section-head">
-    <div class="section-label"><span class="num">${num}</span><i class="rule"></i><span class="lbl">${esc(label)}</span></div>
-    <h2 class="section-title"${id ? ` id="${id}"` : ""} data-scrub>${esc(title)}</h2>
-    <p class="section-lead" data-fade>${esc(lead)}</p>
-  </header>`;
+/* ----------------------------------------------------------------- pieces */
+function slug(c, num, label) {
+  return `<div class="slug section-label">${REG}<span class="num">${num}</span><span class="lbl">${esc(label)}</span><i class="rule" aria-hidden="true"></i><span class="pn">${esc(c.ui.plate)} ${num} / 06</span>${CBAR}</div>`;
+}
+function secHead(title, lead, id) {
+  return `<header class="sec-head"><h2 class="sec-title" id="${id}" data-scrub>${esc(title)}</h2><p class="sec-lead" data-fade>${esc(lead)}</p></header>`;
 }
 
-function header(c) {
-  const nav = c.nav.map((n) => `<a href="${n.href}" data-nav>${esc(n.label)}</a>`).join("");
-  return `<header class="site-header" data-header>
-    <div class="bar">
-      <a class="brand" href="#top" data-cursor="TOP"><span class="mark" aria-hidden="true">DZ</span><span class="brand-name">Danzaio</span></a>
-      <nav class="desktop-nav" aria-label="Primary">${nav}</nav>
-      <div class="bar-actions">
-        <button class="kbd-btn" type="button" data-palette-open aria-label="${esc(c.ui.palette)}"><span class="kbd" data-kbd aria-hidden="true">Ctrl K</span></button>
-        <a class="lang-link" href="${c.altPath}" hreflang="${c.lang === "en" ? "pt-BR" : "en"}" lang="${c.lang === "en" ? "pt-BR" : "en"}" title="${esc(c.ui.switchLang)}">${c.altCode}</a>
+function top(c) {
+  const alt = c.lang === "en" ? "pt-BR" : "en";
+  const links = [...c.nav, { href: "#contact", label: c.contactLabel }];
+  return `<header class="top" data-header>
+    <div class="top-in shell">
+      <a class="brand" href="#top" data-cursor="TOP"><span class="mark" aria-hidden="true">DZ</span><span class="brand-name">Danzaio<span>${esc(c.hero.year)}</span></span></a>
+      <span class="top-sec" aria-hidden="true"><b></b><span data-top-txt>00 / ${esc(c.ui.index)}</span></span>
+      <div class="top-act">
+        <button class="kbd-btn" type="button" data-palette-open aria-label="${esc(c.ui.palette)}"><span data-kbd aria-hidden="true">Ctrl K</span></button>
+        <a class="lang-link" href="${c.altPath}" hreflang="${alt}" lang="${alt}" title="${esc(c.ui.switchLang)}">${c.altCode}</a>
         <button class="icon-btn theme-btn" type="button" data-theme-toggle aria-label="${esc(c.ui.theme)}">${I.moon}${I.sun}</button>
-        <a class="btn btn-lime btn-sm contact-btn" href="${SITE.github}" target="_blank" rel="noopener" data-magnetic><span>${esc(c.contactLabel)}</span>${I.ur}</a>
+        <a class="btn btn-lime btn-sm contact-btn" href="${SITE.github}" ${ext} data-magnetic><span>${esc(c.contactLabel)}</span>${I.ur}</a>
         <button class="icon-btn menu-btn" type="button" data-menu-toggle aria-expanded="false" aria-controls="mobile-menu" aria-label="${esc(c.ui.menu)}">${I.menu}${I.x}</button>
       </div>
     </div>
+    <div class="progress" aria-hidden="true"><i data-progress></i></div>
   </header>
+  <nav class="dock" data-dock aria-label="Sections">${c.nav.map((n, i) => `<a href="${n.href}" data-nav><b>${pad(i + 1)}</b>${esc(n.label)}</a>`).join("")}<a class="dock-go" href="#contact" data-nav><b>06</b>${esc(c.contactLabel)}${I.ur}</a></nav>
   <div class="mobile-menu" id="mobile-menu" data-mobile-menu hidden>
-    <nav aria-label="Mobile">${c.nav.map((n, i) => `<a href="${n.href}" data-mm-link><span class="mm-n">${pad(i + 1)}</span>${esc(n.label)}</a>`).join("")}<a href="${SITE.github}" target="_blank" rel="noopener" data-mm-link><span class="mm-n">${pad(c.nav.length + 1)}</span>${esc(c.contactLabel)}</a></nav>
+    <nav aria-label="Mobile">${links.map((n, i) => `<a href="${n.href}" data-mm-link><span class="mm-n">${pad(i + 1)}</span>${esc(n.label)}</a>`).join("")}</nav>
     <div class="mm-foot">
-      <a class="mm-lang" href="${c.altPath}" hreflang="${c.lang === "en" ? "pt-BR" : "en"}" lang="${c.lang === "en" ? "pt-BR" : "en"}"><b>${esc(c.altLabel)}</b><span>${c.altCode}</span></a>
+      <a class="mm-lang" href="${c.altPath}" hreflang="${alt}" lang="${alt}"><b>${esc(c.altLabel)}</b><span>${c.altCode}</span></a>
       <button class="mm-pal" type="button" data-mm-palette>${esc(c.ui.palette)}</button>
     </div>
   </div>`;
 }
 
+/* ------------------------------------------------------------- the cover */
 function hero(c) {
   const h = c.hero;
   const p0 = PROJECTS[0];
   const w0 = c.work.items[0];
-  const tiles = h.tiles
-    .map(
-      (t, i) => `<a class="tile tile-${["paper", "lime", "ink"][i]}" href="${t.href}" data-cursor="${esc(c.ui.view)}">
-        <b class="tile-k">${esc(t.k)}</b>
-        <span class="tile-t"><em>${esc(t.a)}</em><small>${esc(t.b)}</small></span>
-        <i class="tile-dash" aria-hidden="true"></i>
-        <span class="tile-go" aria-hidden="true">${I.down}</span>
-      </a>`
-    )
-    .join("");
-  return `<section id="top" class="hero shell" aria-labelledby="hero-title">
-    <div class="hero-grid">
-      <div class="hero-main card" data-hero>
-        <canvas class="hero-gl" data-hero-gl aria-hidden="true"></canvas>
-        <div class="hero-meta"><span>${esc(h.eyebrow.toUpperCase())}</span><i class="rule"></i><span>${esc(h.role.toUpperCase())}</span></div>
+  const nf = c.system.term.neofetch;
+  const words = h.line2.split(" ");
+  const last = words.pop();
+  const first = words.join(" ");
+  const meta = [
+    [h.metaK[0], h.role],
+    [h.metaK[1], nf.focus],
+    [h.metaK[2], nf.stack],
+  ];
+  return `<section id="top" class="hero" aria-labelledby="hero-title" data-hero>
+    <canvas class="hero-gl" data-hero-gl aria-hidden="true"></canvas>
+    <div class="hero-in shell">
+      <div class="slug" data-hero-in>${REG}<span class="num">${esc(c.ui.proof)}</span><span class="lbl">${esc(h.eyebrow)}</span><i class="rule" aria-hidden="true"></i><span class="pn">${esc(h.year)}</span>${CBAR}</div>
+      <div class="hero-copy">
         <h1 id="hero-title" class="hero-title" aria-label="${esc(h.line1 + " " + h.line2)}">
-          <span class="line" aria-hidden="true"><span class="ln-in" data-split="chars">${esc(h.line1)}</span></span>
-          <span class="line" aria-hidden="true"><span class="hl"><span class="ln-in" data-split="chars">${esc(h.line2)}</span></span></span>
+          <span class="l1" aria-hidden="true" data-ht-host><span class="ht-word" data-ht>${esc(h.line1)}</span><span class="ht-solid" data-ht-solid>${esc(h.line1)}</span></span>
+          <span class="l2" aria-hidden="true">${first ? `<span class="ln-in" data-split="chars">${esc(first)}</span> ` : ""}<span class="hl"><span class="ln-in" data-split="chars">${esc(last)}</span></span></span>
         </h1>
         <p class="hero-sub" data-hero-in>${esc(h.sub)}</p>
         <div class="hero-cta" data-hero-in>
           <a class="btn btn-ink" href="#work" data-magnetic><span>${esc(h.cta1)}</span>${I.ur}</a>
-          <a class="btn btn-line" href="${SITE.github}" target="_blank" rel="noopener" data-magnetic>${I.gh}<span>${esc(h.cta2)}</span></a>
+          <a class="btn btn-line" href="${SITE.github}" ${ext} data-magnetic>${I.gh}<span>${esc(h.cta2)}</span></a>
         </div>
-        <a class="hero-scroll" href="#loop" aria-label="${esc(c.ui.scroll)}"><span>${esc(c.ui.scroll)}</span>${I.down}</a>
       </div>
-      <a class="hero-card card tone-ink" href="${p0.repo}" target="_blank" rel="noopener" aria-label="${esc(w0.title + ". " + w0.kicker)}" data-tilt data-cursor="${esc(c.ui.open)}" data-hero-card data-reel>
-        <span class="badge"><b data-reel-n>01</b> / ${pad(PROJECTS.length)}</span>
-        <span class="hero-card-img"><img src="/assets/site/img/${p0.img}" width="${p0.imgW}" height="${p0.imgH}" alt="" fetchpriority="high" decoding="async"/><canvas class="reel-gl" data-reel-gl aria-hidden="true"></canvas></span>
-        <span class="arrow-chip" aria-hidden="true">${I.ur}</span>
-        <span class="hero-card-foot"><b data-reel-title>${esc(w0.title.toUpperCase())}</b><span data-reel-kicker>${esc(w0.kicker.toUpperCase())}</span><i class="reel-bar" data-reel-bar aria-hidden="true"></i></span>
+      <a class="reel cm" href="${p0.repo}" ${ext} aria-label="${esc(w0.title + ". " + w0.kicker)}" data-reel data-tilt data-cursor="${esc(c.ui.open)}">
+        <span class="reel-head"><span class="reel-live"><i></i>${esc(h.reel)}</span><span><b data-reel-n>01</b> / ${pad(PROJECTS.length)}</span></span>
+        <span class="reel-img"><img src="/assets/site/img/${p0.img}" width="${p0.imgW}" height="${p0.imgH}" alt="" fetchpriority="high" decoding="async"/><canvas class="wipe-gl" data-reel-gl aria-hidden="true"></canvas></span>
+        <span class="reel-foot"><b data-reel-title>${esc(w0.title.toUpperCase())}</b><span data-reel-kicker>${esc(w0.kicker.toUpperCase())}</span><span class="arrow-chip" aria-hidden="true">${I.ur}</span><i class="reel-bar" data-reel-bar aria-hidden="true"></i></span>
       </a>
-      <div class="tiles" data-tiles>${tiles}</div>
+      <div class="hero-foot" data-hero-in>${meta.map(([k, v]) => `<dl><dt>${esc(k)}</dt><dd>${esc(v)}</dd></dl>`).join("")}<a class="hero-scroll" href="#loop">${REG}<span>${esc(c.ui.scroll)}</span></a></div>
     </div>
   </section>`;
 }
 
-function marquee(c) {
-  const group = c.marquee.map((w) => `<span class="mq-item">${esc(w)}</span>${I.star}`).join("");
-  return `<div class="marquee" data-marquee aria-hidden="true">
-    <div class="marquee-rot">
-      <div class="marquee-track"><div class="marquee-group">${group}</div><div class="marquee-group">${group}</div><div class="marquee-group">${group}</div></div>
-    </div>
-  </div>`;
+function strip(c) {
+  const group = c.marquee.map((w, i) => `<span class="st-item${i % 2 ? " ht-word" : ""}">${esc(w)}</span>${REG}`).join("");
+  return `<div class="strip" data-strip aria-hidden="true"><div class="strip-track"><div class="strip-group">${group}</div><div class="strip-group">${group}</div><div class="strip-group">${group}</div></div></div>`;
 }
 
-// --- the loop: one idea becomes a product (decorative stage + readable beats) ---
+/* -------------------------------------------- plate 01: the loop (kept from v3) */
 const CODE = [
-  ['<i>// price-watch.ts</i>'],
-  ['<b>const</b> deal = <b>await</b> feed.watch(sku)'],
-  ['<b>if</b> (deal.drop >= rule.min) {'],
-  ['  <b>await</b> notify(user, deal)'],
-  ['}'],
-  [''],
-  ['<b>export const</b> checkout ='],
-  ['  stripe.session({ mode: <u>"payment"</u> })'],
-  [''],
-  ['<i>// alerts.test.ts</i>'],
-  ['test(<u>"alert fires on a real drop"</u>, () => {'],
-  ['  expect(sent).toBe(<b>true</b>)'],
-  ['})'],
-  [''],
-  ['<em>✓ auth</em>'],
-  ['<em>✓ price feed</em>'],
-  ['<em>✓ alerts</em>'],
-  ['<em>✓ checkout</em>'],
+  '<i>// price-watch.ts</i>',
+  '<b>const</b> deal = <b>await</b> feed.watch(sku)',
+  '<b>if</b> (deal.drop >= rule.min) {',
+  '  <b>await</b> notify(user, deal)',
+  '}',
+  '',
+  '<b>export const</b> checkout =',
+  '  stripe.session({ mode: <u>"payment"</u> })',
+  '',
+  '<i>// alerts.test.ts</i>',
+  'test(<u>"alert fires on a real drop"</u>, () => {',
+  '  expect(sent).toBe(<b>true</b>)',
+  '})',
+  '',
+  '<em>✓ auth</em>',
+  '<em>✓ price feed</em>',
+  '<em>✓ alerts</em>',
+  '<em>✓ checkout</em>',
 ]
-  .map((l) => `<span>${l[0] || "&nbsp;"}</span>`)
+  .map((l) => `<span>${l || "&nbsp;"}</span>`)
   .join("");
 
 function loop(c) {
@@ -166,7 +157,7 @@ function loop(c) {
     <div class="loop-track" data-loop>
       <div class="loop-sticky shell">
         <div class="loop-left">
-          <div class="section-label"><span class="num">${l.num}</span><i class="rule"></i><span class="lbl">${esc(l.label)}</span></div>
+          ${slug(c, l.num, l.label)}
           <h2 id="loop-title" class="loop-title">${esc(l.title)}</h2>
           <ol class="beats">${beats}</ol>
           <div class="loop-rail" data-loop-rail aria-hidden="true">${rail}</div>
@@ -210,72 +201,74 @@ function loop(c) {
   </section>`;
 }
 
-function services(c) {
-  const s = c.services;
-  const cards = s.items
-    .map(
-      (it, i) => `<article id="cap-${it.id === "commerce" ? "commerce" : it.id}" class="cap cap-${it.id}" data-spot data-reveal>
-        <span class="cap-icon">${CAP_ICON[it.id]}</span>
-        <span class="cap-num">${pad(i + 1)}</span>
-        ${ART[it.id]}
-        <div class="cap-body"><h3>${esc(it.title)}</h3><p>${esc(it.text)}</p></div>
-        <span class="cap-tag">${tagHtml(it.tag)}</span>
-      </article>`
-    )
-    .join("");
-  return `<section id="capabilities" class="section shell services" aria-labelledby="services-title">
-    ${sectionHead(s.num, s.label, s.title, s.lead, "services-title")}
-    <div class="bento" data-bento>${cards}</div>
-    <div class="bento-nav" aria-hidden="true"><span class="bn-count"><b data-bn-cur>01</b> / ${pad(s.items.length)}</span><span class="bn-dots">${s.items.map((_, i) => `<i${i === 0 ? " class=\"on\"" : ""}></i>`).join("")}</span></div>
-  </section>`;
-}
-
+/* ----------------------------------------------------- plate 02: selected work */
 function work(c) {
   const w = c.work;
   const total = pad(PROJECTS.length);
   const items = PROJECTS.map((p, i) => {
     const t = w.items[i];
-    const links = `<a class="btn btn-ink btn-sm" href="${p.repo}" target="_blank" rel="noopener" data-magnetic><span>${esc(c.ui.repo)}</span>${I.ur}</a>${
-      p.live ? `<a class="btn btn-line btn-sm" href="${p.live}" target="_blank" rel="noopener" data-magnetic><span>${esc(c.ui.live)}</span>${I.ur}</a>` : ""
+    const links = `<a class="btn btn-ink btn-sm" href="${p.repo}" ${ext} data-magnetic><span>${esc(c.ui.repo)}</span>${I.ur}</a>${
+      p.live ? `<a class="btn btn-line btn-sm" href="${p.live}" ${ext} data-magnetic><span>${esc(c.ui.live)}</span>${I.ur}</a>` : ""
     }`;
-    return `<article class="proj tone-${p.tone}" style="--i:${i}" data-proj>
-      <div class="proj-inner">
-        <div class="proj-info">
-          <div class="proj-top"><span>${pad(i + 1)} / ${total}</span><span>${esc(t.kicker.toUpperCase())}</span></div>
-          <h3 class="proj-title">${esc(t.title)}</h3>
-          <p class="proj-text">${esc(t.text)}</p>
-          <dl class="why"><dt>${esc(c.ui.why.toUpperCase())}</dt><dd>${esc(t.why)}</dd></dl>
-          <div class="proj-links">${links}</div>
-        </div>
-        <a class="proj-shot" href="${p.live || p.repo}" target="_blank" rel="noopener" data-tilt data-cursor="${esc(c.ui.open)}">
-          <span class="frame${p.tall ? " is-tall" : ""}">
-            <span class="frame-bar"><i></i><i></i><i></i><span class="url" aria-hidden="true">${esc(p.url)}</span></span>
-            <span class="frame-body"><img src="/assets/site/img/${p.img}" width="${p.imgW}" height="${p.imgH}" alt="${esc(t.title)} screenshot" loading="lazy" decoding="async"/></span>
-          </span>
-          <span class="arrow-chip" aria-hidden="true">${I.ur}</span>
-        </a>
-      </div>
-    </article>`;
+    return `<li class="wk${i === 0 ? " on" : ""}" data-wk-item="${i}">
+      <div class="wk-row"><span class="wk-n">${pad(i + 1)}</span><h3 class="wk-title">${esc(t.title)}</h3><span class="wk-kick">${esc(t.kicker)}</span></div>
+      <div class="wk-more"><div class="wk-more-in"><p class="wk-text">${esc(t.text)}</p><dl class="why"><dt>${esc(c.ui.why.toUpperCase())}</dt><dd>${esc(t.why)}</dd></dl><div class="wk-links">${links}</div></div></div>
+      <a class="wk-shot" href="${p.live || p.repo}" ${ext} data-cursor="${esc(c.ui.open)}" tabindex="-1"><span class="frame${p.tall ? " is-tall" : ""}"><span class="frame-bar"><i></i><i></i><i></i><span class="url">${esc(p.url)}</span></span><span class="frame-body"><img src="/assets/site/img/${p.img}" width="${p.imgW}" height="${p.imgH}" alt="${esc(t.title)} screenshot" loading="lazy" decoding="async"/></span></span></a>
+    </li>`;
   }).join("");
-  return `<section id="work" class="section shell work" aria-labelledby="work-title">
-    ${sectionHead(w.num, w.label, w.title, w.lead, "work-title")}
-    <div class="stack" data-stack>${items}</div>
+  const p0 = PROJECTS[0];
+  return `<section id="work" class="plate work" aria-labelledby="work-title">
+    <div class="shell">${slug(c, w.num, w.label)}${secHead(w.title, w.lead, "work-title")}</div>
+    <div class="wk-track" data-wk>
+      <div class="wk-sticky shell">
+        <div class="wk-left"><ol class="wk-list">${items}</ol><p class="wk-hint" aria-hidden="true">${I.down}${esc(w.hint)}</p></div>
+        <div class="wk-stage cm" data-wk-stage aria-hidden="true">
+          <span class="frame-bar"><i></i><i></i><i></i><span class="url" data-wk-url>${esc(p0.url)}</span><span class="wk-count"><b data-wk-n>01</b> / ${total}</span></span>
+          <span class="wk-view"><img data-wk-img src="/assets/site/img/${p0.img}" width="${p0.imgW}" height="${p0.imgH}" alt="" loading="lazy" decoding="async"/><canvas class="wipe-gl" data-wk-gl></canvas></span>
+          <span class="wk-meter">${PROJECTS.map(() => "<i></i>").join("")}</span>
+        </div>
+      </div>
+    </div>
   </section>`;
 }
 
-function system(c) {
+/* -------------------------------------------------------- plate 03: services */
+function services(c) {
+  const s = c.services;
+  const rows = s.items
+    .map(
+      (it, i) => `<li id="cap-${it.id}" class="svc" data-svc>
+        <span class="svc-n">${pad(i + 1)}</span><span class="svc-ico">${CAP_ICON[it.id]}</span>
+        <h3 class="svc-title">${esc(it.title)}</h3>
+        <p class="svc-text">${esc(it.text)}</p>
+        <span class="svc-tag">${tagHtml(it.tag)}</span>
+        <i class="svc-fill" aria-hidden="true"></i>
+      </li>`
+    )
+    .join("");
+  return `<section id="services" class="plate services shell" aria-labelledby="services-title">
+    ${slug(c, s.num, s.label)}${secHead(s.title, s.lead, "services-title")}
+    <ol class="svc-list">${rows}</ol>
+  </section>`;
+}
+
+/* ------------------------------------------------------- plate 04: workbench */
+const SWATCH = [
+  ["paper", "#F1EEE4"],
+  ["ink", "#151612"],
+  ["lime", "#C9FF2F"],
+  ["orange", "#FF5D2C"],
+  ["lilac", "#C6BBEF"],
+];
+function bench(c) {
   const s = c.system;
   const chips = s.chips.map((x) => `<button type="button" class="chip" data-chip="${esc(x)}">${esc(x)}</button>`).join("");
-  const stack = s.stack
-    .map((x, i) => `<li data-stack-row><span class="n">${pad(i + 1)}</span><div><b>${esc(x.t)}</b><span>${esc(x.d)}</span></div><i class="dash" aria-hidden="true"></i></li>`)
-    .join("");
-  const sw = ["paper", "ink", "lime", "orange"]
-    .map((k, i) => `<button type="button" class="swatch sw-${k}" data-swatch="${["#f1eee4", "#151612", "#c9ff2f", "#ff5d2c"][i]}" aria-label="${esc(s.swatchNames[i])}"><span>${esc(s.swatchNames[i])}</span></button>`)
-    .join("");
-  return `<section id="system" class="section shell system" aria-labelledby="system-title">
-    ${sectionHead(s.num, s.label, s.title, s.lead, "system-title")}
-    <div class="system-grid">
-      <div class="term card" data-terminal>
+  const stack = s.stack.map((x, i) => `<li><span class="n">${pad(i + 1)}</span><div><b>${esc(x.t)}</b><span>${esc(x.d)}</span></div></li>`).join("");
+  const sw = SWATCH.map(([k, hex], i) => `<button type="button" class="swatch sw-${k}" data-swatch="${hex}" aria-label="${esc(s.swatchNames[i])} ${hex}"><i></i><span>${esc(s.swatchNames[i])}</span><small>${hex}</small></button>`).join("");
+  return `<section id="bench" class="plate bench shell" aria-labelledby="bench-title">
+    ${slug(c, s.num, s.label)}${secHead(s.title, s.lead, "bench-title")}
+    <div class="bench-grid">
+      <div class="term cm" data-terminal>
         <div class="term-bar"><span class="term-title">${I.term}<span>${esc(s.consoleTitle.toUpperCase())}</span></span><span class="term-path">${esc(s.consolePath)}</span></div>
         <div class="term-body" data-term-body role="log" aria-live="polite" tabindex="0"></div>
         <div class="term-chips" aria-label="Quick commands">${chips}</div>
@@ -285,38 +278,39 @@ function system(c) {
           <button class="term-send" type="submit" aria-label="${esc(s.send)}">${I.up}</button>
         </form>
       </div>
-      <aside class="stack-panel card" aria-labelledby="stack-title">
-        <div class="stack-head"><h3 id="stack-title">${esc(s.stackTitle)}</h3><span class="count">04 / 04</span></div>
-        <ol class="stack-list">${stack}</ol>
-        <div class="swatches">${sw}</div>
+      <aside class="spec" aria-labelledby="stack-title">
+        <div class="spec-head"><h3 id="stack-title">${esc(s.stackTitle)}</h3><span>${pad(s.stack.length)} / ${pad(s.stack.length)}</span></div>
+        <ol class="spec-list">${stack}</ol>
+        <div class="cb"><p class="cb-hint">${esc(s.swatchHint)}</p><div class="swatches">${sw}</div></div>
       </aside>
     </div>
   </section>`;
 }
 
+/* --------------------------------------------------------- plate 05: process */
 function method(c) {
   const m = c.method;
   const parts = m.titleParts.map((p, i) => (i % 2 === 1 ? `<span class="mw" data-mw="${(i - 1) / 2}">${esc(p)}</span>` : esc(p))).join("");
   const steps = m.steps
     .map(
       (s, i) => `<li class="step" data-step="${i}">
-        <span class="step-n">${pad(i + 1)}</span>
+        <span class="step-box" aria-hidden="true">${i + 1}<b>✓</b></span>
         <div class="step-main"><h3>${esc(s.t)}</h3><p>${esc(s.d)}</p></div>
         <span class="step-tag">${esc(s.tag.toUpperCase())}</span>
       </li>`
     )
     .join("");
-  return `<section id="method" class="method" aria-labelledby="method-title">
+  return `<section id="method" class="plate method" aria-labelledby="method-title">
     <div class="method-track" data-method>
       <div class="method-sticky shell">
         <div class="method-left">
-          <div class="section-label"><span class="num">${m.num}</span><i class="rule"></i><span class="lbl">${esc(m.label)}</span></div>
+          ${slug(c, m.num, m.label)}
           <h2 id="method-title" class="method-title">${parts}</h2>
-          <p class="section-lead" data-fade>${esc(m.lead)}</p>
+          <p class="sec-lead" data-fade>${esc(m.lead)}</p>
         </div>
         <div class="method-right">
           <ol class="steps">${steps}</ol>
-          <div class="method-progress" aria-hidden="true"><i data-method-bar></i><span data-method-count>01 / 03</span></div>
+          <div class="method-progress" aria-hidden="true"><i data-method-bar></i><span data-method-count>${pad(m.steps.length)} / ${pad(m.steps.length)}</span></div>
         </div>
       </div>
     </div>
@@ -327,33 +321,37 @@ function method(c) {
   </section>`;
 }
 
+/* --------------------------------------------------------- plate 06: contact */
 function contact(c) {
   const k = c.contact;
-  const tick = Array.from({ length: 8 }, () => `<span>${esc(k.ticker)}</span>${I.star}`).join("");
-  return `<section id="contact" class="contact shell" aria-labelledby="contact-title">
-    <div class="contact-card" data-spot>
-      <canvas class="contact-gl" data-contact-gl aria-hidden="true"></canvas>
-      <div class="contact-body">
-        <h2 id="contact-title" class="contact-title" data-scrub>${esc(k.title)}</h2>
-        <div class="contact-cols">
-          <div class="contact-copy">
-            <p>${esc(k.text)}</p>
-            <p class="contact-note">${esc(k.note.toUpperCase())}</p>
-            <ul class="gh-stats" data-gh hidden></ul>
+  const fit = (82 / (k.big.length * 0.4)).toFixed(2); // first guess for no-JS; main.js measures and fits it to the row
+  return `<section id="contact" class="plate contact" aria-labelledby="contact-title">
+    <div class="shell">
+      ${slug(c, k.num, k.label)}
+      <div class="contact-card cm" data-spot data-contact>
+        <div class="contact-clip" aria-hidden="true"><canvas class="contact-gl" data-contact-gl></canvas></div>
+        <div class="contact-body">
+          <h2 id="contact-title" class="contact-title" data-scrub>${esc(k.title)}</h2>
+          <div class="contact-cols">
+            <div class="contact-copy">
+              <p>${esc(k.text)}</p>
+              <p class="contact-note">${esc(k.note)}</p>
+              <ul class="gh-stats" data-gh hidden></ul>
+            </div>
+            <a class="cta-orb" href="${SITE.github}" ${ext} data-magnetic data-cursor="GO"><span class="cta-label">${esc(k.cta)}</span>${I.ur}</a>
           </div>
-          <a class="cta-orb" href="${SITE.github}" target="_blank" rel="noopener" data-magnetic data-cursor="GO"><span class="cta-label">${esc(k.cta)}</span>${I.ur}</a>
         </div>
       </div>
-      <div class="contact-ticker" aria-hidden="true"><div class="ct-track"><div class="ct-group">${tick}</div><div class="ct-group">${tick}</div></div></div>
+      <a class="bigword" href="${SITE.github}" ${ext} data-bigword data-cursor="GO" aria-label="${esc(k.big)} GitHub"><span class="bw ht-word" style="--fit:${fit}">${esc(k.big)}</span><span class="bw-arrow" aria-hidden="true">${I.ur}</span></a>
     </div>
   </section>`;
 }
 
 function footer(c) {
   return `<footer class="site-footer shell">
-    <div class="foot-brand"><span class="mark">DZ</span><b>Danzaio</b></div>
+    <div class="foot-brand"><span class="mark" aria-hidden="true">DZ</span><b>Danzaio</b></div>
     <p>${esc(c.footer.tag)}</p>
-    <nav class="foot-nav" aria-label="Footer"><a href="${SITE.github}" target="_blank" rel="noopener">${esc(c.footer.github)}</a><a href="#top" data-top>${esc(c.footer.top)}</a></nav>
+    <nav class="foot-nav" aria-label="Footer"><a href="${SITE.github}" ${ext}>${esc(c.footer.github)}</a><a href="#top" data-top>${esc(c.footer.top)}</a></nav>
   </footer>`;
 }
 
@@ -368,8 +366,9 @@ function palette(c) {
   </div>`;
 }
 
-function preloader() {
+function preloader(c) {
   return `<div class="preloader" data-preloader aria-hidden="true">
+    <div class="pl-top"><span>${esc(c.ui.proof)}</span><span>${esc(c.hero.year)}</span></div>
     <div class="pl-inner"><span class="pl-mark">DZ</span><span class="pl-count"><b data-pl-count>000</b><i>%</i></span></div>
     <div class="pl-bar"><i data-pl-bar></i></div>
   </div>`;
@@ -385,6 +384,15 @@ export function render(lang) {
     term: c.system.term,
     contact: c.contact.gh,
     github: SITE.github,
+    top: `00 / ${c.ui.index}`,
+    sections: [
+      ["#loop", c.loop.num, c.loop.label],
+      ["#work", c.work.num, c.work.label],
+      ["#services", c.services.num, c.services.label],
+      ["#bench", c.system.num, c.system.label],
+      ["#method", c.method.num, c.method.label],
+      ["#contact", c.contact.num, c.contact.label],
+    ],
     work: c.work.items.map((t, i) => ({ ...PROJECTS[i], title: t.title, kicker: t.kicker })),
   };
   const ld = {
@@ -438,18 +446,17 @@ export function render(lang) {
 </head>
 <body>
 <a class="skip" href="#main">${esc(c.ui.skip)}</a>
-${preloader()}
+${preloader(c)}
 <div class="grain" aria-hidden="true"></div>
-<div class="progress" aria-hidden="true"><i data-progress></i></div>
 <div class="cursor" aria-hidden="true"><i class="cursor-dot"></i><i class="cursor-ring"><span class="cursor-label"></span></i></div>
-${header(c)}
+${top(c)}
 <main id="main">
 ${hero(c)}
-${marquee(c)}
+${strip(c)}
 ${loop(c)}
-${services(c)}
 ${work(c)}
-${system(c)}
+${services(c)}
+${bench(c)}
 ${method(c)}
 ${contact(c)}
 </main>
@@ -460,8 +467,3 @@ ${palette(c)}
 </html>
 `;
 }
-
-
-
-
-

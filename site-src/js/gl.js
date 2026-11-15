@@ -8,7 +8,7 @@ uniform vec2 uRes;uniform float uDpr;uniform float uTime;
 uniform vec2 uMouse;uniform float uPower;
 uniform vec3 uClick;
 uniform vec3 uInk;uniform vec3 uAccent;uniform float uDark;uniform float uPortrait;
-uniform float uText;uniform float uGain;
+uniform float uText;uniform float uGain;uniform vec4 uQ;
 float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
   return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
@@ -21,7 +21,8 @@ void main(){
   float f=n(vec2(uv.x*asp,uv.y)*3.2+vec2(uTime*.06,-uTime*.035));
   f=f*.62+n(vec2(uv.x*asp,uv.y)*8.-vec2(uTime*.05,uTime*.02))*.38;
   float shape=smoothstep(.38,.9,f);
-  float txt=mix(smoothstep(.62,.12,uv.y)*smoothstep(1.,.45,uv.x),smoothstep(.70,.38,uv.y),uPortrait)*uText;
+  // quiet box (uv from bottom-left: x0,y0,x1,y1) with soft edges, so the field stays out from under the copy
+  float txt=smoothstep(uQ.x-.08,uQ.x+.02,uv.x)*smoothstep(uQ.z+.1,uQ.z-.04,uv.x)*smoothstep(uQ.y-.08,uQ.y+.03,uv.y)*smoothstep(uQ.w+.08,uQ.w-.03,uv.y)*uText;
   shape*=1.-.85*txt;
   float d=distance(c,uMouse);
   float infl=smoothstep(260.*uDpr,0.,d)*uPower;
@@ -50,7 +51,7 @@ const hex = (s) => {
 // opts: ink / accent = CSS custom property names, text = 0..1 strength of the hero's quiet zone under the title,
 // gain = idle dot strength, dark = force the brighter dark-surface mix.
 export function initHeroGL(canvas, host, opts = {}) {
-  const o = { ink: "--ink", accent: "--orange", text: 1, gain: 1, dark: null, ...opts };
+  const o = { ink: "--ink", accent: "--orange", text: 1, gain: 1, dark: null, quiet: [0, 0.12, 0.45, 0.62], quietP: [0, 0.38, 1.2, 0.7], ...opts };
   const gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: true, antialias: false, powerPreference: "low-power" });
   if (!gl) return null;
   const sh = (type, src) => {
@@ -79,7 +80,7 @@ export function initHeroGL(canvas, host, opts = {}) {
   gl.enableVertexAttribArray(loc);
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   const U = (n) => gl.getUniformLocation(prog, n);
-  const u = { res: U("uRes"), dpr: U("uDpr"), time: U("uTime"), mouse: U("uMouse"), power: U("uPower"), click: U("uClick"), ink: U("uInk"), accent: U("uAccent"), dark: U("uDark"), portrait: U("uPortrait") };
+  const u = { res: U("uRes"), dpr: U("uDpr"), time: U("uTime"), mouse: U("uMouse"), power: U("uPower"), click: U("uClick"), ink: U("uInk"), accent: U("uAccent"), dark: U("uDark"), portrait: U("uPortrait"), q: U("uQ") };
   gl.uniform1f(U("uText"), o.text);
   gl.uniform1f(U("uGain"), o.gain);
   gl.enable(gl.BLEND);
@@ -107,6 +108,7 @@ export function initHeroGL(canvas, host, opts = {}) {
     gl.uniform2f(u.res, w, h);
     gl.uniform1f(u.dpr, dpr);
     gl.uniform1f(u.portrait, w / h < 0.9 ? 1 : 0);
+    gl.uniform4fv(u.q, w / h < 0.9 ? o.quietP : o.quiet);
   };
   const ro = new ResizeObserver(resize);
   ro.observe(canvas);

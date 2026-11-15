@@ -1,0 +1,55 @@
+/* ==========================================================================
+   process.css: plate 05. Pinned: the title's three words light up while a proof
+   checklist gets ticked; then the closing quote.
+   ========================================================================== */
+.method-track{position:relative}
+.method-sticky{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(24px,5vw,96px);align-items:center;padding-block:clamp(28px,4vw,64px)}
+.method-left{display:grid;gap:clamp(18px,2vw,28px);align-content:center}
+.method-title{font:800 clamp(2.2rem,4.7vw,5rem)/.98 var(--font-display);letter-spacing:-.045em;text-wrap:balance}
+.mw{color:var(--muted);border-radius:.08em;-webkit-box-decoration-break:clone;box-decoration-break:clone;transition:background-color .4s var(--ease),color .4s var(--ease),padding .4s var(--ease)}
+.mw.on,html.rm .mw,html:not(.js) .mw{background:var(--lime);color:#151612;padding:0 .08em}
+.method-left .sec-lead{max-width:48ch}
+
+.steps{display:grid;gap:12px}
+.step{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:clamp(14px,1.8vw,26px);align-items:center;padding:clamp(18px,2.1vw,28px);border:1.5px solid var(--ink);background:var(--surface);transition:opacity .5s var(--ease),transform .6s var(--ease),background-color .4s,box-shadow .4s,color .3s}
+.step-box{position:relative;display:grid;place-items:center;width:clamp(42px,3.4vw,54px);aspect-ratio:1;border:1.5px solid currentColor;font:800 clamp(1.3rem,1.8vw,1.7rem)/1 var(--font-display)}
+.step-box b{position:absolute;inset:0;display:grid;place-items:center;background:var(--ink);color:var(--lime);font-size:1.1em;transform:scale(1);transition:transform .35s cubic-bezier(.5,1.8,.5,1),opacity .2s}
+.step h3{font:800 clamp(1.8rem,2.9vw,2.9rem)/1 var(--font-display);letter-spacing:-.045em}
+.step p{margin-top:6px;max-width:42ch;font-size:clamp(.88rem,1vw,1rem);line-height:1.42;opacity:.8}
+.step-tag{font:600 .62rem var(--font-mono);letter-spacing:.1em;opacity:.7;writing-mode:vertical-rl;transform:rotate(180deg)}
+.method-progress{display:flex;align-items:center;gap:14px;margin-top:16px;font:600 .68rem var(--font-mono);letter-spacing:.06em;color:var(--muted)}
+.method-progress i{display:block;flex:1;height:3px;border-radius:3px;background:var(--line-soft);position:relative;overflow:hidden}
+.method-progress i::after{content:"";position:absolute;inset:0;background:var(--ink);transform-origin:left;transform:scaleX(var(--p,1))}
+.method-progress span{white-space:nowrap}
+
+html.js:not(.rm) .method-track{height:320svh}
+html.js:not(.rm) .method-sticky{position:sticky;top:0;height:100svh;padding-top:calc(var(--top-h) + 28px);padding-bottom:84px}
+html.js:not(.rm) .step{opacity:.45;transform:scale(.97)}
+html.js:not(.rm) .step:not(.on):not(.done) .step-box b{transform:scale(0);opacity:0}
+html.js:not(.rm) .step.done{opacity:.8;transform:scale(.97)}
+html.js:not(.rm) .step.on{opacity:1;transform:none;background:var(--lime);color:#151612;border-color:#151612;box-shadow:10px 10px 0 var(--shadow)}
+:root[data-theme="ink"] .step.on{box-shadow:10px 10px 0 #000}
+
+.quote{padding-block:clamp(70px,9vw,150px) 0}
+.quote blockquote{position:relative;padding-left:clamp(0px,6vw,110px)}
+.quote blockquote::before{content:"\201C";position:absolute;left:0;top:-.12em;font:800 clamp(5rem,10vw,10rem)/1 var(--font-display);color:var(--orange)}
+.quote-big{font:800 clamp(2.1rem,5vw,5.2rem)/1 var(--font-display);letter-spacing:-.045em;max-width:20ch;text-wrap:balance}
+.quote-sub{margin-top:clamp(18px,2.4vw,32px);padding-left:clamp(0px,6vw,110px);max-width:calc(52ch + 110px);color:var(--muted);font-size:clamp(1rem,1.2vw,1.18rem)}
+
+@media (max-width:900px){
+  .method-sticky{display:flex;flex-direction:column;justify-content:center;gap:16px}
+  html.js:not(.rm) .method-track{height:290svh}
+  html.js:not(.rm) .method-sticky{padding-top:calc(var(--top-h) + var(--sat) + 22px);padding-bottom:calc(20px + var(--sab))}
+  .method-left{gap:12px}
+  .method-title{font-size:clamp(1.85rem,8.4vw,2.6rem)}
+  .method-left .sec-lead{font-size:.88rem;line-height:1.4}
+  .steps{gap:8px}
+  .step{grid-template-columns:auto minmax(0,1fr);padding:13px 14px;gap:12px}
+  html.js:not(.rm) .step.on{box-shadow:5px 5px 0 var(--shadow)}
+  .step-tag{display:none}
+  .step-box{width:38px}
+  .step h3{font-size:1.5rem}
+  .step p{font-size:.82rem;margin-top:3px}
+  .quote blockquote::before{position:static;display:block;height:.5em}
+}
+@media (max-width:900px) and (max-height:740px){.method-left .sec-lead{display:none}}

@@ -1,5 +1,14 @@
 import { gsap } from "gsap";
-import { $, data, rm, fine, clamp } from "./util.js";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { $, $$, data, rm, fine, clamp } from "./util.js";
+
+/* ==========================================================================
+   The wipe engine: one WebGL canvas, the project screenshots as textures, and a
+   halftone wipe between any two of them. Two drivers use it:
+   - initReel: the hero card cycles on a timer
+   - initWorkStage: the pinned work section, where scroll scrubs the wipe
+   Both leave the still <img> in place when WebGL or motion is off.
+   ========================================================================== */
 
 const VERT = `attribute vec2 p;varying vec2 v;void main(){v=p*.5+.5;gl_Position=vec4(p,0.,1.);}`;
 const FRAG = `
@@ -45,14 +54,15 @@ void main(){
   gl_FragColor=vec4(col,1.);
 }`;
 
-// where each screenshot is anchored when it is cropped to the card (x, y in 0..1)
+// where each screenshot is anchored when it is cropped (x, y in 0..1)
 const ANCHOR = { omp: [0.5, 0.4], atlas: [0, 0], zoo: [0, 0], client: [0, 0] };
-const HOLD = 4.4;
 const CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789/#*+=<>";
 
 // Text resolves left to right out of random glyphs (mono type, so the width never moves).
 export function scramble(el, text, duration = 0.6) {
   const o = { p: 0 };
+  gsap.killTweensOf(el.__scr || {});
+  el.__scr = o;
   return gsap.to(o, {
     p: 1,
     duration,
@@ -69,15 +79,10 @@ export function scramble(el, text, duration = 0.6) {
   });
 }
 
-// Hero card: the four projects cycle with a halftone wipe. Returns null (and leaves the still image) without WebGL.
-export function initReel(card) {
-  if (!card) return null;
-  const canvas = $("[data-reel-gl]", card);
-  const items = data.work;
+export function createWipe(canvas, items) {
   if (!canvas || rm || items.length < 2) return null;
   const gl = canvas.getContext("webgl", { alpha: false, antialias: false, powerPreference: "low-power" });
   if (!gl) return null;
-
   const sh = (type, src) => {
     const s = gl.createShader(type);
     gl.shaderSource(s, src);
@@ -93,7 +98,7 @@ export function initReel(card) {
     gl.linkProgram(prog);
     if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error("link");
   } catch (e) {
-    console.warn("[reel]", e.message);
+    console.warn("[wipe]", e.message);
     return null;
   }
   gl.useProgram(prog);
@@ -110,8 +115,9 @@ export function initReel(card) {
   gl.uniform3f(U("uLime"), 0.788, 1, 0.184);
 
   const tex = items.map(() => null);
+  const pending = items.map(() => null);
   const load = (i) =>
-    new Promise((res, rej) => {
+    (pending[i] ||= new Promise((res, rej) => {
       const im = new Image();
       im.decoding = "async";
       im.onload = () => {
@@ -127,10 +133,10 @@ export function initReel(card) {
       };
       im.onerror = rej;
       im.src = "/assets/site/img/" + items[i].img;
-    });
+    }));
 
-  const st = { cur: 0, next: 0, p: 0, lens: 0, mx: 0, my: 0, busy: false };
-  let dpr = 1, w = 2, h = 2, need = false, live = false, onScreen = true, hover = false;
+  const st = { a: 0, b: 0, p: 0, lens: 0, mx: 0, my: 0 };
+  let dpr = 1, w = 2, h = 2, need = false;
 
   const fit = (i) => {
     const ia = tex[i].a;
@@ -144,14 +150,15 @@ export function initReel(card) {
     return [1, sy, 0, (1 - sy) * ay];
   };
   const render = () => {
-    const a = tex[st.cur], b = tex[st.next] || a;
-    if (!a) return;
+    const ai = tex[st.a] ? st.a : tex[st.b] ? st.b : -1;
+    if (ai < 0) return;
+    const bi = tex[st.b] ? st.b : ai;
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, a.t);
+    gl.bindTexture(gl.TEXTURE_2D, tex[ai].t);
     gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, b.t);
-    gl.uniform4fv(u.fitA, fit(st.cur));
-    gl.uniform4fv(u.fitB, fit(tex[st.next] ? st.next : st.cur));
+    gl.bindTexture(gl.TEXTURE_2D, tex[bi].t);
+    gl.uniform4fv(u.fitA, fit(ai));
+    gl.uniform4fv(u.fitB, fit(bi));
     gl.uniform1f(u.p, st.p);
     gl.uniform1f(u.lens, st.lens);
     gl.uniform2f(u.mouse, st.mx * dpr, h - st.my * dpr);
@@ -163,7 +170,6 @@ export function initReel(card) {
     need = false;
     render();
   });
-
   const resize = () => {
     const r = canvas.getBoundingClientRect();
     dpr = Math.min(devicePixelRatio || 1, 1.5);
@@ -178,7 +184,62 @@ export function initReel(card) {
   };
   new ResizeObserver(resize).observe(canvas);
 
-  /* ----- labels */
+  const eng = {
+    live: false,
+    has: (i) => !!tex[i],
+    // first picture as soon as it decodes, then the rest
+    start(first = 0) {
+      st.a = st.b = first;
+      return load(first)
+        .then(() => {
+          resize();
+          canvas.classList.add("is-live");
+          eng.live = true;
+          return Promise.all(items.map((_, i) => load(i)));
+        })
+        .catch(() => {
+          if (!eng.live) canvas.remove();
+          throw new Error("wipe textures");
+        });
+    },
+    set(a, b, p) {
+      if (a === st.a && b === st.b && p === st.p) return;
+      st.a = a;
+      st.b = b;
+      st.p = p;
+      draw();
+    },
+    // pointer lens over a host element (fine pointers only)
+    lens(host, onHover) {
+      if (!fine) return;
+      const lensTo = gsap.quickTo(st, "lens", { duration: 0.45, ease: "power3.out", onUpdate: draw });
+      host.addEventListener("pointerenter", () => {
+        onHover?.(true);
+        lensTo(1);
+      });
+      host.addEventListener("pointermove", (e) => {
+        const r = canvas.getBoundingClientRect();
+        st.mx = clamp(e.clientX - r.left, 0, r.width);
+        st.my = clamp(e.clientY - r.top, 0, r.height);
+        draw();
+      });
+      host.addEventListener("pointerleave", () => {
+        onHover?.(false);
+        lensTo(0);
+      });
+    },
+  };
+  return eng;
+}
+
+/* ------------------------------------------------- driver 1: the hero reel */
+const HOLD = 4.4;
+export function initReel(card) {
+  if (!card) return null;
+  const items = data.work;
+  const eng = createWipe($("[data-reel-gl]", card), items);
+  if (!eng) return null;
+
   const nEl = $("[data-reel-n]", card);
   const tEl = $("[data-reel-title]", card);
   const kEl = $("[data-reel-kicker]", card);
@@ -192,29 +253,27 @@ export function initReel(card) {
     card.setAttribute("aria-label", `${it.title}. ${it.kicker}`);
   };
 
-  /* ----- the cycle */
-  let hold = null;
+  let cur = 0, busy = false, onScreen = true, hover = false, hold = null;
   const arm = () => {
     hold?.kill();
     hold = gsap.fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: HOLD, ease: "none", onComplete: advance });
-    if (!onScreen || hover || document.hidden) hold.pause();
+    gate();
   };
   function advance() {
-    const n = (st.cur + 1) % items.length;
-    if (!tex[n] || st.busy) return void arm();
-    st.busy = true;
-    st.next = n;
+    const n = (cur + 1) % items.length;
+    if (!eng.has(n) || busy) return void arm();
+    busy = true;
     label(n);
-    gsap.to(st, {
+    const o = { p: 0 };
+    gsap.to(o, {
       p: 1,
       duration: 1.25,
       ease: "power2.inOut",
-      onUpdate: draw,
+      onUpdate: () => eng.set(cur, n, o.p),
       onComplete() {
-        st.cur = n;
-        st.p = 0;
-        st.busy = false;
-        render();
+        cur = n;
+        busy = false;
+        eng.set(n, n, 0);
         arm();
       },
     });
@@ -229,40 +288,84 @@ export function initReel(card) {
     gate();
   }).observe(card);
   document.addEventListener("visibilitychange", gate);
-
-  /* ----- pointer: pause the cycle and show the halftone lens */
-  if (fine) {
-    const lensTo = gsap.quickTo(st, "lens", { duration: 0.45, ease: "power3.out", onUpdate: draw });
-    card.addEventListener("pointerenter", () => {
-      hover = true;
-      gate();
-      lensTo(1);
-    });
-    card.addEventListener("pointermove", (e) => {
-      const r = canvas.getBoundingClientRect();
-      st.mx = clamp(e.clientX - r.left, 0, r.width);
-      st.my = clamp(e.clientY - r.top, 0, r.height);
-      draw();
-    });
-    card.addEventListener("pointerleave", () => {
-      hover = false;
-      gate();
-      lensTo(0);
-    });
-  }
-
-  /* ----- start: first picture as soon as it decodes, the rest once the page is settled */
-  load(0)
-    .then(() => {
-      resize();
-      canvas.classList.add("is-live");
-      live = true;
-      return Promise.all(items.slice(1).map((_, i) => load(i + 1)));
-    })
-    .then(() => arm())
-    .catch(() => {
-      if (!live) canvas.remove();
-    });
-
+  eng.lens(card, (on) => {
+    hover = on;
+    gate();
+  });
+  eng.start(0).then(arm, () => {});
   return { next: advance };
+}
+
+/* --------------------------------------- driver 2: the pinned work stage */
+// Scroll position maps to a pair of projects and a wipe amount: hold, wipe, hold.
+export function initWorkStage(root, scrollTo) {
+  const track = $("[data-wk]", root);
+  const stage = $("[data-wk-stage]", root);
+  if (!track || !stage || rm) return null;
+  const items = data.work;
+  const n = items.length;
+  const rows = $$("[data-wk-item]", root);
+  const img = $("[data-wk-img]", stage);
+  const urlEl = $("[data-wk-url]", stage);
+  const nEl = $("[data-wk-n]", stage);
+  const meter = $$(".wk-meter i", stage);
+  const wide = matchMedia("(min-width: 901px)");
+  let eng = null;
+  let st = null;
+  let cur = 0;
+
+  const ensure = () => {
+    if (eng || !wide.matches) return;
+    eng = createWipe($("[data-wk-gl]", stage), items);
+    if (!eng) return;
+    // textures load once the section gets near
+    const io = new IntersectionObserver(
+      ([en]) => {
+        if (!en.isIntersecting) return;
+        io.disconnect();
+        eng.start(cur).then(() => st && update(st), () => (eng = null));
+      },
+      { rootMargin: "800px 0px" }
+    );
+    io.observe(stage);
+    eng.lens(stage);
+  };
+  ensure();
+  wide.addEventListener?.("change", ensure);
+
+  const activate = (i) => {
+    if (i === cur) return;
+    cur = i;
+    rows.forEach((r, k) => r.classList.toggle("on", k === i));
+    nEl.textContent = String(i + 1).padStart(2, "0");
+    scramble(urlEl, items[i].url, 0.5);
+    if (!eng?.live) img.src = "/assets/site/img/" + items[i].img;
+  };
+  // progress 0..1 -> f 0..n-1, with a little extra hold on the first and last project
+  const fOf = (p) => clamp(p * (n - 1 + 0.6) - 0.3, 0, n - 1);
+  const pOf = (f) => (f + 0.3) / (n - 1 + 0.6);
+  function update(self) {
+    if (!wide.matches) return;
+    const f = fOf(self.progress);
+    const a = Math.min(n - 2, Math.floor(f));
+    const p = clamp((f - a - 0.3) / 0.4, 0, 1);
+    eng?.live && eng.set(a, a + 1, p);
+    meter.forEach((m, k) => m.style.setProperty("--f", clamp(f - k + 1, 0, 1).toFixed(3)));
+    activate(p > 0.5 ? a + 1 : a);
+  }
+  st = ScrollTrigger.create({ trigger: track, start: "top top", end: "bottom bottom", onUpdate: update, onRefresh: update });
+
+  // a row click (or keyboard focus inside a row) scrolls to that project's hold position
+  const go = (i) => {
+    if (!wide.matches || !st) return;
+    scrollTo(st.start + pOf(i) * (st.end - st.start));
+  };
+  rows.forEach((r, i) => {
+    r.addEventListener("click", (e) => {
+      if (e.target.closest("a")) return;
+      go(i);
+    });
+    r.addEventListener("focusin", () => i !== cur && go(i));
+  });
+  return { go };
 }

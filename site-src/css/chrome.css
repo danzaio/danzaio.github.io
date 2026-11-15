@@ -1,0 +1,100 @@
+/* ==========================================================================
+   chrome.css: top bar, bottom dock, mobile menu, preloader, footer
+   ========================================================================== */
+
+/* ---------- top bar ---------------------------------------------------- */
+.top{position:fixed;inset:0 0 auto;z-index:50;padding-top:var(--sat);background:color-mix(in srgb,var(--paper) 84%,transparent);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4);border-bottom:1px solid var(--line-soft);transition:transform .5s var(--ease),background-color .3s}
+.top.is-hidden{transform:translateY(-101%)}
+.top-in{height:var(--top-h);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
+.brand{display:inline-flex;align-items:center;gap:11px;justify-self:start;font:700 1.02rem var(--font-display);letter-spacing:-.01em}
+.mark{position:relative;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--paper);font:700 .6rem var(--font-mono);letter-spacing:.02em}
+.mark::before,.mark::after{content:"";position:absolute;background:var(--ink)}
+.mark::before{left:-6px;right:-6px;top:50%;height:1px;z-index:-1}
+.mark::after{top:-6px;bottom:-6px;left:50%;width:1px;z-index:-1}
+.brand-name span{color:var(--muted);font:600 .62rem var(--font-mono);letter-spacing:.08em;text-transform:uppercase;margin-left:8px}
+.top-sec{display:flex;align-items:center;gap:10px;font:600 .66rem/1 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.top-sec b{width:7px;height:7px;border-radius:50%;background:var(--lime);border:1px solid #151612;animation:blink 2s steps(1) infinite}
+.top-act{display:flex;align-items:center;gap:6px;justify-self:end}
+.kbd-btn{height:34px;padding:0 10px;border:1px solid var(--line-soft);border-radius:6px;font:500 .68rem var(--font-mono);letter-spacing:.04em;color:var(--muted);transition:color .2s,border-color .2s}
+.kbd-btn:hover{color:var(--ink);border-color:var(--ink)}
+.lang-link{padding:8px 10px;font:600 .7rem var(--font-mono);letter-spacing:.06em;color:var(--muted);border-radius:6px;transition:color .2s}
+.lang-link:hover{color:var(--ink)}
+.icon-btn{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--ink);border-radius:50%;transition:background-color .25s,color .25s}
+.icon-btn .ico{width:17px;height:17px;grid-area:1/1}
+.icon-btn:hover{background:var(--ink);color:var(--paper)}
+.theme-btn .ico-sun{display:none}
+:root[data-theme="ink"] .theme-btn .ico-moon{display:none}
+:root[data-theme="ink"] .theme-btn .ico-sun{display:block}
+.contact-btn{height:38px;margin-left:4px}
+.menu-btn{display:none}
+.menu-btn .ico-x{display:none}
+.menu-btn[aria-expanded="true"] .ico-menu{display:none}
+.menu-btn[aria-expanded="true"] .ico-x{display:block}
+.progress{position:absolute;left:0;right:0;bottom:-1px;height:2px;pointer-events:none}
+.progress i{display:block;height:100%;background:var(--ink);transform-origin:left;transform:scaleX(0)}
+:root[data-theme="ink"] .progress i{background:var(--lime)}
+
+/* ---------- bottom dock: the section index ------------------------------ */
+.dock{position:fixed;left:50%;bottom:calc(18px + var(--sab));z-index:55;display:flex;align-items:center;gap:2px;padding:5px;translate:-50% 0;border-radius:999px;background:var(--ink-static);border:1px solid rgba(247,244,235,.16);color:#bdbab0;box-shadow:0 14px 34px rgba(10,10,8,.22);transition:transform .6s var(--ease),opacity .4s}
+:root[data-theme="ink"] .dock{background:#25261f;border-color:var(--line)}
+.dock a{display:flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:999px;font:500 .78rem/1 var(--font-body);white-space:nowrap;transition:background-color .3s,color .3s}
+.dock a b{font:600 .6rem var(--font-mono);letter-spacing:.04em;opacity:.55}
+.dock a:hover{color:#f7f4eb}
+.dock a[aria-current="true"]{background:var(--lime);color:#151612}
+.dock a[aria-current="true"] b{opacity:.75}
+.dock .dock-go{margin-left:4px;background:var(--paper-static);color:#151612}
+.dock .dock-go:hover{background:var(--lime);color:#151612}
+.dock .dock-go .ico{width:14px;height:14px}
+html.js:not(.rm) .dock:not(.on){transform:translateY(calc(100% + 34px));opacity:0;pointer-events:none}
+
+/* ---------- mobile menu ------------------------------------------------ */
+.mobile-menu{position:fixed;inset:0;z-index:45;background:var(--paper);display:flex;flex-direction:column;justify-content:space-between;padding:calc(var(--top-h) + 36px + var(--sat)) var(--gutter) calc(22px + var(--sab))}
+.mobile-menu[hidden]{display:none}
+.mobile-menu nav{display:grid;margin-block:auto}
+.mobile-menu nav a{display:flex;align-items:baseline;gap:16px;padding:12px 0;border-bottom:1px solid var(--line-soft);font:800 clamp(2.3rem,10.5vw,4.2rem)/1 var(--font-display);letter-spacing:-.045em}
+.mm-n{min-width:2ch;font:500 .72rem var(--font-mono);color:var(--muted);letter-spacing:.06em}
+.mm-foot{display:flex;gap:10px;flex-wrap:wrap}
+.mm-lang,.mm-pal{flex:1 1 150px;display:flex;justify-content:space-between;align-items:center;gap:10px;height:54px;padding:0 20px;border:1.5px solid var(--ink);border-radius:999px;font:600 .92rem/1 var(--font-body);white-space:nowrap}
+.mm-lang span{font:700 .68rem/1 var(--font-mono);letter-spacing:.08em;background:var(--lime);color:#151612;padding:6px 10px;border-radius:999px}
+.mm-pal{background:var(--ink);color:var(--paper)}
+
+/* ---------- preloader: a lime sheet that breaks into the dot screen ----- */
+.preloader{position:fixed;inset:0;z-index:300;background:var(--lime);color:#151612;display:none;flex-direction:column;justify-content:space-between;padding:clamp(20px,3vw,44px);--pr:19px;-webkit-mask-image:radial-gradient(circle,#000 var(--pr),transparent calc(var(--pr) + 1px));mask-image:radial-gradient(circle,#000 var(--pr),transparent calc(var(--pr) + 1px));-webkit-mask-size:26px 26px;mask-size:26px 26px}
+html.intro .preloader{display:flex;animation:plfail 0s 7s forwards}
+@keyframes plfail{to{visibility:hidden;opacity:0;pointer-events:none}}
+.pl-top{display:flex;justify-content:space-between;align-items:center;font:600 .7rem var(--font-mono);letter-spacing:.1em;text-transform:uppercase}
+.pl-inner{display:flex;justify-content:space-between;align-items:flex-end}
+.pl-mark{font:800 clamp(2.4rem,6vw,5rem)/1 var(--font-display);letter-spacing:-.05em;align-self:flex-start}
+.pl-count{display:flex;align-items:baseline;font-family:var(--font-display)}
+.pl-count b{font-weight:800;font-size:clamp(7rem,26vw,24rem);line-height:.78;letter-spacing:-.07em;font-variant-numeric:tabular-nums}
+.pl-count i{font:800 clamp(2rem,6vw,5rem)/1 var(--font-display);font-style:normal}
+.pl-bar{height:8px;background:rgba(21,22,18,.15);margin-top:18px}
+.pl-bar i{display:block;height:100%;background:#151612;transform-origin:left;transform:scaleX(0)}
+
+/* ---------- footer ----------------------------------------------------- */
+.site-footer{display:flex;align-items:center;justify-content:space-between;gap:18px 32px;flex-wrap:wrap;padding-block:24px calc(96px + var(--sab));border-top:1px solid var(--line-soft);font-size:.9rem;color:var(--muted)}
+.foot-brand{display:flex;align-items:center;gap:12px;color:var(--ink);font:700 1.02rem var(--font-display)}
+.foot-nav{display:flex;gap:22px}
+.foot-nav a{color:var(--ink);font-weight:500;position:relative}
+.foot-nav a::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:1.5px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .4s var(--ease)}
+.foot-nav a:hover::after{transform:scaleX(1)}
+
+/* entrance: hidden until the intro runs (failsafe unhides after 5 s) */
+html.js:not(.rm):not(.is-ready) .top-in,
+html.js:not(.rm):not(.is-ready) [data-hero-in]{opacity:0;animation:unhide 0s 5s forwards}
+
+@media (max-width:1100px){
+  .top-sec,.kbd-btn{display:none}
+  .top-in{grid-template-columns:1fr auto}
+}
+@media (max-width:900px){
+  :root{--top-h:54px}
+  .lang-link,.contact-btn,.dock{display:none}
+  .menu-btn{display:grid}
+  .brand-name span{display:none}
+  .site-footer{padding-bottom:calc(30px + var(--sab))}
+}
+@media (hover:none){
+  .icon-btn,.mm-lang,.mm-pal{transition:transform .18s var(--ease),background-color .25s,color .25s}
+  .icon-btn:active,.mm-lang:active,.mm-pal:active{transform:scale(.95)}
+}
