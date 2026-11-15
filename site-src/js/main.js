@@ -5,6 +5,7 @@ import { scroller } from "./scroller.js";
 import { theme } from "./theme.js";
 import { initHeroGL } from "./gl.js";
 import { initLoop } from "./loop.js";
+import { initScenes } from "./scenes.js";
 import { initReel, initWorkStage, scramble } from "./reel.js";
 import { initTerminal } from "./terminal.js";
 import { initPalette } from "./palette.js";
@@ -94,7 +95,7 @@ function setMenu(open) {
 }
 menuBtn.addEventListener("click", () => setMenu(!menuOpen));
 
-const PINNED = ["#loop", "#method"];
+const PINNED = ["#loop", "#services", "#method"];
 function goto(href) {
   if (href === "#top") return scroller.to(0);
   const el = $(href);
@@ -349,6 +350,7 @@ if (rm) {
   }
 
   initLoop();
+  initScenes();
   gsap.delayedCall(root.classList.contains("intro") ? 3.4 : 1.6, () => initReel(reel));
   initWorkStage($("#work"), (y) => scroller.to(y));
 
@@ -400,53 +402,8 @@ if (rm) {
     gsap.from(el, { y: 26, opacity: 0, duration: 0.9, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 90%", once: true } });
   });
 
-  /* ----- services: the fill prints out from the pointer; on touch, from the row that crosses the middle */
-  {
-    const rows = $$("[data-svc]");
-    gsap.from(rows, { y: 40, opacity: 0, duration: 0.9, ease: "power3.out", stagger: 0.08, clearProps: "transform,opacity", scrollTrigger: { trigger: ".svc-list", start: "top 85%", once: true } });
-    if (fine) {
-      rows.forEach((el) =>
-        el.addEventListener("pointerenter", (e) => {
-          const r = el.getBoundingClientRect();
-          el.style.setProperty("--mx", (((e.clientX - r.left) / r.width) * 100).toFixed(1) + "%");
-          el.style.setProperty("--my", (((e.clientY - r.top) / r.height) * 100).toFixed(1) + "%");
-        })
-      );
-    } else {
-      rows.forEach((el) => ScrollTrigger.create({ trigger: el, start: "top 62%", end: "bottom 38%", toggleClass: "on" }));
-    }
-  }
-
-  /* ----- process: pinned; the title's words light up while the checklist gets ticked */
-  {
-    const method = $("[data-method]");
-    const steps = $$(".step", method);
-    const words = $$(".mw", method);
-    const bar = $("[data-method-bar]", method);
-    const count = $("[data-method-count]", method);
-    let cur = -1;
-    const set = (i) => {
-      if (i === cur) return;
-      cur = i;
-      steps.forEach((s, k) => {
-        s.classList.toggle("on", k === i);
-        s.classList.toggle("done", k < i);
-      });
-      words.forEach((w, k) => w.classList.toggle("on", k <= i));
-      count.textContent = `${String(i + 1).padStart(2, "0")} / ${String(steps.length).padStart(2, "0")}`;
-      if (i > 0) buzz(6);
-    };
-    set(0);
-    ScrollTrigger.create({
-      trigger: method,
-      start: "top top",
-      end: "bottom bottom",
-      onUpdate: (self) => {
-        bar.style.setProperty("--p", self.progress.toFixed(3));
-        set(Math.min(steps.length - 1, Math.floor(self.progress * steps.length)));
-      },
-    });
-  }
+  /* ----- the raw idea prints solid as the cover scrolls away (what the lens does by hand, for touch too) */
+  if (dots) gsap.fromTo(dots, { "--dr": "0.021em" }, { "--dr": "0.042em", ease: "none", immediateRender: false, scrollTrigger: { trigger: hero, start: "top top", end: "65% top", scrub: 0.4 } });
 
   /* ----- the closing word prints from a fine screen to solid ink */
   {
@@ -460,40 +417,31 @@ if (rm) {
     ScrollTrigger.create({ trigger: frame, start: "top 90%", end: "bottom 10%", onToggle: (s) => (s.isActive ? tw.play() : tw.pause()) });
   });
 
-  /* ----- pointer layer (cursor, magnetic, tilt) */
+  /* ----- pointer layer (label chip, magnetic, tilt); the system cursor is never replaced */
   if (fine) {
-    const dot = $(".cursor-dot");
     const ring = $(".cursor-ring");
     const label = $(".cursor-label");
-    const dx = gsap.quickSetter(dot, "x", "px");
-    const dy = gsap.quickSetter(dot, "y", "px");
-    const rx = gsap.quickTo(ring, "x", { duration: 0.5, ease: "power3" });
-    const ry = gsap.quickTo(ring, "y", { duration: 0.5, ease: "power3" });
+    const rx = gsap.quickTo(ring, "x", { duration: 0.35, ease: "power3" });
+    const ry = gsap.quickTo(ring, "y", { duration: 0.35, ease: "power3" });
+    let seen = false;
     window.addEventListener(
       "pointermove",
       (e) => {
-        if (!root.classList.contains("has-cursor")) {
+        if (!seen) {
           gsap.set(ring, { x: e.clientX, y: e.clientY });
-          root.classList.add("has-cursor");
+          seen = true;
         }
-        dx(e.clientX);
-        dy(e.clientY);
         rx(e.clientX);
         ry(e.clientY);
       },
       { passive: true }
     );
     document.addEventListener("pointerover", (e) => {
-      const t = e.target.closest("[data-cursor],a,button,[role=option],[data-wk-item]");
-      const txt = t?.dataset.cursor;
+      const txt = e.target.closest("[data-cursor]")?.dataset.cursor;
       ring.classList.toggle("is-label", !!txt);
-      ring.classList.toggle("is-link", !!t && !txt);
       if (txt) label.textContent = txt.toUpperCase();
     });
-    document.addEventListener("pointerdown", () => ring.classList.add("is-down"));
-    document.addEventListener("pointerup", () => ring.classList.remove("is-down"));
-    root.addEventListener("pointerleave", () => gsap.to([dot, ring], { opacity: 0, duration: 0.2 }));
-    root.addEventListener("pointerenter", () => gsap.to([dot, ring], { opacity: 1, duration: 0.2 }));
+    root.addEventListener("pointerleave", () => ring.classList.remove("is-label"));
 
     $$("[data-magnetic]").forEach((el) => {
       const xTo = gsap.quickTo(el, "x", { duration: 0.7, ease: "elastic.out(1,.45)" });

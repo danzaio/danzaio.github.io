@@ -14,10 +14,7 @@ const I = {
   sun: svg('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>', "ico ico-sun"),
   gh: svg('<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>'),
   term: svg('<path d="M4 17l6-6-6-6M12 19h8"/>'),
-  win: svg('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 6.5h.01M10 6.5h.01"/>'),
-  phone: svg('<rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/>'),
   bag: svg('<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/>'),
-  bot: svg('<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 14h.01M15 14h.01M9 17.5h6"/><circle cx="12" cy="3" r="1"/>'),
   menu: svg('<path d="M4 8h16M4 16h16"/>', "ico ico-menu"),
   x: svg('<path d="M6 6l12 12M18 6 6 18"/>', "ico ico-x"),
   search: svg('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
@@ -30,7 +27,6 @@ const arrowInline = `<svg class="tag-arrow" viewBox="0 0 24 12" width="22" heigh
 const tagHtml = (parts) => parts.map(esc).join(arrowInline);
 const pad = (n) => String(n).padStart(2, "0");
 const ext = `target="_blank" rel="noopener"`;
-const CAP_ICON = { saas: I.win, mobile: I.phone, commerce: I.bag, ai: I.bot };
 
 /* ----------------------------------------------------------------- pieces */
 function slug(c, num, label) {
@@ -57,7 +53,7 @@ function top(c) {
     </div>
     <div class="progress" aria-hidden="true"><i data-progress></i></div>
   </header>
-  <nav class="dock" data-dock aria-label="Sections">${c.nav.map((n, i) => `<a href="${n.href}" data-nav><b>${pad(i + 1)}</b>${esc(n.label)}</a>`).join("")}<a class="dock-go" href="#contact" data-nav><b>06</b>${esc(c.contactLabel)}${I.ur}</a></nav>
+  <nav class="dock" data-dock aria-label="Sections">${c.nav.map((n, i) => `<a href="${n.href}" data-nav aria-label="${esc(n.label)}"><b>${pad(i + 1)}</b><span>${esc(n.label)}</span></a>`).join("")}<a class="dock-go" href="#contact" data-nav aria-label="${esc(c.contactLabel)}"><b>06</b><span>${esc(c.contactLabel)}</span>${I.ur}</a></nav>
   <div class="mobile-menu" id="mobile-menu" data-mobile-menu hidden>
     <nav aria-label="Mobile">${links.map((n, i) => `<a href="${n.href}" data-mm-link><span class="mm-n">${pad(i + 1)}</span>${esc(n.label)}</a>`).join("")}</nav>
     <div class="mm-foot">
@@ -154,15 +150,15 @@ function loop(c) {
   const bars = [34, 46, 40, 58, 52, 74, 92].map((h, i) => `<rect x="${6 + i * 16}" y="${100 - h}" width="11" height="${h}" rx="2"${i === 6 ? ' class="hot"' : ""}/>`).join("");
   const checks = l.checks.map((x) => `<li data-ls-check><b>✓</b>${esc(x)}</li>`).join("");
   return `<section id="loop" class="loop" aria-labelledby="loop-title">
-    <div class="loop-track" data-loop>
-      <div class="loop-sticky shell">
-        <div class="loop-left">
+    <div class="scene-track" data-loop>
+      <div class="scene-sticky shell">
+        <div class="scene-left">
           ${slug(c, l.num, l.label)}
-          <h2 id="loop-title" class="loop-title">${esc(l.title)}</h2>
+          <h2 id="loop-title" class="scene-title">${esc(l.title)}</h2>
           <ol class="beats">${beats}</ol>
-          <div class="loop-rail" data-loop-rail aria-hidden="true">${rail}</div>
+          <div class="scene-rail" data-loop-rail aria-hidden="true">${rail}</div>
         </div>
-        <div class="loop-right">
+        <div class="scene-right">
           <div class="ls" data-loop-stage data-status="${esc(JSON.stringify(l.status))}" aria-hidden="true">
             <div class="ls-bar"><i></i><i></i><i></i><span class="ls-file">${esc(l.file)}</span><span class="ls-demo">${esc(l.demo)}</span><span class="ls-status" data-ls-state="3"><b></b><span data-ls-status>${esc(l.status[3])}</span></span></div>
             <div class="ls-body">
@@ -233,22 +229,61 @@ function work(c) {
 }
 
 /* -------------------------------------------------------- plate 03: services */
+// shared scene parts: the stage's title bar, a beat, the rail, a pointer that clicks
+const lsBar = (file, demo, state, label) =>
+  `<div class="ls-bar"><i></i><i></i><i></i><span class="ls-file">${esc(file)}</span><span class="ls-demo">${esc(demo)}</span><span class="ls-status" data-ls-state="${state}"><b></b><span data-ls-status>${esc(label)}</span></span></div>`;
+const beat = (i, n, kick, word, text, tag) =>
+  `<li class="beat" data-beat="${i}"><span class="beat-n">${pad(i + 1)} / ${pad(n)}<i aria-hidden="true"></i>${esc(kick)}</span><h3>${esc(word)}</h3><p>${esc(text)}</p>${tag ? `<span class="beat-tag">${tag}</span>` : ""}</li>`;
+const rail = (n) => `<div class="scene-rail" style="--n:${n}" aria-hidden="true">${Array.from({ length: n }, (_, i) => `<i style="--i:${i}"></i>`).join("")}</div>`;
+const POINTER = `<span class="sv-cur" data-cur><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M4 2.5 19.5 11l-6.6 1.9L9.6 19.8z"/></svg></span>`;
+const JACKET = `<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M23 9 32 14l9-5 12 7-4 13-6-3v29H21V26l-6 3-4-13z"/><path d="M32 14v39M27 33h-3M40 33h-3" fill="none"/></svg>`;
+
 function services(c) {
   const s = c.services;
-  const rows = s.items
-    .map(
-      (it, i) => `<li id="cap-${it.id}" class="svc" data-svc>
-        <span class="svc-n">${pad(i + 1)}</span><span class="svc-ico">${CAP_ICON[it.id]}</span>
-        <h3 class="svc-title">${esc(it.title)}</h3>
-        <p class="svc-text">${esc(it.text)}</p>
-        <span class="svc-tag">${tagHtml(it.tag)}</span>
-        <i class="svc-fill" aria-hidden="true"></i>
-      </li>`
-    )
-    .join("");
-  return `<section id="services" class="plate services shell" aria-labelledby="services-title">
-    ${slug(c, s.num, s.label)}${secHead(s.title, s.lead, "services-title")}
-    <ol class="svc-list">${rows}</ol>
+  const v = s.scene;
+  const n = s.items.length;
+  const beats = s.items.map((it, i) => beat(i, n, it.title, v.status[i], it.text, tagHtml(it.tag)).replace('<li class', `<li id="cap-${it.id}" class`)).join("");
+  // SaaS: sidebar, counting KPIs, revenue line, invoices
+  const saas = `<div class="ss-side" data-ss-side><span class="ss-brand"><b></b>${esc(v.brand)}</span><ul>${v.nav.map((x, i) => `<li${i ? "" : ' class="on"'}>${esc(x)}</li>`).join("")}</ul><i class="ss-meter"><i></i></i></div>
+    <div class="ss-kpis">${v.kpi.map(([k, val]) => `<div class="sv-card ss-kpi" data-ss-kpi><span>${esc(k)}</span><b data-count>${esc(val)}</b></div>`).join("")}</div>
+    <div class="sv-card ss-chart" data-ss-chart><span class="sv-k">${esc(v.kpi[1][0])}</span><svg viewBox="0 0 200 100" preserveAspectRatio="none"><path class="g" d="M0 25H200M0 50H200M0 75H200"/><path class="a" data-ss-area d="M0 100V82L25 76 50 80 75 60 100 64 125 44 150 48 175 24 200 12V100Z"/><path class="ln" data-ss-line d="M0 82 25 76 50 80 75 60 100 64 125 44 150 48 175 24 200 12"/></svg></div>
+    <div class="sv-card ss-rows"><ul>${v.rows.map(([t, st], i) => `<li data-ss-row><i></i><span>${esc(t)}</span><em class="${i < 2 ? "ok" : "due"}" data-ss-pill>${esc(st)}</em></li>`).join("")}</ul></div>`;
+  // Mobile: delivery route, the phone, a push that breaks out of it
+  const mob = `<div class="sv-card sm-map" data-sm-map><svg viewBox="0 0 340 400" aria-hidden="true"><path class="road" d="M0 120H340M0 270H340M105 0V400M235 0V400M0 380 340 20"/><path class="rt" data-sm-route d="M48 342C98 318 60 236 150 222S252 160 292 62"/><circle class="pin" cx="48" cy="342" r="10"/><circle class="pin end" cx="292" cy="62" r="12"/><circle class="van" data-sm-van cx="292" cy="62" r="14"/></svg><span class="sm-cap"><b>${esc(v.cards[0][0])}</b>${esc(v.cards[0][1])}</span></div>
+    <div class="sm-phone" data-sm-phone><i class="lp-notch"></i><div class="sm-screen"><b class="sm-h">${esc(v.today)}</b>${v.cards.map(([t, st], i) => `<div class="sm-card" data-sm-card><i></i><span><b>${esc(t)}</b>${esc(st)}</span><em style="--w:${i ? 100 : 66}%"></em></div>`).join("")}<div class="sm-promo" data-sm-card><i></i><i></i><i></i></div><span class="sm-tap" data-sm-tap></span><span class="sm-tabs">${v.tabs.map((x, i) => `<span${i === 1 ? ' class="on"' : ""}><i></i>${esc(x)}</span>`).join("")}</span></div></div>
+    <div class="sm-notif" data-sm-notif><span><i></i>${esc(v.notif[0])}</span><strong>${esc(v.notif[1])}</strong><p>${esc(v.notif[2])}</p></div>
+    <div class="sm-os" data-sm-os><span>iOS</span><span>Android</span></div>`;
+  // Commerce: product, add to cart, pay, receipt
+  const shop = `<div class="sc-top" data-sc-top><b class="sc-logo"></b><span>Acme</span><span class="sc-bag">${I.bag}<b data-sc-badge>1</b></span></div>
+    <div class="sv-card sc-prod" data-sc-prod><div class="sc-img">${JACKET}</div><div class="sc-info"><b>${esc(v.product[0])}</b><span class="sc-price">${esc(v.product[1])}</span><span class="sc-sizes"><i>S</i><i class="on">M</i><i>L</i></span><span class="sc-add" data-sc-add>${esc(v.product[2])}</span></div></div>
+    <div class="sv-card sc-cart" data-sc-cart><b class="sc-h">${esc(v.cart[0])}</b><div class="sc-line"><i></i><span>${esc(v.product[0])}<small>M</small></span><b>${esc(v.product[1])}</b></div><div class="sc-sub"><span>${esc(v.cart[1])}</span><b>${esc(v.product[1])}</b></div><span class="sc-pay is-paid" data-sc-pay><span class="a">${esc(v.cart[2])}</span><span class="b">✓ ${esc(v.cart[3])}</span></span></div>
+    <div class="sc-receipt" data-sc-receipt><b>✓</b><span>${esc(v.cart[4])}</span><i></i><i></i></div>
+    <span class="sc-plus" data-sc-plus>+1</span>${POINTER}`;
+  // AI: an agent run drawn as a graph, its log, a human approval
+  const NODE = [[9, 16.5], [31, 16.5], [56, 7], [56, 26], [84, 16.5]];
+  const EDGE = ["M15.5 16.5H24.5", "M37.5 16.5C44 16.5 43 7 49.5 7", "M37.5 16.5C44 16.5 43 26 49.5 26", "M62.5 7C70 7 70 16.5 77.5 16.5", "M62.5 26C70 26 70 16.5 77.5 16.5"];
+  const ai = `<div class="sa-graph"><svg viewBox="0 0 94 33" preserveAspectRatio="none" aria-hidden="true">${EDGE.map((d) => `<path data-sa-edge d="${d}"/>`).join("")}</svg>${v.nodes.map((x, i) => `<span class="sa-node" data-sa-node style="left:${NODE[i][0]}cqi;top:${NODE[i][1]}cqi"><i></i>${esc(x)}</span>`).join("")}</div>
+    <div class="sa-log"><span class="sv-k">agent.run</span>${v.log.map((x, i) => `<span class="sa-ln" data-sa-ln><i>${pad(i + 1)}</i>${esc(x)}</span>`).join("")}</div>
+    <div class="sa-ok" data-sa-ok><span class="sv-k">${esc(v.nodes[4])}</span><i></i><i></i><i></i><b data-sa-approved>✓ ${esc(v.approve)}</b></div>`;
+  const layers = [saas, mob, shop, ai].map((h, i) => `<div class="sv-l sv-l${i}" data-sv-l data-n="${pad(i + 1)}">${h}</div>`).join("");
+  return `<section id="services" class="plate services" aria-labelledby="services-title">
+    <div class="scene-track" data-scene="services" style="--beats:4.6">
+      <div class="scene-sticky shell">
+        <div class="scene-left">
+          ${slug(c, s.num, s.label)}
+          <h2 id="services-title" class="scene-title">${esc(s.title)}</h2>
+          <p class="scene-lead">${esc(s.lead)}</p>
+          <ol class="beats">${beats}</ol>
+          ${rail(n)}
+        </div>
+        <div class="scene-right">
+          <div class="ls sv" data-stage data-status="${esc(JSON.stringify([...v.status, v.done]))}" aria-hidden="true">
+            ${lsBar(v.file, v.demo, 3, v.done)}
+            <div class="ls-body sv-body is-sheet" data-sv-body>${layers}<i class="sv-sweep" data-sweep></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>`;
 }
 
@@ -290,27 +325,49 @@ function bench(c) {
 /* --------------------------------------------------------- plate 05: process */
 function method(c) {
   const m = c.method;
+  const v = m.scene;
+  const n = m.steps.length;
   const parts = m.titleParts.map((p, i) => (i % 2 === 1 ? `<span class="mw" data-mw="${(i - 1) / 2}">${esc(p)}</span>` : esc(p))).join("");
-  const steps = m.steps
-    .map(
-      (s, i) => `<li class="step" data-step="${i}">
-        <span class="step-box" aria-hidden="true">${i + 1}<b>✓</b></span>
-        <div class="step-main"><h3>${esc(s.t)}</h3><p>${esc(s.d)}</p></div>
-        <span class="step-tag">${esc(s.tag.toUpperCase())}</span>
-      </li>`
-    )
-    .join("");
+  const beats = m.steps.map((s, i) => beat(i, n, s.tag, s.t, s.d, "")).join("");
+  const tab = (i) => `<span class="pr-tab">${pad(i + 1)} · ${esc(m.steps[i].t)}</span>`;
+  const rows = v.rows.map(([p, d], i) => `<li data-pr-row><i class="th"></i><span class="tx"><i></i><i></i></span><b>${esc(p)}</b><em${i ? "" : ' class="hot"'}>${esc(d)}</em></li>`).join("");
+  const log = v.log.map(([t, e, x]) => `<li data-pr-log><i>${esc(t)}</i><span>${esc(e)}</span><b>${esc(x)}</b></li>`).join("");
+  const checks = v.checks.map((x, i) => `<li class="on" data-pr-check="${i}"><b>✓</b>${esc(x)}</li>`).join("");
   return `<section id="method" class="plate method" aria-labelledby="method-title">
-    <div class="method-track" data-method>
-      <div class="method-sticky shell">
-        <div class="method-left">
+    <div class="scene-track" data-scene="method" style="--beats:3.4">
+      <div class="scene-sticky shell">
+        <div class="scene-left">
           ${slug(c, m.num, m.label)}
-          <h2 id="method-title" class="method-title">${parts}</h2>
-          <p class="sec-lead" data-fade>${esc(m.lead)}</p>
+          <h2 id="method-title" class="scene-title">${parts}</h2>
+          <p class="scene-lead">${esc(m.lead)}</p>
+          <ol class="beats">${beats}</ol>
+          ${rail(n)}
         </div>
-        <div class="method-right">
-          <ol class="steps">${steps}</ol>
-          <div class="method-progress" aria-hidden="true"><i data-method-bar></i><span data-method-count>${pad(m.steps.length)} / ${pad(m.steps.length)}</span></div>
+        <div class="scene-right">
+          <div class="ls pr" data-stage data-status="${esc(JSON.stringify(v.status))}" aria-hidden="true">
+            ${lsBar(v.file, v.demo, 3, v.status[2])}
+            <div class="ls-body pr-body">
+              <div class="pr-gate pr-app pass" data-pr-gate>${tab(0)}
+                <div class="pa-top"><i class="pa-logo"></i><span class="pa-nav"><i></i><i></i><i></i></span><b class="pa-cta is-set" data-pr-cta>${esc(v.cta)}</b></div>
+                <ul class="pa-rows">${rows}</ul>
+                <span class="pa-toast" data-pr-toast><b>✓</b>${esc(v.toast)}</span>
+              </div>
+              <div class="pr-gate pr-ops pass" data-pr-gate>${tab(1)}
+                <span class="po-head"><i></i>${esc(v.ops)}</span>
+                <ul class="po-log">${log}</ul>
+                <div class="po-ask" data-pr-ask><span>${esc(v.ask)}</span><b class="po-btn is-ok" data-pr-approve><span class="a">${esc(v.approve)}</span><span class="b">✓ ${esc(v.approved)}</span></b></div>
+              </div>
+              <div class="pr-gate pr-diff pass" data-pr-gate>${tab(2)}
+                <span class="pd-file">${esc(v.diffFile)}</span>
+                <span class="pd-ln del" data-pr-del><i>−</i>${esc(v.minus)}</span>
+                <span class="pd-ln add" data-pr-add><i>+</i>${esc(v.plus)}</span>
+                <span class="pd-tests"><span>${esc(v.tests)}</span><i><i data-pr-bar></i></i><b data-pr-pass>${esc(v.pass)}</b></span>
+              </div>
+              <ul class="pr-checks">${checks}</ul>
+              <div class="ls-stamp pr-stamp" data-pr-stamp>${esc(v.stamp)}</div>
+              ${POINTER}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -448,7 +505,7 @@ export function render(lang) {
 <a class="skip" href="#main">${esc(c.ui.skip)}</a>
 ${preloader(c)}
 <div class="grain" aria-hidden="true"></div>
-<div class="cursor" aria-hidden="true"><i class="cursor-dot"></i><i class="cursor-ring"><span class="cursor-label"></span></i></div>
+<div class="cursor" aria-hidden="true"><i class="cursor-ring"><span class="cursor-label"></span></i></div>
 ${top(c)}
 <main id="main">
 ${hero(c)}

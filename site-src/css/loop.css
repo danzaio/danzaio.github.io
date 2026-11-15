@@ -1,5 +1,6 @@
 /* ==========================================================================
-   loop.css: plate 01, one idea becomes a product (kept from v3, slug instead of section label)
+   loop.css: the scene kit (.scene-*, .beats, .ls stage, shared by loop, services and process)
+   plus plate 01, one idea becomes a product
    ==========================================================================
  */
 /* ==========================================================================
@@ -9,29 +10,29 @@
    ========================================================================== */
 .loop{padding-top:clamp(40px,5vw,80px)}
 .loop .slug .pn,.loop .slug .cbar{display:none}
-.loop-track{position:relative}
-.loop-sticky{display:grid;grid-template-columns:minmax(0,.74fr) minmax(0,1.26fr);gap:clamp(24px,4vw,72px);align-items:center;padding-block:clamp(28px,4vw,64px)}
-.loop-left{display:grid;gap:clamp(14px,1.6vw,24px);align-content:center}
-.loop-title{font:700 clamp(1.2rem,1.85vw,1.85rem)/1.14 var(--font-display);letter-spacing:-.03em;max-width:21ch;color:var(--muted)}
+.scene-track{position:relative}
+.scene-sticky{display:grid;grid-template-columns:minmax(0,.74fr) minmax(0,1.26fr);gap:clamp(24px,4vw,72px);align-items:center;padding-block:clamp(28px,4vw,64px)}
+.scene-left{display:grid;gap:clamp(14px,1.6vw,24px);align-content:center}
+.scene-title{font:700 clamp(1.2rem,1.85vw,1.85rem)/1.14 var(--font-display);letter-spacing:-.03em;max-width:21ch;color:var(--muted)}
 .beats{display:grid;gap:22px}
 .beat{display:grid;gap:clamp(8px,1vw,14px);align-content:start}
 .beat-n{font:600 .72rem var(--font-mono);letter-spacing:.08em;color:var(--muted)}
 .beat h3{font:800 clamp(1.9rem,3vw,3rem)/.9 var(--font-display);letter-spacing:-.05em}
 .beat p{max-width:34ch;font-size:clamp(1rem,1.25vw,1.2rem);line-height:1.45;color:var(--muted)}
-.loop-rail{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:340px;--p:1}
-.loop-rail i{display:block;height:4px;border-radius:4px;background:var(--line-soft);position:relative;overflow:hidden}
-.loop-rail i::after{content:"";position:absolute;inset:0;background:var(--ink);transform-origin:left;transform:scaleX(clamp(0,calc(var(--p) * 4 - var(--i)),1))}
+.scene-rail{display:grid;grid-template-columns:repeat(var(--n,4),1fr);gap:6px;max-width:340px;--p:1}
+.scene-rail i{display:block;height:4px;border-radius:4px;background:var(--line-soft);position:relative;overflow:hidden}
+.scene-rail i::after{content:"";position:absolute;inset:0;background:var(--ink);transform-origin:left;transform:scaleX(clamp(0,calc(var(--p) * var(--n,4) - var(--i)),1))}
 
 /* scroll-driven mode: pinned, one beat on screen at a time */
-html.js:not(.rm) .loop-track{height:460svh}
-html.js:not(.rm) .loop-sticky{position:sticky;top:0;height:100svh;padding-top:calc(var(--header-h) + 28px);padding-bottom:84px}
+html.js:not(.rm) .scene-track{height:calc(var(--beats,4) * 115svh)}
+html.js:not(.rm) .scene-sticky{position:sticky;top:0;height:100svh;padding-top:calc(var(--header-h) + 28px);padding-bottom:84px}
 html.js:not(.rm) .beats{gap:0}
 html.js:not(.rm) .beat{grid-area:1/1;opacity:0;visibility:hidden;transform:translateY(22px);transition:opacity .3s var(--ease),transform .5s var(--ease),visibility 0s .3s}
 html.js:not(.rm) .beat.on{opacity:1;visibility:visible;transform:none;transition:opacity .45s var(--ease) .1s,transform .6s var(--ease) .1s,visibility 0s}
 html.js:not(.rm) .beat h3{font-size:clamp(3.6rem,8.4vw,8.6rem);line-height:.86;letter-spacing:-.055em}
 
 /* stage */
-.loop-right{display:grid;justify-items:end}
+.scene-right{display:grid;justify-items:end}
 .ls{width:min(100%,calc((100svh - var(--header-h) - 150px) * 1.5));border:1.5px solid var(--ink);border-radius:16px;background:var(--surface);overflow:hidden;box-shadow:10px 10px 0 var(--shadow);will-change:transform}
 :root[data-theme="ink"] .ls{border-color:var(--line);box-shadow:10px 10px 0 var(--lime)}
 .ls-bar{display:flex;align-items:center;gap:7px;height:40px;padding:0 12px 0 14px;border-bottom:1.5px solid var(--ink);background:var(--paper-deep);font:600 .68rem var(--font-mono);letter-spacing:.04em;white-space:nowrap}
@@ -114,19 +115,30 @@ html.js:not(.rm) .beat h3{font-size:clamp(3.6rem,8.4vw,8.6rem);line-height:.86;l
 .ls-checks b{display:grid;place-items:center;width:2cqi;height:2cqi;border-radius:50%;background:var(--lime);color:#151612;border:1px solid #151612;font-size:1.2cqi}
 .ls-stamp{position:absolute;left:36cqi;top:7.4cqi;z-index:6;padding:.7cqi 2cqi .9cqi;border:.5cqi solid var(--orange);border-radius:1cqi;color:var(--orange);background:color-mix(in srgb,var(--surface) 86%,transparent);font:800 5.2cqi/1 var(--font-display);letter-spacing:.01em;text-transform:uppercase;transform:rotate(-6deg)}
 
+/* kit parts used by the services and process scenes */
+.beat-n i{display:inline-block;width:18px;height:1px;margin:0 9px .28em;background:currentColor;vertical-align:middle;opacity:.6}
+.beat-tag{justify-self:start;display:inline-flex;align-items:center;gap:8px;margin-top:4px;padding:7px 13px;border:1px solid var(--ink);border-radius:999px;font:600 .64rem var(--font-mono);letter-spacing:.08em;white-space:nowrap}
+.scene-lead{max-width:44ch;color:var(--muted);font-size:clamp(.9rem,1vw,1rem);line-height:1.5}
+.sv-card{position:absolute;border:1.5px solid var(--ink);border-radius:1.3cqi;background:var(--surface);box-shadow:.7cqi .7cqi 0 var(--ink)}
+.sv-k{display:block;font:700 1.25cqi var(--font-mono);letter-spacing:.1em;text-transform:uppercase;opacity:.65}
+.sv-cur{position:absolute;left:0;top:0;z-index:9;width:3.4cqi;height:3.4cqi;pointer-events:none;opacity:0;--cx:50;--cy:70;transform:translate(calc(var(--cx) * 1cqi - .5cqi),calc(var(--cy) * 1cqi - .35cqi))}
+.sv-cur svg{display:block;width:100%;height:100%;fill:var(--paper-static);stroke:#151612;stroke-width:1.6;stroke-linejoin:round;transform-origin:20% 15%;filter:drop-shadow(.25cqi .35cqi 0 rgba(21,22,18,.35))}
+html.js:not(.rm) .scene-lead{display:none}
+@media (min-width:901px) and (min-height:860px){html.js:not(.rm) .scene-lead{display:block}}
+
 /* the last beat lands on the lime highlight, like the hero line */
 html.js:not(.rm) .beat:last-child h3{justify-self:start;padding:0 .1em .04em;margin-left:-.1em;background:linear-gradient(var(--lime),var(--lime)) no-repeat 0 62%/0% 84%;transition:background-size .6s var(--ease-io) .3s,color .3s .3s}
 html.js:not(.rm) .beat.on:last-child h3{background-size:100% 84%;color:#151612}
 
 
 @media (max-width:900px){
-  .loop-sticky{display:flex;flex-direction:column;align-items:stretch;gap:16px}
-  .loop-left{display:contents}
-  .loop-left .slug{order:1}
-  .loop-title{order:2;max-width:none;font-size:1.05rem}
-  .loop-right{order:3;justify-items:stretch}
+  .scene-sticky{display:flex;flex-direction:column;align-items:stretch;gap:16px}
+  .scene-left{display:contents}
+  .scene-left .slug{order:1}
+  .scene-title{order:2;max-width:none;font-size:1.05rem}
+  .scene-right{order:3;justify-items:stretch}
   .beats{order:4}
-  .loop-rail{order:5;max-width:none}
+  .scene-rail{order:5;max-width:none}
   .ls{width:100%;border-radius:12px;box-shadow:5px 5px 0 var(--shadow)}
   :root[data-theme="ink"] .ls{box-shadow:5px 5px 0 var(--lime)}
   .ls-bar{height:34px}
@@ -136,8 +148,8 @@ html.js:not(.rm) .beat.on:last-child h3{background-size:100% 84%;color:#151612}
   .ls-checks b{width:2.6cqi;height:2.6cqi;font-size:1.6cqi}
   .la-tag{font-size:2cqi}
   .beat p{font-size:.95rem}
-  html.js:not(.rm) .loop-track{height:420svh}
-  html.js:not(.rm) .loop-sticky{justify-content:center;padding-top:calc(var(--header-h) + var(--sat) + 22px);padding-bottom:calc(18px + var(--sab))}
+  html.js:not(.rm) .scene-track{height:calc(var(--beats,4) * 105svh)}
+  html.js:not(.rm) .scene-sticky{justify-content:center;padding-top:calc(var(--header-h) + var(--sat) + 22px);padding-bottom:calc(72px + var(--sab))}
   html.js:not(.rm) .beats{min-height:168px}
   html.js:not(.rm) .beat h3{font-size:clamp(3rem,15vw,4.4rem)}
 }

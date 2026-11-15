@@ -68,4 +68,18 @@
   .frame{box-shadow:6px 6px 0 var(--ink)}
   :root[data-theme="ink"] .frame{box-shadow:6px 6px 0 var(--lime)}
   .why{grid-template-columns:minmax(0,1fr)}
+  /* phones with motion: the same pinned stage, on top; below it only the project on screen */
+  html.js:not(.rm) .wk-track{height:330svh}
+  html.js:not(.rm) .wk-sticky{position:sticky;top:0;height:100svh;display:flex;flex-direction:column;justify-content:center;gap:22px;padding-top:calc(var(--top-h) + var(--sat) + 10px);padding-bottom:calc(76px + var(--sab))}
+  html.js:not(.rm) .wk-stage{display:block;order:-1;width:min(100% - 7px,calc((100svh - var(--top-h) - 420px) * 1.6));box-shadow:7px 7px 0 var(--ink)}
+  html.js:not(.rm)[data-theme="ink"] .wk-stage{box-shadow:7px 7px 0 var(--lime)}
+  html.js:not(.rm) .wk-list{display:block}
+  html.js:not(.rm) .wk{display:none;padding:0;border:0}
+  html.js:not(.rm) .wk.on{display:grid;gap:0;animation:wk-in .55s var(--ease) both}
+  html.js:not(.rm) .wk.on .wk-n{background:var(--lime);color:#151612;border-color:#151612}
+  html.js:not(.rm) .wk-title{font-size:clamp(1.8rem,8.2vw,2.5rem)}
+  html.js:not(.rm) .wk-shot,html.js:not(.rm) .why{display:none}
+  html.js:not(.rm) .wk-more-in{gap:14px;padding-top:12px}
+  html.js:not(.rm) .wk-text{font-size:.98rem;line-height:1.45}
 }
+@keyframes wk-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}

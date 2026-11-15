@@ -309,16 +309,12 @@ export function initWorkStage(root, scrollTo) {
   const urlEl = $("[data-wk-url]", stage);
   const nEl = $("[data-wk-n]", stage);
   const meter = $$(".wk-meter i", stage);
-  const wide = matchMedia("(min-width: 901px)");
-  let eng = null;
   let st = null;
   let cur = 0;
 
-  const ensure = () => {
-    if (eng || !wide.matches) return;
-    eng = createWipe($("[data-wk-gl]", stage), items);
-    if (!eng) return;
-    // textures load once the section gets near
+  // pinned on every width (phones stack the stage above the project); textures load once the section gets near
+  let eng = createWipe($("[data-wk-gl]", stage), items);
+  if (eng) {
     const io = new IntersectionObserver(
       ([en]) => {
         if (!en.isIntersecting) return;
@@ -329,9 +325,7 @@ export function initWorkStage(root, scrollTo) {
     );
     io.observe(stage);
     eng.lens(stage);
-  };
-  ensure();
-  wide.addEventListener?.("change", ensure);
+  }
 
   const activate = (i) => {
     if (i === cur) return;
@@ -345,7 +339,6 @@ export function initWorkStage(root, scrollTo) {
   const fOf = (p) => clamp(p * (n - 1 + 0.6) - 0.3, 0, n - 1);
   const pOf = (f) => (f + 0.3) / (n - 1 + 0.6);
   function update(self) {
-    if (!wide.matches) return;
     const f = fOf(self.progress);
     const a = Math.min(n - 2, Math.floor(f));
     const p = clamp((f - a - 0.3) / 0.4, 0, 1);
@@ -357,7 +350,7 @@ export function initWorkStage(root, scrollTo) {
 
   // a row click (or keyboard focus inside a row) scrolls to that project's hold position
   const go = (i) => {
-    if (!wide.matches || !st) return;
+    if (!st) return;
     scrollTo(st.start + pOf(i) * (st.end - st.start));
   };
   rows.forEach((r, i) => {

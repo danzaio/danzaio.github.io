@@ -145,23 +145,10 @@ a:hover .arrow-chip{transform:translate(-2px,-2px);box-shadow:5px 5px 0 #151612}
 .grain{position:fixed;inset:0;z-index:90;pointer-events:none;opacity:var(--grain);background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");mix-blend-mode:multiply}
 :root[data-theme="ink"] .grain{mix-blend-mode:screen;filter:invert(1)}
 .cursor{display:contents}
-.cursor-dot,.cursor-ring{position:fixed;left:0;top:0;z-index:250;pointer-events:none;opacity:0;will-change:transform}
-.cursor-dot{width:6px;height:6px;margin:-3px;border-radius:50%;background:#fff;mix-blend-mode:difference}
-/* the ring is a registration mark: circle + crosshair */
-.cursor-ring{width:38px;height:38px;margin:-19px;border:1.5px solid #fff;border-radius:50%;mix-blend-mode:difference;display:grid;place-items:center;transition:width .35s var(--ease),height .35s var(--ease),margin .35s var(--ease),background-color .25s,border-color .25s}
-.cursor-ring::before,.cursor-ring::after{content:"";position:absolute;background:#fff;transition:opacity .2s}
-.cursor-ring::before{width:56px;height:1px}
-.cursor-ring::after{width:1px;height:56px}
-.cursor-label{position:relative;z-index:1;font:700 .6rem var(--font-mono);letter-spacing:.08em;color:#151612;opacity:0;transition:opacity .2s}
-.cursor-ring.is-link{width:58px;height:58px;margin:-29px}
-.cursor-ring.is-link::before,.cursor-ring.is-link::after{opacity:0}
-.cursor-ring.is-label{width:84px;height:84px;margin:-42px;background:var(--lime);border-color:#151612;mix-blend-mode:normal}
-.cursor-ring.is-label::before,.cursor-ring.is-label::after{opacity:0}
-.cursor-ring.is-label .cursor-label{opacity:1}
-.cursor-ring.is-down{transform:scale(.85)}
-html.has-cursor,html.has-cursor a,html.has-cursor button,html.has-cursor [data-cursor]{cursor:none}
-html.has-cursor input{cursor:text}
-html.has-cursor .cursor-dot,html.has-cursor .cursor-ring{opacity:1}
+/* the system cursor stays; a small lime chip rides beside it over labelled targets (OPEN, GO) */
+.cursor-ring{position:fixed;left:0;top:0;z-index:250;pointer-events:none;will-change:transform;display:grid;place-items:center;width:58px;height:58px;margin:14px 0 0 14px;border:1.5px solid #151612;border-radius:50%;background:var(--lime);opacity:0;scale:.4;transition:opacity .2s,scale .35s var(--ease)}
+.cursor-label{font:700 .58rem var(--font-mono);letter-spacing:.08em;color:#151612}
+.cursor-ring.is-label{opacity:1;scale:1}
 @media (hover:none),(pointer:coarse){.cursor{display:none}}
 
 /* ---------- palette ---------------------------------------------------- */

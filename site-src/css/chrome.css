@@ -89,10 +89,17 @@ html.js:not(.rm):not(.is-ready) [data-hero-in]{opacity:0;animation:unhide 0s 5s 
 }
 @media (max-width:900px){
   :root{--top-h:54px}
-  .lang-link,.contact-btn,.dock{display:none}
+  .lang-link,.contact-btn{display:none}
   .menu-btn{display:grid}
   .brand-name span{display:none}
-  .site-footer{padding-bottom:calc(30px + var(--sab))}
+  /* phones: the dock stays, numbers only; the current plate opens up to show its name */
+  .dock{bottom:calc(12px + var(--sab));max-width:calc(100vw - 24px);padding:4px}
+  .dock a{gap:0;height:40px;padding:0 11px}
+  .dock a b{font-size:.68rem;opacity:.8}
+  .dock a span{display:inline-block;max-width:0;overflow:hidden;opacity:0;transition:max-width .45s var(--ease),opacity .3s,margin .45s var(--ease)}
+  .dock a[aria-current="true"] span{max-width:7.5em;opacity:1;margin-left:7px}
+  .dock .dock-go{margin-left:2px}
+  .dock .dock-go .ico{margin-left:6px}
 }
 @media (hover:none){
   .icon-btn,.mm-lang,.mm-pal{transition:transform .18s var(--ease),background-color .25s,color .25s}
