@@ -318,6 +318,10 @@ body.nav-on #navBar{display:block}body.nav-on #mapTop,body.nav-on #near,body.nav
 #navX{flex:none;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.22);color:#fff;font-size:16px;font-weight:800;cursor:pointer}
 .navsub{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-top:0;border-radius:0 0 16px 16px;padding:8px 12px;font-size:13px;box-shadow:var(--shadow)}
 .navsub b{white-space:nowrap}
+.arnav{position:absolute;left:0;top:0;flex-direction:column;align-items:center;gap:4px;pointer-events:none;z-index:3;filter:drop-shadow(0 3px 8px rgba(0,0,0,.5))}
+.arnav span{background:#1f6fd1;color:#fff;font:800 14px Inter,sans-serif;padding:5px 10px;border-radius:12px;white-space:nowrap}
+.arnav.side{top:46%;flex-direction:row;gap:8px;background:#1f6fd1;border-radius:16px;padding:8px 12px}.arnav.side b{color:#fff;font-size:22px}.arnav.side span{padding:0;background:none}
+.arnav.side.l{left:10px}.arnav.side.r{left:auto;right:66px;flex-direction:row-reverse}
 /* mapa real */
 #rmap{position:absolute;inset:0;display:none;background:#efe9dc}
 body.rm-on #rmap{display:block}
@@ -2216,10 +2220,16 @@ function navTick(){const n=NAV;if(!n||!S.pos)return;const l=LBY[n.id];if(dist(S.
   if(!s||s.ty==='arrive'){const d=s?s.at-bal:rest;ic='<div class="navflag">🏁</div>';txt=fmtD(d);sub=esc(l.name)}
   else{ic=arrow(NAVROT[s.mod]??0);txt=`${fmtD(s.at-bal)} · ${t(NAVKEY[s.mod]||'nav_st')}`;sub=esc(s.name||l.name)}}
  else{const b=bearing(S.pos,l);ic=arrow(S.heading!=null?angDiff(b,S.heading):b);txt=`${fmtD(rest)} · ${card(b)}`;sub=t(S.heading!=null?'navFollow':'navStraight')}
- $('#navBar').innerHTML=`<div class="navmain"><div class="navic">${ic}</div><div style="flex:1;min-width:0"><b>${txt}</b><span>${sub}</span></div>${NATIVE?`<button id="navAR" aria-label="AR">AR</button>`:''}<button id="navX" aria-label="${t('navStop')}">✕</button></div><div class="navsub"><span class="badge" style="background:var(--c-${l.cat});width:22px;height:22px;font-size:11px">${l.n}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l.name)}</span><b>${fmtD(rest)} · ${t('walkMin',walk(rest))}</b></div>`;
- $('#navX').onclick=()=>endNav(false);{const ab=$('#navAR');if(ab)ab.onclick=navAR}drawRoute(true);drawMe();if(S.follow&&cur==='mapa')centerOn(S.pos.lat,S.pos.lon,null,true)}
+ $('#navBar').innerHTML=`<div class="navmain"><div class="navic">${ic}</div><div style="flex:1;min-width:0"><b>${txt}</b><span>${sub}</span></div>${FRAMED?'':`<button id="navAR" aria-label="AR">AR</button>`}<button id="navX" aria-label="${t('navStop')}">✕</button></div><div class="navsub"><span class="badge" style="background:var(--c-${l.cat});width:22px;height:22px;font-size:11px">${l.n}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l.name)}</span><b>${fmtD(rest)} · ${t('walkMin',walk(rest))}</b></div>`;
+ $('#navX').onclick=()=>endNav(false);{const ab=$('#navAR');if(ab)ab.onclick=()=>NATIVE?navAR():openCam(null,true)}drawRoute(true);drawMe();if(S.follow&&cur==='mapa')centerOn(S.pos.lat,S.pos.lon,null,true)}
 const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
-function navAR(){if(!NAV||!NATIVE)return;const o={points:navRest().map(q=>[q[1],q[0]]),name:LBY[NAV.id].name,hint:LANG};try{const P=Capacitor.Plugins&&Capacitor.Plugins.ArNav;(P?P.start(o):Capacitor.nativePromise('ArNav','start',o)).catch(()=>toast(t('arNativeFail')))}catch(e){toast(t('arNativeFail'))}}
+function navAR(){if(!NAV||!NATIVE)return;const fb=()=>{toast(t('arNativeFail'));openCam(null,true)};const o={points:navRest().map(q=>[q[1],q[0]]),name:LBY[NAV.id].name,hint:LANG};try{const P=Capacitor.Plugins&&Capacitor.Plugins.ArNav;(P?P.start(o):Capacitor.nativePromise('ArNav','start',o)).catch(fb)}catch(e){fb()}}
+function navAhead(m){const n=NAV;if(!n)return null;const tgt=Math.min(n.tot,(n.along||0)+m);for(let i=(n.seg||0);i<n.cum.length-1;i++){if(n.cum[i+1]>=tgt){const u=(tgt-n.cum[i])/((n.cum[i+1]-n.cum[i])||1);return {lat:n.line[i][1]+u*(n.line[i+1][1]-n.line[i][1]),lon:n.line[i][0]+u*(n.line[i+1][0]-n.line[i][0])}}}const q=n.line[n.line.length-1];return {lat:q[1],lon:q[0]}}
+function arNavDraw(proj,W,H){const el=$('#arNav');if(!el)return;if(!NAV||!CAM.ar||!S.pos||!headOK()){el.style.display='none';return}
+ const a=NAV.real?navAhead(22):LBY[NAV.id],b=bearing(S.pos,a),r=angDiff(b,S.heading),pp=proj(b,-14);const txt=($('#navBar .navmain b')||{}).textContent||'';
+ el.style.display='flex';
+ if(pp&&pp[0]>70&&pp[0]<W-70){el.className='arnav';el.style.transform=`translate(${pp[0].toFixed(0)}px,${Math.max(H*0.42,Math.min(H-300,pp[1])).toFixed(0)}px) translate(-50%,-50%)`;el.innerHTML=`<svg viewBox="-40 -60 80 120" width="110" height="165"><g fill="#1f6fd1" stroke="#fff" stroke-width="3" stroke-linejoin="round"><path d="M0 -56 L26 -30 H10 L0 -40 L-10 -30 H-26Z" opacity=".55"/><path d="M0 -24 L32 8 H12 L0 -4 L-12 8 H-32Z" opacity=".8"/><path d="M0 14 L38 52 H14 L0 38 L-14 52 H-38Z"/></g></svg><span>${esc(txt)}</span>`}
+ else{el.className='arnav side '+(r>0?'r':'l');el.style.transform='';el.innerHTML=`<b>${r>0?'▶':'◀'}</b><span>${r>0?t('rotRight',Math.round(Math.abs(r))):t('rotLeft',Math.round(Math.abs(r)))}</span>`}}
 const navRest=()=>NAV?[NAV.cut||NAV.line[0]].concat(NAV.line.slice((NAV.seg||0)+1)):null;
 /* ============ mapa real (MapLibre + OpenFreeMap; o desenhado fica de reserva) ============ */
 const RM={on:false,map:null,ready:false,tried:false,mk:{},ph:{},me:null,head:false,lastB:0,warm:false,tok:0,terr:0};
@@ -2704,7 +2714,7 @@ function devAngles(){if(!S.tilt)return null;let so=0;try{so=(screen.orientation&
 /* Radar AR: etiquetas das locações projetadas na imagem da câmera */
 function arBuild(){const el=$('#arLayer');
  el.innerHTML=L.map(l=>`<button class="arl" data-id="${l.id}" style="display:none"><span class="b" style="background:var(--c-${l.cat})">${l.n}</span><span class="tx"><b>${esc(l.got.split(' · ')[0])}</b><small>${esc(l.name)} · <i></i></small></span></button>`).join('')
-  +'<div class="arsun" id="arSun" style="display:none">☀</div><div class="artgt" id="arTgt" style="display:none"><i></i><span>🎯 '+t('frameHere')+'</span></div><div class="aredge" id="arEdge" style="display:none"></div>';
+  +'<div class="arsun" id="arSun" style="display:none">☀</div><div class="artgt" id="arTgt" style="display:none"><i></i><span>🎯 '+t('frameHere')+'</span></div><div class="aredge" id="arEdge" style="display:none"></div><div id="arNav" class="arnav" style="display:none"></div>';
  $$('.arl',el).forEach(b=>b.onclick=e=>{e.stopPropagation();closeCam();openLoc(b.dataset.id)})}
 function camLoop(t){if(!CAM.on)return;arFrame();if(!t||t-CAM.lastTick>160){CAM.lastTick=t||0;camTick()}requestAnimationFrame(camLoop)}
 function arFrame(){const el=$('#arLayer');if(!el)return;const W=innerWidth,H=innerHeight,v=$('#camV');const tgtEl=$('#arTgt'),edge=$('#arEdge'),sunEl=$('#arSun');
@@ -2712,6 +2722,7 @@ function arFrame(){const el=$('#arLayer');if(!el)return;const W=innerWidth,H=inn
  let f;if(v.videoWidth){const vw=v.videoWidth,vh=v.videoHeight,sc=Math.max(W/vw,H/vh);f=(Math.max(vw,vh)/2)/Math.tan(33*toR)*sc}else f=W/(2*Math.tan(24*toR));f*=CAM.lensF||1;
  const o=devAngles()||{roll:0,pitch:0},cr=Math.cos(-o.roll*toR),sr=Math.sin(-o.roll*toR);
  const proj=(bear,elev)=>{const dl=angDiff(bear,S.heading);if(Math.abs(dl)>75)return null;const x=f*Math.tan(dl*toR),y=-f*Math.tan(Math.max(-80,Math.min(80,elev-o.pitch))*toR);return [W/2+x*cr-y*sr,H/2+x*sr+y*cr]};
+ arNavDraw(proj,W,H);
  const labels=$$('.arl',el);
  if(!showLabels){labels.forEach(b=>b.style.display='none');sunEl.style.display='none'}
  else{const myAlt=(S.posSrc==='gps'&&S.pos.alt!=null)?S.pos.alt:8;const items=[];

@@ -34,3 +34,32 @@ jobs:
           body: Debug build of the Android app, rebuilt on every change to the guide. Install by opening the APK on an Android phone and allowing installs from the browser.
           files: got-dubrovnik-native/got-dubrovnik.apk
           prerelease: true
+
+  smoke:
+    needs: apk
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download APK from the release
+        run: curl -sSL -o app.apk https://github.com/${{ github.repository }}/releases/download/android-latest/got-dubrovnik.apk
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Run the app in an emulator and take screenshots
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: bash got-dubrovnik-native/smoke.sh
+      - uses: softprops/action-gh-release@v2
+        if: always()
+        with:
+          tag_name: android-latest
+          files: |
+            shots/*.png
+            shots/*.txt
