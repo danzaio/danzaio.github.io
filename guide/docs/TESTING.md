@@ -22,7 +22,8 @@ O runner:
 
 Um teste **passa** quando termina com código 0, não registra erro de página (`ERRS []`,
 `erros: nenhum`) e a saída normalizada é igual ao gabarito. Imagens `data:`, endereços `blob:`,
-a porta e o código dos erros de rede (`net::ERR_…`) são trocados por marcadores antes de comparar.
+a porta, o código dos erros de rede (`net::ERR_…`) e o total de caracteres do `i18n.py` são trocados
+por marcadores, e as linhas "Failed to load resource" (quantas requisições externas falham) são ignoradas.
 O que falhar roda de novo, sozinho, uma vez; se passar, aparece "(passou na 2ª tentativa)" —
 sinal de teste com espera fixa demais, que vale corrigir.
 
