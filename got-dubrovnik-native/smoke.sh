@@ -26,9 +26,9 @@ adb emu geo fix 18.10905 42.64112; sleep 10
 shot 2_map_gps
 alive 3; tap 300 955 5; shot 3_places      # Places tab
 tap 400 360 6; shot 4_place_sheet # first place in the list
-adb shell input keyevent KEYCODE_BACK; sleep 3
-tap 400 630 6; up; up; shot 4b_scenes # 4th place with the GPS fix above (St Dominic Street): sheet scrolled to its gallery of show frames
-adb shell input keyevent KEYCODE_BACK; sleep 3; alive 4c
+tap 919 222 3                     # ✕ closes the sheet (Android's back key would leave the app)
+tap 400 685 6; up; up; shot 4b_scenes # 4th place with the GPS fix above (St Dominic Street): sheet scrolled to its gallery of show frames
+adb shell am force-stop $P; sleep 2; adb shell am start -n $P/.MainActivity; sleep 25
 tap 300 955 5; tap 400 360 6
 tap 500 340 12; shot 5_walk_nav   # "Walk there" button (y 0.32-0.36; 0.39 hit the Maps links and opened Chrome)
 alive 6; tap 700 955 5; shot 6_photos      # Photos tab
