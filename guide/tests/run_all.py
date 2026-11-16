@@ -24,6 +24,7 @@ VOLATILE = [(re.compile(r'data:image/[a-z]+;base64,[A-Za-z0-9+/=]+'), 'data:imag
             (re.compile(r'blob:http://localhost:\d+/[0-9a-f-]+'), 'blob:…'),
             (re.compile(r'localhost:\d+'), 'HOST'),
             (re.compile(r'net::ERR_[A-Z_]+'), 'net::ERR_…'),
+            (re.compile(r'\bchars=\d+'), 'chars=…'),           # i18n.py: total de caracteres varia com a formatação do sistema
             (re.compile(r'\d+\.\d+s elapsed'), '')]
 
 
@@ -39,10 +40,14 @@ def serve(root, port):
     return srv
 
 
+DROP = re.compile(r'^\s*error: Failed to load resource')   # quantas requisições externas falham depende da rede/ambiente
+
+
 def norm(text, shots):
     text = text.replace(shots, 'SHOTS/')
     for rx, rep in VOLATILE:
         text = rx.sub(rep, text)
+    text = '\n'.join(l for l in text.splitlines() if not DROP.match(l))
     return text.rstrip() + '\n'
 
 
@@ -123,7 +128,7 @@ def main():
         o = norm(out, shots)
         gp = os.path.join(golden_dir, n.replace('.py', '.out'))
         why = (['código %s' % code] if code != 0 else []) + page_errors(o)
-        if not a.update and not why and os.path.exists(gp) and open(gp, encoding='utf-8').read() != o:
+        if not a.update and not why and os.path.exists(gp) and norm(open(gp, encoding='utf-8').read(), shots) != o:
             why.append('diff')
         return not why
     retried = set()
@@ -147,7 +152,7 @@ def main():
         if a.update and code == 0:
             open(gp, 'w', encoding='utf-8').write(o)
         elif os.path.exists(gp):
-            g = open(gp, encoding='utf-8').read()
+            g = norm(open(gp, encoding='utf-8').read(), shots)
             if g != o:
                 d = list(difflib.unified_diff(g.splitlines(), o.splitlines(), 'gabarito', 'agora', lineterm='', n=0))
                 why.append('saída diferente do gabarito:\n      ' + '\n      '.join(x[:180] for x in d[2:40]))
