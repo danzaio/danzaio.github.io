@@ -1,9 +1,11 @@
 // Porto Real — cache offline. Página: rede primeiro (pega atualizações), cache se estiver sem internet.
-const V = 'porto-real-v16';
+const V = 'porto-real-v17';
 // dentro do app Android os arquivos já vêm no pacote: ali o service worker só guarda o mapa
 const NATIVE = new URL(self.location.href).searchParams.has('native');
 const TILES = 'porto-real-tiles-v1';
-const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png', './lib/maplibre-gl.js', './lib/maplibre-gl.css'];
+const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png', './lib/maplibre-gl.js', './lib/maplibre-gl.css',
+  // frames da série que vêm com o app (uso pessoal)
+  './frames/p-bokar-1.jpg', './frames/p-bokar-2.jpg', './frames/p-purple-1.jpg', './frames/p-redkeep-1.jpg', './frames/p-redkeep-2.jpg', './frames/p-redkeep-3.jpg', './frames/p-torneio-1.jpg', './frames/p-torneio-2.jpg', './frames/w-belvedere.jpg', './frames/w-bokar.jpg', './frames/w-domsteps.jpg', './frames/w-kingslanding.jpg', './frames/w-lokrum.jpg', './frames/w-lovr1.jpg', './frames/w-lovr2.jpg', './frames/w-market.jpg', './frames/w-minceta.jpg', './frames/w-pile.jpg', './frames/w-pilebay.jpg', './frames/w-purple.jpg', './frames/w-reitor.jpg', './frames/w-shame.jpg', './frames/w-trsteno.jpg', './frames/w-walls.jpg', './frames/w-westharbour.jpg', './frames/w-westpier.jpg'];
 self.addEventListener('install', e => {
   e.waitUntil((NATIVE ? Promise.resolve() : caches.open(V).then(c => c.addAll(CORE))).then(() => self.skipWaiting()));
 });

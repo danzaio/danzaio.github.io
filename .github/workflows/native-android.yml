@@ -41,7 +41,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Download APK from the release
-        run: curl -sSL -o app.apk https://github.com/${{ github.repository }}/releases/download/android-latest/got-dubrovnik.apk
+        # o repo é privado: baixa pela API com o token do próprio workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download android-latest -R ${{ github.repository }} -p got-dubrovnik.apk -O app.apk --clobber
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
