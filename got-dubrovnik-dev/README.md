@@ -21,4 +21,7 @@ sandbox with these assumptions; adjust paths when running elsewhere:
 | `v8.py` | paste a still from the clipboard, still opacity in the camera, photo-to-still match editor and export |
 | `v9.py` | chosen take per mission: right episode and direct link to the scene |
 | `v10.py` | clip links at the exact second, bulk still import with mission assignment, still pack export/import |
+| `v11.py` | several stills per mission in IndexedDB: migration from the old format, limit, persistence, pack v1/v2, fallback without IndexedDB |
+| `v12.py` | switching stills inside the camera and the match editor |
+| `v13.py` | every mission card in the six languages; clip moments list |
 | `clean.py <lang>` | clean screenshots for sharing; `og.py` renders the social preview image |
