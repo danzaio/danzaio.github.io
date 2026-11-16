@@ -13,7 +13,7 @@ async def main():
             await pg.evaluate("endTour(); startGPS(true)"); await pg.wait_for_timeout(900)
             f=f"/tmp/h_{w}_{lg}.png"; await pg.screenshot(path=f, clip={"x":0,"y":0,"width":w,"height":56}); shots.append(f)
             r = await pg.evaluate("(()=>{const b=document.querySelector('.brand b');const r=document.createRange();r.selectNodeContents(b);return [Math.round(r.getBoundingClientRect().width),b.clientWidth,getComputedStyle(b).fontSize]})()")
-            print(w,lg,r)
+            print(w,lg,'cabe' if r[0]<=r[1]+1 else f'NÃO CABE {r}')  # medidas em px mudam com as fontes do sistema; o que importa é caber
             await ctx.close()
         ims=[Image.open(f) for f in shots]; W=max(i.width for i in ims)
         s=Image.new('RGB',(W,sum(i.height+6 for i in ims)),'#333');y=0

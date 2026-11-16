@@ -7,7 +7,7 @@ guia seguinte: [0, 'none']
 viewer: [True, True]
 fit: {'z': 1.8, 'x': -0.1999999831394596, 'y': -0.0562499662789192, 'w': 50, 'm': 0} inset(352.95px 72.4px 312.225px 362px)
 blend: ['0.4', 'none', '◐ Transparência']
-salvo: [56077, 'kings-landing-lovr-match.jpg']
+salvo: [True, 'kings-landing-lovr-match.jpg']
 voltou: True
 sem take: [True, False, False]
 en 🎯 Fit your photo to the still | Drag and zoom your photo until the buildings line up with the scene. | IN THE SHOW | ME, SAME SPOT | ◧ Split | ◐ Blend | 🔍 Zoom | 💾 Save t

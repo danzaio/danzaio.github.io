@@ -55,7 +55,7 @@ async def main():
         await pg.click("#camShot"); await pg.wait_for_timeout(1200); await pg.click("#camX"); await pg.wait_for_timeout(400)
         fid=await pg.evaluate("DB.all().then(a=>a[0].id)")
         await pg.evaluate(f"viewFoto({json.dumps(fid)})"); await pg.wait_for_timeout(700); await pg.screenshot(path="V_view.png")
-        await pg.click("#refB"); await pg.wait_for_timeout(900); print("ref:",await pg.evaluate("(()=>{const r=refGet('p-redkeep');return r&&[r.w,r.h,r.u.length]})()"))
+        await pg.click("#refB"); await pg.wait_for_timeout(900); print("ref:",await pg.evaluate("(()=>{const r=refGet('p-redkeep');return r&&[r.w,r.h,r.u.length>20000]})()"))
         await pg.evaluate("closeModal();openCam('p-redkeep')"); await pg.wait_for_timeout(1800); print("ghost mode:",await pg.evaluate("[CAM.ghost,document.querySelector('#camGhost').tagName]")); await pg.screenshot(path="V_cam2.png")
         await pg.click("#camGh"); g1=await pg.evaluate("CAM.ghost"); await pg.click("#camGh"); g2=await pg.evaluate("CAM.ghost"); await pg.click("#camGh"); print("cycle:",g1,g2,await pg.evaluate("CAM.ghost"))
         await pg.click("#camX")

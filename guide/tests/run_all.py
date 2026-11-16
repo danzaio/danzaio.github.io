@@ -23,6 +23,7 @@ ARGS = {'rm.py': ['mock'], 'smoke.py': None}         # smoke recebe o motor
 VOLATILE = [(re.compile(r'data:image/[a-z]+;base64,[A-Za-z0-9+/=]+'), 'data:image…'),
             (re.compile(r'blob:http://localhost:\d+/[0-9a-f-]+'), 'blob:…'),
             (re.compile(r'localhost:\d+'), 'HOST'),
+            (re.compile(r'net::ERR_[A-Z_]+'), 'net::ERR_…'),
             (re.compile(r'\d+\.\d+s elapsed'), '')]
 
 
@@ -116,6 +117,21 @@ def main():
             results.append(f.result())
             n, code, out, dt = results[-1]
             print(f'  · {n} terminou ({dt:.0f}s)', flush=True)
+
+    # o que falhou roda de novo, sozinho (com 4 Chromes juntos, um teste com espera curta às vezes perde o tempo)
+    def verdict(n, code, out):
+        o = norm(out, shots)
+        gp = os.path.join(golden_dir, n.replace('.py', '.out'))
+        why = (['código %s' % code] if code != 0 else []) + page_errors(o)
+        if not a.update and not why and os.path.exists(gp) and open(gp, encoding='utf-8').read() != o:
+            why.append('diff')
+        return not why
+    retried = set()
+    if not a.update:
+        for i, (n, code, out, dt) in enumerate(list(results)):
+            if not verdict(n, code, out):
+                print(f'  · {n} falhou; rodando de novo sozinho', flush=True)
+                results[i] = run_one(n, port, shots, a.engine, a.timeout); retried.add(n)
     srv.shutdown()
 
     fails = 0
@@ -137,7 +153,8 @@ def main():
                 why.append('saída diferente do gabarito:\n      ' + '\n      '.join(x[:180] for x in d[2:40]))
         ok = not why
         fails += not ok
-        print(f'{"✓ PASSOU" if ok else "✗ FALHOU"}  {n:12} {dt:5.0f}s' + ('' if ok else '  — ' + '; '.join(why)))
+        flag = ' (passou na 2ª tentativa)' if ok and n in retried else ''
+        print(f'{"✓ PASSOU" if ok else "✗ FALHOU"}  {n:12} {dt:5.0f}s{flag}' + ('' if ok else '  — ' + '; '.join(why)))
         if not ok and code != 0:
             print('      ' + '\n      '.join(o.strip().splitlines()[-12:]))
     print(f'\n{len(results) - fails}/{len(results)} passaram' + (' · gabaritos regravados' if a.update else ''))

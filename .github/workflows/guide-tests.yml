@@ -41,9 +41,16 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
       - if: ${{ matrix.webkit }}
         run: python -m playwright install --with-deps webkit
-      # o gabarito foi gravado sem as fontes do Google (o sandbox não alcança); aqui também não, para medir igual
-      - run: echo "0.0.0.0 fonts.googleapis.com fonts.gstatic.com" | sudo tee -a /etc/hosts
+      # os gabaritos foram gravados num Chrome sem internet (só localhost): sem rotas reais, tiles ou fontes do Google.
+      # Um proxy morto deixa este Chrome igual; o servidor dos testes fica de fora pelo NO_PROXY.
       - run: python3 guide/tests/run_all.py ${{ matrix.args }} -j 4 --work /tmp/guide-run
+        env:
+          HTTP_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          http_proxy: http://127.0.0.1:9
+          https_proxy: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1
+          no_proxy: localhost,127.0.0.1
       - if: failure()
         uses: actions/upload-artifact@v4
         with:

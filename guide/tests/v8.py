@@ -36,8 +36,8 @@ async def main():
         print("fit:",await pg.evaluate("store.get('fit_f1')"),await pg.evaluate("$('#fitI').style.clipPath")); await pg.screenshot(path="X_fit2.png")
         await pg.click("#fitM"); await pg.wait_for_timeout(300); print("blend:",await pg.evaluate("[$('#fitI').style.opacity,$('#fitL').style.display,$('#fitWl').textContent]")); await pg.screenshot(path="X_fit3.png")
         await pg.click("#fitM")
-        await pg.evaluate("(()=>{window._saved=null;saveBlob=(b,n)=>{window._saved=[b.size,n];window._blob=b}})()"); await pg.click("#fitSave"); await pg.wait_for_timeout(1200)
-        print("salvo:",await pg.evaluate("_saved"))
+        await pg.evaluate("(()=>{window._saved=null;saveBlob=(b,n)=>{window._saved=[b.size,n];window._blob=b}})()"); await pg.click("#fitSave"); await pg.wait_for_function("window._saved",timeout=15000)
+        print("salvo:",await pg.evaluate("_saved&&[_saved[0]>20000,_saved[1]]"))  # tamanho exato do JPEG muda com fontes/encoder
         data=await pg.evaluate("async()=>{const r=new FileReader();return await new Promise(res=>{r.onload=()=>res(r.result);r.readAsDataURL(_blob)})}")
         import base64; open("X_match.jpg","wb").write(base64.b64decode(data.split(",")[1]))
         await pg.click("#fitBack"); await pg.wait_for_timeout(400); print("voltou:",await pg.evaluate("!!$('#fitB')"))

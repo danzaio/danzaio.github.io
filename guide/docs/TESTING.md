@@ -21,8 +21,10 @@ O runner:
 4. compara a saída de cada um com o **gabarito** (`tests/golden/<franquia>/<script>.out`).
 
 Um teste **passa** quando termina com código 0, não registra erro de página (`ERRS []`,
-`erros: nenhum`) e a saída normalizada é igual ao gabarito. Imagens `data:`, endereços `blob:`
-e a porta são trocados por marcadores antes de comparar.
+`erros: nenhum`) e a saída normalizada é igual ao gabarito. Imagens `data:`, endereços `blob:`,
+a porta e o código dos erros de rede (`net::ERR_…`) são trocados por marcadores antes de comparar.
+O que falhar roda de novo, sozinho, uma vez; se passar, aparece "(passou na 2ª tentativa)" —
+sinal de teste com espera fixa demais, que vale corrigir.
 
 ### Mudou algo de propósito?
 
@@ -46,8 +48,9 @@ Commit o gabarito novo junto com a mudança. **Nunca** rode `--update` sem ler o
 | template (Chrome) | smoke no `_template` |
 | got-dubrovnik (Safari engine) | smoke no WebKit com cara de iPhone |
 
-As fontes do Google ficam bloqueadas no CI (`/etc/hosts`), igual ao sandbox onde os gabaritos
-foram gravados, para o texto medir igual. Se falhar, os prints da rodada ficam como artefato do job.
+Os gabaritos foram gravados num Chrome **sem internet** (só `localhost`): sem rotas reais pelas
+ruas, sem tiles, sem fontes do Google. No CI, um proxy morto (`HTTP(S)_PROXY=127.0.0.1:9`,
+`NO_PROXY=localhost`) deixa o Chrome igual. Se falhar, os prints da rodada ficam como artefato do job.
 
 O APK tem o próprio workflow (`native-android.yml`): monta, instala no emulador, toca em algumas
 telas (`got-dubrovnik-native/smoke.sh`) e publica prints e log na release `android-latest`.
@@ -84,6 +87,10 @@ telas (`got-dubrovnik-native/smoke.sh`) e publica prints e log na release `andro
   `print("ERRS", errs)`.
 - Imprima **valores**, não "ok": o gabarito pega qualquer mudança.
 - Nada de horário de agora ou data de hoje na saída (o sol muda todo dia): fixe a data ou não imprima.
+- Nada de medida em pixel nem tamanho de arquivo exato: mudam com as fontes do sistema e a versão do
+  Chrome. Imprima o que importa ("cabe", `tamanho > 20000`).
+- Espere pelo resultado (`wait_for_function("window._saved")`), não por um tempo fixo: com 4 testes
+  em paralelo, 1,2 s às vezes não bastam.
 - Prints vão para `/home/claude/tests/` (o runner troca pela pasta da rodada).
 - Rode `--only seu_teste --update`, confira o `.out` gerado e commit.
 
