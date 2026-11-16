@@ -1,0 +1,24 @@
+{
+  "id": "got-dubrovnik",
+  "name": "Porto Real — Game of Thrones em Dubrovnik",
+  "out": "got-dubrovnik",
+  "appVersion": "13",
+  "cache": "porto-real",
+  "swVersion": 18,
+  "store": "pr_",
+  "idb": "portoreal",
+  "hostedUrl": "https://danzaio.github.io/got-dubrovnik/",
+  "languages": [
+    "pt",
+    "en",
+    "es",
+    "de",
+    "fr",
+    "it"
+  ],
+  "native": {
+    "appId": "com.danzaio.gotdubrovnik",
+    "appName": "GoT Dubrovnik",
+    "dir": "got-dubrovnik-native"
+  }
+}

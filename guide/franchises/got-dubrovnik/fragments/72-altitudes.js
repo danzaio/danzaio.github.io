@@ -1,0 +1,1 @@
+const ALT={gradac:30,lovr:42,pilebay:2,pile:10,minceta:45,walls:14,bokar:16,stradun:5,rupe:15,jesuit:16,bosk:20,reitor:8,domst:8,domsteps:10,ploce:9,oldport:2,lokrum:20,belvedere:40,srd:405,trsteno:60};

@@ -1,0 +1,52 @@
+name: Guide tests
+on:
+  push:
+    branches: [main]
+    paths: ['guide/**', 'got-dubrovnik/**', '.github/workflows/guide-tests.yml']
+  pull_request:
+    paths: ['guide/**', 'got-dubrovnik/**']
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pillow numpy
+      - name: published folder matches core + franchise
+        run: python3 guide/tools/build.py --all --check
+      - name: scene images match 50-frames.js
+        run: python3 guide/tools/frames/check.py got-dubrovnik
+      - name: template still builds
+        run: python3 guide/tools/build.py _template --to /tmp/template
+
+  web:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {name: got-dubrovnik (Chrome), args: ''}
+          - {name: template (Chrome), args: '--franchise _template'}
+          - {name: got-dubrovnik (Safari engine), args: '--engine webkit --only smoke', webkit: true}
+    name: ${{ matrix.name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install playwright pillow numpy
+      - if: ${{ !matrix.webkit }}
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - if: ${{ matrix.webkit }}
+        run: python -m playwright install --with-deps webkit
+      # o gabarito foi gravado sem as fontes do Google (o sandbox não alcança); aqui também não, para medir igual
+      - run: echo "0.0.0.0 fonts.googleapis.com fonts.gstatic.com" | sudo tee -a /etc/hosts
+      - run: python3 guide/tests/run_all.py ${{ matrix.args }} -j 4 --work /tmp/guide-run
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shots-${{ strategy.job-index }}
+          path: /tmp/guide-run/shots
+          if-no-files-found: ignore

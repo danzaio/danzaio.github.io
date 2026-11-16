@@ -1,16 +1,16 @@
-# GoT Dubrovnik — native shell (Android)
+# GoT Dubrovnik — casca nativa (Android)
 
-Capacitor wrapper around the web guide in `../got-dubrovnik`. The web files are
-copied into `www/` at build time, so there is a single source for the app.
+Casca Capacitor 7 em volta do guia publicado em `../got-dubrovnik/` (gerado por
+`guide/tools/build.py got-dubrovnik` a partir de `guide/core` + `guide/franchises/got-dubrovnik`).
+Os arquivos web são copiados para `www/` no build, então a fonte é uma só.
 
-Build (done by GitHub Actions on every push that touches the guide):
+Build (feito pelo GitHub Actions a cada push que mexe no guia):
 
+    python3 ../guide/tools/build.py got-dubrovnik --check
     npm ci
     mkdir -p www && cp -r ../got-dubrovnik/* www/
     npx cap sync android
     cd android && ./gradlew assembleDebug
 
-The APK is published under Releases as `android-latest`.
-
-Planned native-only modules: AR walking path and building outlines with the
-ARCore Geospatial API (needs a Google Cloud API key), background arrival alerts.
+O APK sai na release `android-latest`. Plugin nativo `ArNav`: navegação AR (ARCore Geospatial,
+precisa de chave do Google Cloud) e voz do sistema. Detalhes em `guide/docs/RELEASE.md`.

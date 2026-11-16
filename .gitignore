@@ -4,3 +4,7 @@
 
 .planning/
 .claude/
+
+# guias: prévias do build e cache do Python
+_template-preview/
+__pycache__/

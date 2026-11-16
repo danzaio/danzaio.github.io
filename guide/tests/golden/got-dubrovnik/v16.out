@@ -1,0 +1,24 @@
+arquivos: 47 ok
+HOJE sem cena correspondente: []
+missões com antes e depois: p-torneio:1 p-redkeep:2 p-pile:1 p-roofs:1 p-shame1:2 p-shame2:2 p-olenna:2
+frames por missão: p-torneio:3 p-redkeep:6 p-bokar:3 p-purple:2 p-pile:2 p-roofs:2 p-stradun:0 p-shame1:2 p-shame2:2 p-market:2 p-ploce:0 p-arena:3 p-throne:0 p-olenna:5 p-srd:1
+redkeep: {'big': 'frames/w-pilebay.jpg', 'seg': ['🎬 Cena*', '📷 Hoje'], 'tag': '🎞 da série · 1/6', 'hj': 2}
+depois de Hoje: {'big': 'frames/h-pilebay.jpg', 'seg': ['🎬 Cena', '📷 Hoje*'], 'tag': '📷 hoje, do mesmo ângulo · 1/6', 'hj': 2}
+img hoje carregou: [704, True]
+visor: [['frames/w-pilebay.jpg', 'frames/h-pilebay.jpg'], True, True]
+cena sem hoje: {'big': 'frames/p-redkeep-1.jpg', 'seg': [], 'tag': '🎞 da série · 2/6', 'hj': 2}
+volta: ['🎬 Cena', '📷 Hoje*']
+p-shame1 {'big': 'frames/bp-jesuit.jpg', 'seg': ['🎬 Cena*', '📷 Hoje'], 'tag': '🎞 da série · 1/2', 'hj': 2}
+p-pile {'big': 'frames/g-riot.jpg', 'seg': ['🎬 Cena*', '📷 Hoje'], 'tag': '🎞 da série · 1/2', 'hj': 1}
+p-olenna {'big': 'frames/w-trsteno.jpg', 'seg': [], 'tag': '🎞 da série · 1/5', 'hj': 2}
+p-arena {'big': 'frames/w-belvedere.jpg', 'seg': [], 'tag': '🎞 da série · 1/3', 'hj': 0}
+ficha lovr: ['p-torneio-1.jpg', 'p-torneio-2.jpg', 'w-lovr1.jpg 📷', 'w-lovr2.jpg', 'bp-arcades.jpg 📷']
+ficha visor: ['frames/w-lovr1.jpg', 'frames/h-lovr1.jpg']
+câmera: ['block', '🎬 Cena', 'frames/w-pilebay.jpg")', '']
+guia take: ['block', '🎬 Cena', 'frames/w-pilebay.jpg")', 'frames/w-pilebay.jpg']
+câmera hoje: ['block', '📷 Hoje', 'frames/h-pilebay.jpg")', 'frames/h-pilebay.jpg']
+próximo take (sem hoje): ['none', '📷 Hoje', 'frames/p-redkeep-1.jpg")', 'frames/p-redkeep-1.jpg']
+fr: {'big': 'frames/w-minceta.jpg', 'seg': ['🎬 Scène*', "📷 Aujourd'hui"], 'tag': '🎞 de la série · 1/2', 'hj': 1}
+versão: True
+frames com erro: []
+ERRS []

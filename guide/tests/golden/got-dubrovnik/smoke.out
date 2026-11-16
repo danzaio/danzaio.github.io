@@ -1,0 +1,3 @@
+engine: chromium
+conteúdo: {'places': 20, 'missions': 15, 'routes': 4, 'quiz': 10, 'frames': 33, 'brand': 'Porto Real'}
+erros: nenhum

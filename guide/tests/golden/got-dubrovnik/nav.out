@@ -1,0 +1,11 @@
+nav: [True, 2, 424, True] bar: 185 m · vire à direita | Od Puča | 🔇 | AR | ✕ | 10 | Escadaria Jesuíta | 425 m · ~8 min a pé
+arnav: [True, True, 'arnav', 'flex', '185 m · vire à direita']
+arnav side: ['arnav side l', '◀\nGire 110° para a esquerda']
+bar2: 25 m · vire à direita | Od Puča | 🔇 | AR | ✕ | 10 | Escadaria Jesuíta | 260 m · ~5 min a pé snap: True rest pts: 3
+bar3: 🏁 | 125 m | Escadaria Jesuíta | 🔇 | AR | ✕ | 10 | Escadaria Jesuíta | 125 m · ~2 min a pé
+router calls during nav: 2 bar4: 205 m · vire à direita | Od Puča | 🔇 | AR | ✕ | 10 | Escadaria Jesuíta | 380 m · ~7 min a pé
+ended: [True, False, True]
+far: None
+fallback: [False] 155 m · ESE | Siga a seta | 🔇 | AR | ✕ | 8 | Stradun (Placa) | 155 m · ~3 min a pé
+stopped: None
+errs: []

@@ -18,6 +18,8 @@ async def main():
         # 2) dentro de iframe (simula o app do Claude)
         ctx = await b.new_context(viewport={"width":390,"height":844}, device_scale_factor=2, is_mobile=True, has_touch=True)
         pg = await ctx.new_page(); pg.on("pageerror", lambda e: errs.append("PAGEERROR(frame) "+str(e)))
+        # página com o guia num iframe (como no app do Claude); servida pelo próprio teste
+        await ctx.route("**/_frame_test.html", lambda r: r.fulfill(content_type="text/html", body='<!DOCTYPE html><meta name="viewport" content="width=device-width"><style>body{margin:0}iframe{width:100vw;height:100vh;border:0}</style><iframe src="index.html?lang=en"></iframe>'))
         await pg.goto("http://localhost:8765/_frame_test.html"); await pg.wait_for_timeout(1500)
         fr = pg.frames[1]
         print("FRAMED:", await fr.evaluate("FRAMED"))

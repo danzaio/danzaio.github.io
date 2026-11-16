@@ -1,0 +1,13 @@
+{
+  "id": "_template",
+  "name": "TODO — Franquia em Cidade",
+  "out": "_template-preview",
+  "appVersion": "1",
+  "cache": "todo-guia",
+  "swVersion": 1,
+  "store": "todo_",
+  "idb": "todoguia",
+  "hostedUrl": "https://example.com/todo/",
+  "languages": ["pt", "en", "es", "de", "fr", "it"],
+  "native": null
+}

@@ -1,0 +1,14 @@
+mock webgl: True rm-on: True markers: 20
+me: True acc feats: 1
+labels shown: True
+zMe cycle: [True, False] [True, True, 120] bearing after turn: 150 [False, False]
+pitch: 60 north visible: grid
+after north: [0, 0, 'none']
+sheet: Jesuit Stairs
+photo markers: 12 fans: 12
+route pts: 4
+sim tap pos: ['sim', '42.64034', '18.10957']
+planner map: [True, True, False]
+PLM after close: None
+drawn: [False, False] real again: [True, 20]
+errs: []

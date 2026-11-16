@@ -1,0 +1,19 @@
+chave antiga: ['pr_still_p-bokar']
+migrado: [True, True, 4, None]
+1 [4, 3]
+2 [5, 4]
+3 [6, 5]
+4 [7, 6]
+5 [7, 6]
+miniaturas: [7, 1]
+escolheu 2: 1 links: ['🎬 Ver o take', '🔎 Mais imagens']
+removeu: [6, 1]
+sem duplicar: 3
+após recarregar: [6, 1, 4, 3, 12]
+viewer: [True, True]
+encaixe usa o ativo: True
+pacote v 2 {'p-torneio': 4, 'p-bokar': 1, 'p-pile': 1}
+importou v2.json [3, '401010000000000']
+importou v1.json [4, '401010000001000']
+sem IDB: [True, False, 1, True]
+ERRS []

@@ -1,4 +1,4 @@
-// Porto Real — cache offline. Página: rede primeiro (pega atualizações), cache se estiver sem internet.
+// Cache offline do guia. Página: rede primeiro (pega atualizações), cache se estiver sem internet.
 const V = 'porto-real-v18';
 // dentro do app Android os arquivos já vêm no pacote: ali o service worker só guarda o mapa
 const NATIVE = new URL(self.location.href).searchParams.has('native');

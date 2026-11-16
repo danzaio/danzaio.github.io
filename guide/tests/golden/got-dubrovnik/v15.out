@@ -1,0 +1,35 @@
+manifesto: 36 ok
+missões com frames: p-torneio:3 p-redkeep:6 p-bokar:3 p-purple:2 p-pile:2 p-roofs:2 p-shame1:2 p-shame2:2 p-market:2 p-arena:3 p-olenna:5 p-srd:1
+sem frame: p-stradun p-ploce p-throne
+torneio: {'big': ['frames/p-torneio-1.jpg', 1280, 310], 'tag': '🎞 da série · 1/3', 'cnt': '3 da série', 'th': 3, 'btns': ['＋ Adicionar o take', '📋 Colar take', '🎬 Ver o take', '📺 0:55', '📺 0:19', '🔎 Mais imagens', '✕ Ocultar']}
+escolheu 3º: 🎞 da série · 3/3
+visor: ['frames/w-lovr1.jpg', 1280, True]
+depois de recarregar: [2, 'frames/w-lovr1.jpg']
+ocultar: 3 -> 2 ['p-bokar/p-bokar-2']
+oculto continua oculto: 2
+aba fotos: 🎬 Takes das cenas | 12/15 | Cada missão já vem com frames da série. Para trocar ou somar, escolha prints de uma vez e diga de qual missão é cada um; os seus ficam só neste aparelho. | ＋ Importar vários | 📥 Importar pacote | ↺ Mostrar de novo 1 frames ocultos |
+voltou: [3, 0, 0]
+purple: [['w-purple', 'p-purple-1', 'meu'], 2, 1]
+purple cartão: {'big': ['data:image…', 600, 310], 'tag': '📱 seu print · 3/3', 'cnt': '2 da série + 1 seus', 'th': 3, 'btns': ['＋ Adicionar o take', '📋 Colar take', '🎬 Ver o take', '📺 0:59', '🔎 Mais imagens', '✕ Remover']}
+purple recarregado: [['w-purple', 'p-purple-1', 'meu'], 2]
+exporta: {'stills': {'p-purple': 1}}
+removeu print: [2, 0, 0]
+limite: [6, 4, 2]
+ficha lovr: [['p-torneio-1.jpg', True], ['p-torneio-2.jpg', True], ['w-lovr1.jpg', True], ['w-lovr2.jpg', True], ['bp-arcades.jpg', False]]
+ficha visor: frames/p-torneio-2.jpg
+lugares com cenas: gradac:2 lovr:5 pilebay:7 pile:2 minceta:2 walls:1 bokar:3 jesuit:2 reitor:1 domst:2 domsteps:1 lokrum:1 belvedere:3 srd:1 trsteno:5
+spoiler: True -> [False, True]
+câmera: ['block', 'url("frames/w-lovr1.jpg")', '🎬 3/3 ›']
+guia take: [3, 'block']
+troca take na câmera: [0, '🎬 1/3 ›']
+foto: botões [True, True]
+lado a lado: 
+encaixe: [False, 3]
+en faltando: []
+es faltando: []
+de faltando: []
+fr faltando: []
+it faltando: []
+de: 6 aus der Serie | 🎞 aus der Serie · 1/6
+frames com erro: []
+ERRS []

@@ -1,0 +1,26 @@
+deeplink: ['jesuit', True, False, 'Jesuit Stairs']
+listen: ['jesuit', '⏹ Stop', 9, ['#cancel', 'Jesuit Stairs. Steps of the Great Sept of Baelor.', 'The Walk of Shame starts here: Cersei descends the steps whi']]
+stop: [None, '🔊 Listen', '#cancel']
+share: {'title': 'Jesuit Stairs — Steps of the Great Sept of Baelor', 'text': 'Jesuit Stairs — Steps of the Great Sept of Baelor', 'url': 'https://danzaio.github.io/got-dubrovnik/?lang=en&loc=jesuit'}
+report: https://github.com/danzaio/danzaio.github.io/issues/new?title=%5BGoT%20Dubrovnik%5D%20Jesuit%20Stairs&body=Place%3A%20jesuit%0ALanguage%3A%20en%0AApp%3A%20web%0A%0AWhat%20is%20wrong%20or%20out%20of%20date%3F%0A%0A
+bad loc: [None, False]
+nav sem voz: [False, []] btn: 🔇
+voz ligada: [True, True, ['Voz ligada', 'Em 190 metros, vire à direita']] btn: 🔊
+na virada: ['Vire à direita'] | 10 m · vire à direita | Od Puča | 🔊 | AR | ✕ | 10 | Escadaria Jesuíta | 250 m · ~4 min a pé
+sem repetir: 1
+chegada: [False, ['Você chegou: Escadaria Jesuíta']]
+cq: [True, True]
+quizBest: 7
+pt trip: ✈️ Preparar para a viagem |  | Faça isto no Wi-Fi antes de sair: o mapa, as rotas a pé e o guia inteiro ficam no aparelho e funcionam sem internet. |  | faltando: []
+en trip: ✈️ Get ready for the trip |  | Do this on Wi-Fi before you leave: the map, the walking routes and the whole guide stay on your phone and work without  | faltando: []
+es trip: ✈️ Preparar el viaje |  | Hazlo con wifi antes de salir: el mapa, las rutas a pie y toda la guía se quedan en el móvil y funcionan sin internet. |  |  | faltando: []
+de trip: ✈️ Für die Reise vorbereiten |  | Mach das im WLAN, bevor du losgehst: Karte, Fußwege und der ganze Guide bleiben auf dem Handy und funktionieren ohne | faltando: []
+fr trip: ✈️ Préparer le voyage |  | À faire en Wi-Fi avant de partir : la carte, les itinéraires à pied et tout le guide restent sur le téléphone et marchent s | faltando: []
+it trip: ✈️ Prepararsi al viaggio |  | Fallo con il Wi-Fi prima di partire: la mappa, i percorsi a piedi e tutta la guida restano sul telefono e funzionano sen | faltando: []
+sw controla: [True, True]
+download: [True, '✈️ Preparar para a viagem |  | Faça isto no Wi-Fi antes de sair: o mapa, as rotas a pé e o guia inteiro ficam no aparelho e funcionam sem in'] pedidos: {'tile': 0, 'glyph': 3, 'sprite': 4, 'style': 2}
+caches: {'porto-real-v18': 56, 'porto-real-tiles-v1': 61}
+offline: ['Porto Real de Verdad', True, 20]
+ios : ✈️ Get ready for the trip |  | Do this on Wi-Fi before you leave: the map, the walking routes and the whole guide stay on your phone and work without internet. |  | 1 | Add to your home screen | In Safari, tap Share (the square with an arrow), then “Add to Hom
+insta : ✈️ Get ready for the trip |  | Do this on Wi-Fi before you leave: the map, the walking routes and the whole guide stay on your phone and work without internet. |  | 1 | Add to your home screen | You're in another app's built-in browser, which keeps nothing. Op
+ERRS []
