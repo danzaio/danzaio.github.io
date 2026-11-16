@@ -313,6 +313,9 @@ table.t td:last-child{text-align:right;font-weight:700;white-space:nowrap}
 .still img{width:96px;border-radius:8px;display:block}
 .tkrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.tkth{padding:0;border:3px solid transparent;border-radius:10px;background:#000;overflow:hidden;width:88px;height:52px;cursor:pointer;opacity:.7}.tkth.on{border-color:var(--gold2);opacity:1}.tkth img{width:100%;height:100%;object-fit:cover;border-radius:0}
 #camStill{position:absolute;left:10px;top:118px;width:34vw;max-width:170px;border:2px solid #fff;border-radius:10px;background:#000 center/cover no-repeat;box-shadow:0 4px 14px rgba(0,0,0,.5);z-index:4;padding:0;transition:width .2s}
+#camYT{position:absolute;left:10px;top:118px;width:min(74vw,420px);z-index:6;border:2px solid #fff;border-radius:10px;overflow:hidden;background:#000;box-shadow:0 4px 14px rgba(0,0,0,.5)}#camYT .ytbox{margin:0;border-radius:0}
+#camYTb{position:absolute;left:12px;bottom:calc(var(--sab) + 222px);z-index:6;min-width:46px;height:46px;padding:0 8px;border-radius:999px;border:0;background:rgba(16,10,6,.78);color:#f3e6c4;font:700 13px Inter,sans-serif;place-items:center;cursor:pointer}#camYTb.on{background:var(--gold2);color:#fff}
+.ytbox{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000;margin-top:8px}.ytbox iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 #camTk{position:absolute;left:calc(min(34vw,170px) + 20px);top:118px;z-index:5;border:0;border-radius:999px;background:rgba(16,10,6,.78);color:#f3e6c4;font:700 13px Inter,sans-serif;padding:8px 12px;cursor:pointer}
 #camOp{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--sab) + 236px);width:56vw;max-width:300px;z-index:5;accent-color:#d6ae45}
 .fit{position:relative;overflow:hidden;border-radius:12px;margin:10px 0 8px;background:#000 center/cover no-repeat;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}.fit img{position:absolute;max-width:none;pointer-events:none;-webkit-user-drag:none}.fit>i{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:#fff;box-shadow:0 0 4px rgba(0,0,0,.7);pointer-events:none}.fit>span{position:absolute;top:8px;background:rgba(16,10,6,.75);color:#f3e6c4;font-size:10px;font-weight:800;letter-spacing:.04em;padding:3px 7px;border-radius:6px;pointer-events:none}
@@ -421,6 +424,7 @@ body.rm-on #z3D,body.rm-on #zNorth.show{display:grid!important}
   <div class="camTop"><div style="flex:1;min-width:0"><h3 class="serif" id="camTitle"></h3><div class="camTip" id="camTip"></div></div><button class="camBtn" id="camX" aria-label="Fechar câmera" data-i18n-aria="a_camx">✕</button></div>
   <button id="camStill" style="display:none" aria-label="Scene"></button>
   <button id="camTk" style="display:none" aria-label="Next still"></button>
+  <div id="camYT" style="display:none"></div><button id="camYTb" style="display:none" aria-label="YouTube">📺</button>
   <input type="range" id="camOp" min="15" max="90" value="45" style="display:none" aria-label="Opacity" data-i18n-aria="a_camop">
   <div class="camGuide" id="camGuide" style="display:none"></div>
   <div class="camRot" id="camRot" style="display:none">↻ Esta foto fica melhor na horizontal</div>
@@ -1260,6 +1264,12 @@ Object.assign(UI.es,{"tnRoofs": "La escena se rodó al pie de la torre, en el pa
 Object.assign(UI.de,{"tnRoofs": "Die Szene wurde am Fuß des Turms gedreht, auf dem Mauerweg um den runden Sockel: Mach das Foto dort, bevor du hinaufsteigst."});
 Object.assign(UI.fr,{"tnRoofs": "La scène a été tournée au pied de la tour, sur le chemin de ronde autour de sa base arrondie : prenez la photo là avant de monter."});
 Object.assign(UI.it,{"tnRoofs": "La scena è stata girata ai piedi della torre, sul camminamento attorno alla base curva: scatta lì prima di salire in cima."});
+Object.assign(UI.pt,{"ytHere": "toque em 📺 para ver o take aqui mesmo", "ytNeedNet": "O take ao vivo precisa de internet.", "ytFail": "Este clipe não pôde ser aberto aqui.", "ytOpen": "Abrir no YouTube", "ytBack": "Voltar ao frame", "ytNote": "O vídeo é do YouTube e para sozinho no segundo do take. Para usar por cima da câmera, no encaixe ou sem internet, tire um print dele e adicione como take.", "ytOnPhoto": "Take em cima da sua foto"});
+Object.assign(UI.en,{"ytHere": "tap 📺 to see the shot right here", "ytNeedNet": "The live shot needs an internet connection.", "ytFail": "This clip couldn't be opened here.", "ytOpen": "Open on YouTube", "ytBack": "Back to the frame", "ytNote": "The video comes from YouTube and stops by itself at the second of the shot. To use it over the camera, in the match or offline, take a screenshot of it and add it as a still.", "ytOnPhoto": "The shot above your photo"});
+Object.assign(UI.es,{"ytHere": "toca 📺 para ver el plano aquí mismo", "ytNeedNet": "El plano en vivo necesita internet.", "ytFail": "Este clip no se pudo abrir aquí.", "ytOpen": "Abrir en YouTube", "ytBack": "Volver al fotograma", "ytNote": "El vídeo es de YouTube y se detiene solo en el segundo del plano. Para usarlo sobre la cámara, en el encaje o sin internet, haz una captura y añádela como fotograma.", "ytOnPhoto": "El plano encima de tu foto"});
+Object.assign(UI.de,{"ytHere": "tippe auf 📺, um die Einstellung gleich hier zu sehen", "ytNeedNet": "Die Live-Einstellung braucht Internet.", "ytFail": "Dieser Clip ließ sich hier nicht öffnen.", "ytOpen": "Auf YouTube öffnen", "ytBack": "Zurück zum Bild", "ytNote": "Das Video kommt von YouTube und hält von selbst in der Sekunde der Einstellung an. Für die Kamera-Überlagerung, den Abgleich oder ohne Internet: Screenshot machen und als Standbild hinzufügen.", "ytOnPhoto": "Die Einstellung über deinem Foto"});
+Object.assign(UI.fr,{"ytHere": "touchez 📺 pour voir le plan ici même", "ytNeedNet": "Le plan en direct a besoin d'internet.", "ytFail": "Cet extrait n'a pas pu être ouvert ici.", "ytOpen": "Ouvrir sur YouTube", "ytBack": "Revenir à l'image", "ytNote": "La vidéo vient de YouTube et s'arrête toute seule à la seconde du plan. Pour l'utiliser sur l'appareil photo, dans le calage ou hors ligne, faites-en une capture et ajoutez-la comme image.", "ytOnPhoto": "Le plan au-dessus de votre photo"});
+Object.assign(UI.it,{"ytHere": "tocca 📺 per vedere l'inquadratura qui", "ytNeedNet": "L'inquadratura dal vivo richiede internet.", "ytFail": "Non è stato possibile aprire qui questa clip.", "ytOpen": "Apri su YouTube", "ytBack": "Torna al fotogramma", "ytNote": "Il video è di YouTube e si ferma da solo al secondo dell'inquadratura. Per usarlo sulla fotocamera, nell'allineamento o senza internet, fai uno screenshot e aggiungilo come fotogramma.", "ytOnPhoto": "L'inquadratura sopra la tua foto"});
 /* ============ i18n: conteúdo traduzido ============ */
 const TRB={};
 TRB.en={
@@ -2235,8 +2245,34 @@ const TNOTE={'p-roofs':'tnRoofs'};
 const mmss=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
 const clips=p=>(YT[p.id]||[]).map(y=>({u:'https://www.youtube.com/watch?v='+y[0]+'&t='+y[1]+'s',at:mmss(y[1])}));
 const clipAt=p=>clips(p).map(c=>c.at).join(' · ');
+/* ============ take ao vivo: o player do YouTube embutido, parado no segundo do take ============
+   Nada da série é copiado para o app: o vídeo continua no YouTube, com o player e os controles dele. */
+let YTN=0;
+function ytBox(vid,at){const k='ytp'+(++YTN),o=FRAMED?'':'&origin='+encodeURIComponent(location.origin);
+ return `<div class="ytbox"><iframe id="${k}" data-at="${at}" data-vid="${vid}" src="https://www.youtube-nocookie.com/embed/${vid}?start=${at}&autoplay=1&mute=1&playsinline=1&rel=0&enablejsapi=1${o}" title="YouTube" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" onload="ytHello(this)"></iframe></div>`}
+const ytSend=(f,o)=>{try{f.contentWindow.postMessage(JSON.stringify(Object.assign({id:f.id,channel:'widget'},o)),'*')}catch(e){}};
+const ytCmd=(f,func,args)=>ytSend(f,{event:'command',func,args:args||[]});
+// o player só fala depois de receber "listening"; repete algumas vezes porque o iframe pode demorar a ficar pronto
+function ytHello(f){let n=0;const iv=setInterval(()=>{if(!f.isConnected||f.dataset.ready||++n>12){clearInterval(iv);return}ytSend(f,{event:'listening'})},400);ytSend(f,{event:'listening'})}
+function ytFreeze(f){f.dataset.frozen='1';ytCmd(f,'pauseVideo');ytCmd(f,'seekTo',[+f.dataset.at,true])}
+window.addEventListener('message',e=>{let host='';try{host=new URL(e.origin).hostname}catch(_){return}if(!/(^|\.)youtube(-nocookie)?\.com$/.test(host))return;
+ const f=$$('.ytbox iframe').find(x=>x.contentWindow===e.source);if(!f)return;let d;try{d=typeof e.data==='string'?JSON.parse(e.data):e.data}catch(_){return}if(!d)return;
+ if(d.event==='onReady'||d.event==='initialDelivery'){if(!f.dataset.ready){f.dataset.ready='1';ytCmd(f,'addEventListener',['onStateChange']);ytCmd(f,'addEventListener',['onError']);ytCmd(f,'mute');ytCmd(f,'playVideo')}}
+ if(d.event==='onError'){const b=f.closest('.ytwrap')||f.closest('.ytbox');if(b)b.outerHTML=`<div class="hint" style="margin-top:8px">${t('ytFail')} <a href="https://www.youtube.com/watch?v=${f.dataset.vid}&t=${f.dataset.at}s" target="_blank" rel="noopener">${t('ytOpen')} ↗</a></div>`;return}
+ const st=d.event==='onStateChange'?d.info:(d.info&&typeof d.info==='object'?d.info.playerState:undefined);
+ if(d.info&&typeof d.info==='object'&&typeof d.info.currentTime==='number')f.dataset.time=d.info.currentTime.toFixed(1);
+ if(typeof st==='number'){f.dataset.state=st;if(st===1&&!f.dataset.frozen)ytFreeze(f)}});
+const ytStop=sel=>$$(sel+' .ytbox, '+sel+' .ytwrap').forEach(x=>x.remove());
+// bloco pronto: player + voltar ao frame + abrir no YouTube
+const ytBlock=(vid,at)=>`<div class="ytwrap">${ytBox(vid,at)}<div class="row" style="margin-top:6px"><button class="btn sm" onclick="const f=this.closest('.ytwrap').querySelector('iframe');if(f)ytFreeze(f)">↺ ${t('ytBack')} · ${mmss(at)}</button><a class="btn sm" href="https://www.youtube.com/watch?v=${vid}&t=${at}s" target="_blank" rel="noopener">${t('ytOpen')} ↗</a></div></div>`;
+function ytShow(id,i,host){const y=(YT[id]||[])[i],el=$(host||'#ytc-'+id);if(!y||!el)return;if(!navigator.onLine){toast(t('ytNeedNet'),3200);return}el.innerHTML=ytBlock(y[0],y[1])+`<div class="small muted" style="margin-top:6px">${t('ytNote')}</div>`;try{el.scrollIntoView({block:'nearest',behavior:'smooth'})}catch(e){}}
+// na câmera: o player num canto, como referência ao lado da imagem ao vivo (toque de novo: próximo momento, depois fecha)
+function camYT(){const p=CAM.ph,L=p?(YT[p.id]||[]):[],box=$('#camYT'),b=$('#camYTb');if(!L.length){box.innerHTML='';box.style.display='none';b.style.display='none';CAM.yt=-1;return}
+ if(!navigator.onLine&&CAM.yt<0){toast(t('ytNeedNet'),3200);return}CAM.yt=(CAM.yt==null?-1:CAM.yt)+1;if(CAM.yt>=L.length)CAM.yt=-1;
+ if(CAM.yt<0){box.innerHTML='';box.style.display='none';b.classList.remove('on');b.textContent='📺';camOverlay();return}
+ const y=L[CAM.yt];box.innerHTML=ytBox(y[0],y[1]);box.style.display='block';b.classList.add('on');b.textContent=mmss(y[1]);$('#camStill').style.display='none';$('#camTk').style.display='none'}
 // links de uma missão: a cena na página de cenas, os momentos do clipe, a busca de imagens
-const takeBtns=p=>{const s=phScene(p),cl=clips(p);return `<a class="btn sm" href="${takeURL(p)||stillSearch(p)}" target="_blank" rel="noopener">🎬 ${t('seeTake')}</a>`+cl.map(c=>`<a class="btn sm" href="${c.u}" target="_blank" rel="noopener">▶ ${c.at}</a>`).join('')+(!cl.length&&s?`<a class="btn sm" href="${sceneVid(LBY[p.loc],s)}" target="_blank" rel="noopener">▶ ${t('seeClip')}</a>`:'')+(takeURL(p)?`<a class="btn sm" href="${stillSearch(p)}" target="_blank" rel="noopener">🔎 ${t('moreImgs')}</a>`:'')};
+const takeBtns=p=>{const s=phScene(p),cl=clips(p);return `<a class="btn sm" href="${takeURL(p)||stillSearch(p)}" target="_blank" rel="noopener">🎬 ${t('seeTake')}</a>`+cl.map((c,i)=>`<button class="btn sm gold" onclick="ytShow('${p.id}',${i})">📺 ${c.at}</button>`).join('')+(!cl.length&&s?`<a class="btn sm" href="${sceneVid(LBY[p.loc],s)}" target="_blank" rel="noopener">▶ ${t('seeClip')}</a>`:'')+(takeURL(p)?`<a class="btn sm" href="${stillSearch(p)}" target="_blank" rel="noopener">🔎 ${t('moreImgs')}</a>`:'')};
 const takeURL=p=>{const k=TAKE[p.id];return k?KLD+k[0]+'#:~:text='+encodeURIComponent(k[2]):null};
 const gotEN=l=>{try{return (TRB.en.L[l.id]&&TRB.en.L[l.id].got)||l.got}catch(e){return l.got}};
 const sceneQ=(l,s)=>'Game of Thrones '+(s&&s[0]?`S${s[0]}E${s[1]} ${s[2]} `:'')+gotEN(l).split(' · ')[0]+' '+l.hr.split(' · ')[0]+' Dubrovnik';
@@ -2250,11 +2286,11 @@ const canPaste=()=>!!(navigator.clipboard&&navigator.clipboard.read);
 async function pasteStill(id){try{const items=await navigator.clipboard.read();for(const it of items){const ty=it.types.find(x=>x.startsWith('image/'));if(ty){await setStill(id,await it.getType(ty));return}}}catch(e){}toast(t('stillPasteFail'),4200)}
 function stillUI(id){{const tc=$('#takesCard');if(tc&&tc.firstChild){const b=tc.querySelector('b');if(b)b.textContent=takesN()+'/'+PH.length}}const el=$('#st-'+id);if(!el)return;const p=PH.find(x=>x.id===id),L=stillList(id),e=TK.m[id],sc=phScene(p);
  const add=L.length<TK.MAX?`<button class="btn sm gold" onclick="pickStill('${id}')">＋ ${t('stillAdd')}</button>${canPaste()?`<button class="btn sm gold" onclick="pasteStill('${id}')">📋 ${t('stillPaste')}</button>`:''}`:'';
- const picked=takeURL(p)&&sc?`<div class="small" style="margin-top:4px"><b>🎯 ${t('takePicked')}:</b> ${t('epTag',sc[0],sc[1])} “${esc(sc[2])}” · ${t('takeSrc')}${clipAt(p)?' · '+t('clipAtL',clipAt(p)):''}${TNOTE[id]?'<br>📍 '+t(TNOTE[id]):''}</div>`:'';
+ const picked=takeURL(p)&&sc?`<div class="small" style="margin-top:4px"><b>🎯 ${t('takePicked')}:</b> ${t('epTag',sc[0],sc[1])} “${esc(sc[2])}” · ${t('takeSrc')}${clipAt(p)?' · '+t('ytHere'):''}${TNOTE[id]?'<br>📍 '+t(TNOTE[id]):''}</div>`:'';
  el.innerHTML=L.length?`<div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;align-items:baseline"><b>🎬 ${t('stillTitle')}</b><span class="small muted">${L.length}/${TK.MAX}</span></div><div class="small muted">${t(L.length>1?'stillHaveN':'stillHave')}</div>
   <div class="tkrow">${L.map((x,i)=>`<button class="tkth${i===e.a?' on':''}" onclick="stillPick('${id}',${i});stillUI('${id}')" aria-label="${i+1}"><img src="${x.u}" alt=""></button>`).join('')}</div>
-  <div class="row" style="margin-top:8px">${add}${takeBtns(p)}<button class="btn sm" onclick="stillDel('${id}',${e.a});stillUI('${id}')">✕ ${t('stillRemove')}</button></div></div>`
-  :`<div style="flex:1;min-width:0"><b>🎬 ${t('stillTitle')}</b><div class="small muted">${t('stillHint')}</div>${picked}${canPaste()?`<div class="small" style="margin-top:4px">${t('stillHow')}</div>`:''}<div class="row" style="margin-top:8px">${add}${takeBtns(p)}</div></div>`}
+  <div class="row" style="margin-top:8px">${add}${takeBtns(p)}<button class="btn sm" onclick="stillDel('${id}',${e.a});stillUI('${id}')">✕ ${t('stillRemove')}</button></div><div id="ytc-${id}"></div></div>`
+  :`<div style="flex:1;min-width:0"><b>🎬 ${t('stillTitle')}</b><div class="small muted">${t('stillHint')}</div>${picked}${canPaste()?`<div class="small" style="margin-top:4px">${t('stillHow')}</div>`:''}<div class="row" style="margin-top:8px">${add}${takeBtns(p)}</div><div id="ytc-${id}"></div></div>`}
 // takes em lote: a pessoa escolhe vários prints de uma vez e diz a missão de cada um; tudo fica só no aparelho
 const takesN=()=>PH.filter(p=>stillGet(p.id)).length;
 function takesUI(){const el=$('#takesCard');if(!el)return;const n=takesN();
@@ -2687,7 +2723,7 @@ window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h&&h
 
 /* ============ sheet de detalhes ============ */
 function openSheet(html){$('#sheetBody').innerHTML=html;$('#sheetBody').scrollTop=0;$('#sheet').classList.add('open');$('#scrim').classList.add('on')}
-function closeSheet(){stopListen();if(PLM){try{PLM.remove()}catch(e){}PLM=null}$('#sheet').classList.remove('open');$('#scrim').classList.remove('on');if(S.sel){S.sel=null;drawMarkers()}}
+function closeSheet(){stopListen();ytStop('#sheet');if(PLM){try{PLM.remove()}catch(e){}PLM=null}$('#sheet').classList.remove('open');$('#scrim').classList.remove('on');if(S.sel){S.sel=null;drawMarkers()}}
 $('#scrim').onclick=closeSheet;
 (()=>{let y0=null,dy=0;const g=$('#grab'),sh=$('#sheet');g.addEventListener('pointerdown',e=>{y0=e.clientY;dy=0;sh.style.transition='none';try{g.setPointerCapture(e.pointerId)}catch(_){ }});
  g.addEventListener('pointermove',e=>{if(y0==null)return;dy=Math.max(0,e.clientY-y0);sh.style.transform=`translateY(${dy}px)`});
@@ -2913,19 +2949,19 @@ async function camLensUI(){const el=$('#camLens');let btns=[];
  }catch(e){btns=[];el.innerHTML=''}
  el.style.display=btns.length?'flex':'none'}
 function camStopTracks(){if(CAM.stream){CAM.stream.getTracks().forEach(t=>t.stop());CAM.stream=null}}
-function closeCam(){if(S.headingSrc==='drag'){S.headingSrc=null;S.heading=null;drawMe()}camStopTracks();CAM.on=false;$('#cam').classList.remove('on');window.removeEventListener('resize',camOverlay);if(!S.guiding)keepAwake(false)}
+function closeCam(){{const b=$('#camYT');b.innerHTML='';b.style.display='none';CAM.yt=-1;$('#camYTb').classList.remove('on');$('#camYTb').textContent='📺'}if(S.headingSrc==='drag'){S.headingSrc=null;S.heading=null;drawMe()}camStopTracks();CAM.on=false;$('#cam').classList.remove('on');window.removeEventListener('resize',camOverlay);if(!S.guiding)keepAwake(false)}
 // mantém a tela acesa durante a câmera e o modo guiado
 let wakeL=null;async function keepAwake(on){try{if(on){if(!wakeL&&navigator.wakeLock){wakeL=await navigator.wakeLock.request('screen');wakeL.addEventListener('release',()=>{wakeL=null})}}else if(wakeL){await wakeL.release();wakeL=null}}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&(CAM.on||S.guiding||NAV))keepAwake(true)});
 function camOverlay(){const W=innerWidth,H=innerHeight,p=CAM.ph;const svg=$('#camOv');svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
- if(!p){$('#camStill').style.display='none';$('#camOp').style.display='none';$('#camTk').style.display='none';CAM.frame=null;svg.innerHTML=`<g id="camLevel" transform="translate(${W/2},${H/2})"></g>`;$('#camRot').style.display='none';$('#camAR').classList.toggle('on',CAM.ar);camTick();return}
+ if(!p){$('#camStill').style.display='none';$('#camOp').style.display='none';$('#camTk').style.display='none';$('#camYTb').style.display='none';CAM.frame=null;svg.innerHTML=`<g id="camLevel" transform="translate(${W/2},${H/2})"></g>`;$('#camRot').style.display='none';$('#camAR').classList.toggle('on',CAM.ar);camTick();return}
  const vert=p.vert,portrait=H>=W;let fw=W,fh=H;
  if(vert!==portrait){if(portrait){fw=W*0.94;fh=fw*2/3}else{fh=H*0.9;fw=fh*0.8}}
  const fx=(W-fw)/2,fy=(H-fh)/2;CAM.frame={fx,fy,fw,fh};let s='';
  if(vert!==portrait)s+=`<path d="M0 0H${W}V${H}H0Z M${fx} ${fy}v${fh}h${fw}v-${fh}Z" fill="rgba(0,0,0,.5)" fill-rule="evenodd"/><rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="6 5"/>`;
  if(CAM.grid)for(const t of [1/3,2/3])s+=`<line x1="${fx+fw*t}" y1="${fy}" x2="${fx+fw*t}" y2="${fy+fh}" stroke="rgba(255,255,255,.6)" stroke-width="1"/><line x1="${fx}" y1="${fy+fh*t}" x2="${fx+fw}" y2="${fy+fh*t}" stroke="rgba(255,255,255,.6)" stroke-width="1"/>`;
  const ref=refGet(p.id),stl=stillGet(p.id);if(CAM.ghost===2&&!ref)CAM.ghost=1;if(CAM.ghost===3&&!stl)CAM.ghost=1;{const op=$('#camOp');op.style.display=CAM.ghost===3?'block':'none';op.value=CAM.stillOp||45}
- {const cs=$('#camStill');cs.style.display=stl?'block':'none';if(stl){cs.style.backgroundImage=`url(${stl.u})`;cs.style.aspectRatio=stl.w+'/'+stl.h;cs.classList.toggle('big',!!CAM.stillBig)}const n=stillList(p.id).length,tk=$('#camTk');tk.style.display=n>1?'block':'none';if(n>1)tk.textContent='🎬 '+(TK.m[p.id].a+1)+'/'+n+' ›'}
+ {const cs=$('#camStill');cs.style.display=stl?'block':'none';if(stl){cs.style.backgroundImage=`url(${stl.u})`;cs.style.aspectRatio=stl.w+'/'+stl.h;cs.classList.toggle('big',!!CAM.stillBig)}const n=stillList(p.id).length,tk=$('#camTk');tk.style.display=n>1?'block':'none';if(n>1)tk.textContent='🎬 '+(TK.m[p.id].a+1)+'/'+n+' ›';$('#camYTb').style.display=YT[p.id]?'grid':'none';if(CAM.yt>=0){cs.style.display='none';tk.style.display='none'}}
  if(CAM.ghost===3){const k=Math.min(fw/stl.w,fh/stl.h),rw=stl.w*k,rh=stl.h*k;s+=`<image id="camGhost" href="${stl.u}" x="${fx+(fw-rw)/2}" y="${fy+(fh-rh)/2}" width="${rw}" height="${rh}" opacity="${(CAM.stillOp||45)/100}"/>`}
  else 
  if(CAM.ghost===2){const k=Math.min(fw/ref.w,fh/ref.h),rw=ref.w*k,rh=ref.h*k;s+=`<image id="camGhost" href="${ref.u}" x="${fx+(fw-rw)/2}" y="${fy+(fh-rh)/2}" width="${rw}" height="${rh}" opacity=".9" style="filter:drop-shadow(0 0 1.5px #000)"/>`}
@@ -3000,6 +3036,7 @@ $('#camX').onclick=closeCam;$('#camShot').onclick=camShot;
 $('#camFlip').onclick=async()=>{CAM.facing=CAM.facing==='environment'?'user':'environment';CAM.deviceId=null;CAM.lensF=1;try{await camStart()}catch(e){toast(t('flipFail'))}};
 $('#camGrid').onclick=()=>{CAM.grid=!CAM.grid;camOverlay()};$('#camGh').onclick=()=>{const id=CAM.ph&&CAM.ph.id,opts=[1].concat(id&&stillGet(id)?[3]:[],id&&refGet(id)?[2]:[],[0]);CAM.ghost=opts[(opts.indexOf(CAM.ghost)+1)%opts.length];camOverlay();if(CAM.ghost)toast(CAM.ghost===3?'🎬 '+t('guideStill'):CAM.ghost===2?'🖼️ '+t('guidePhoto'):'✏️ '+t('guideLine'),1600)};
 $('#camOp').oninput=e=>{CAM.stillOp=+e.target.value;const g=$('#camGhost');if(g)g.setAttribute('opacity',CAM.stillOp/100)};
+$('#camYTb').onclick=camYT;
 $('#camTk').onclick=()=>{const p=CAM.ph;if(!p)return;const n=stillList(p.id).length;if(n>1){stillPick(p.id,(TK.m[p.id].a+1)%n);camOverlay()}};
 $('#camStill').onclick=()=>{CAM.stillBig=!CAM.stillBig;$('#camStill').classList.toggle('big',CAM.stillBig)};
 $('#camAR').onclick=()=>{CAM.ar=!CAM.ar;$('#camAR').classList.toggle('on',CAM.ar);if(CAM.ar&&!headOK())toast(t('arEnableHint'))};
@@ -3020,6 +3057,7 @@ async function renderAlbum(){const el=$('#album');if(!el)return;const all=(await
  $$('img',el).forEach(i=>i.onclick=()=>viewFoto(i.dataset.f))}
 async function viewFoto(fid){const o=(await DB.all()).find(x=>x.id===fid);if(!o)return;const p=PH.find(x=>x.id===o.ph),l=LBY[o.loc];
  modal(`<h2 style="font-size:18px">${esc(p?p.title:l.name)}</h2><div class="small muted">${esc(l.name)} · ${new Date(o.ts).toLocaleString(LOCALE[LANG])}</div>
+ ${p&&YT[p.id]?`<div class="row" style="margin:8px 0 0"><b class="small" style="align-self:center">📺 ${t('ytOnPhoto')}</b>${clips(p).map((c,i)=>`<button class="btn sm gold" onclick="ytShow('${p.id}',${i},'#vfYT')">${c.at}</button>`).join('')}</div><div id="vfYT"></div>`:''}
  <div class="cmp"><img id="vfImg" src="${urlOf(o)}" style="width:100%;border-radius:12px;display:block">${p&&OUT[p.id]?`<div class="cmpo" id="cmpO"><svg viewBox="0 0 ${outBox(p)[0]} ${outBox(p)[1]}" preserveAspectRatio="xMidYMid meet">${outlineInner(p,'#fff',.6,true)}</svg></div><i id="cmpL"></i>`:''}</div>
  ${p&&OUT[p.id]?`<label class="small muted" style="display:flex;align-items:center;gap:8px;margin:0 0 8px">✏️ <input type="range" id="cmpR" min="0" max="100" value="50" style="flex:1"> ${t('compare')}</label>`:''}
  <div class="grid2"><button class="btn gold" id="mkPost">🖼️ ${t('makePostal')}</button><button class="btn" id="svOrig">⬇️ ${t('saveOrig')}</button></div>
@@ -3057,7 +3095,7 @@ async function makePostal(o){try{await document.fonts.load('900 60px Cinzel');aw
 
 /* ============ modal ============ */
 function modal(html){$('#modalBox').innerHTML=html;$('#modal').classList.add('on');$$('[data-close]',$('#modalBox')).forEach(b=>b.onclick=closeModal)}
-function closeModal(){$('#modal').classList.remove('on')}
+function closeModal(){ytStop('#modal');$('#modal').classList.remove('on')}
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
 
 /* ============ Mais ============ */
@@ -3082,7 +3120,7 @@ function renderMais(){const el=$('#v-mais');const m=zMonth();const low=[11,12,1,
  <div class="card" id="quizCard"></div>
  <div class="card"><h2>${t('settings')}</h2><div class="row" style="margin-top:8px"><button class="btn sm gold" id="tourBtn">🎓 ${t('replayTour')}</button><button class="btn sm" id="langBtn">🌐 ${t('language')}: ${LANGS[LANG]}</button><button class="btn sm" id="themeBtn2">🌓 ${t('theme')}: ${t('theme_'+S.theme)}</button>${FRAMED?'':`<button class="btn sm" id="mapBtn">🗺️ ${t('mapMode')}: ${store.get('mapMode','real')==='drawn'?t('mapDrawn'):t('mapReal')}</button>`}<button class="btn sm" id="simBtn">🧪 ${t('simTitle')}: ${S.sim?t('onW'):t('offW')}</button><button class="btn sm" id="spBtn">${S.spoil?'🙈':'👀'} ${t('noSpoilers')}: ${S.spoil?t('onW'):t('offW')}</button><button class="btn sm" id="rsBtn">${t('resetConq')}</button></div></div>
  <div class="card" id="ajuda"><h2>${t('helpTitle')}</h2><ul class="clean small">${FRAMED?`<li>${t('helpFramed',`<a href="${HOSTED_URL}?lang=${LANG}" target="_blank" rel="noopener">${HOSTED_URL}</a>`)}</li>`:''}${t('helpHTML')}</ul></div>
- <div class="card"><h2>${t('aboutTitle')}</h2><p class="small" style="margin-top:0">${t('aboutP')}</p><p class="small muted">${t('sourcesP')} · v10</p><p class="small" style="margin-bottom:0">${t('reportAbout')} <a href="${reportURL(null)}" target="_blank" rel="noopener">${t('reportBtn')} ↗</a></p></div>
+ <div class="card"><h2>${t('aboutTitle')}</h2><p class="small" style="margin-top:0">${t('aboutP')}</p><p class="small muted">${t('sourcesP')} · v11</p><p class="small" style="margin-bottom:0">${t('reportAbout')} <a href="${reportURL(null)}" target="_blank" rel="noopener">${t('reportBtn')} ↗</a></p></div>
  </div>`;
  $('#shareBtn').onclick=shareApp;{const mb=$('#mapBtn');if(mb)mb.onclick=()=>{setMapMode(store.get('mapMode','real')==='drawn'?'real':'drawn');renderMais();toast('🗺️ '+t('mapMode')+': '+(store.get('mapMode','real')==='drawn'?t('mapDrawn'):t('mapReal')))}}$('#langBtn').onclick=openLangModal;$('#langBtn2').onclick=openLangModal;
  $('#tourBtn').onclick=()=>{go('mapa');setTimeout(()=>startTour(0),120)};

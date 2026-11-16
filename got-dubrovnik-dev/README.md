@@ -24,4 +24,5 @@ sandbox with these assumptions; adjust paths when running elsewhere:
 | `v11.py` | several stills per mission in IndexedDB: migration from the old format, limit, persistence, pack v1/v2, fallback without IndexedDB |
 | `v12.py` | switching stills inside the camera and the match editor |
 | `v13.py` | every mission card in the six languages; clip moments list |
+| `v14.py` | live take: embedded YouTube player frozen at the take second (mock player speaking the same postMessage protocol), in the mission, the photo viewer and the camera |
 | `clean.py <lang>` | clean screenshots for sharing; `og.py` renders the social preview image |
