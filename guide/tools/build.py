@@ -72,7 +72,7 @@ def assemble(text, fdir, used, cfg):
         else:
             out.append(line)
     s = '\n'.join(out)
-    for tok, key in (('@@CACHE@@', 'cache'), ('@@SW_VERSION@@', 'swVersion'), ('@@STORE@@', 'store'), ('@@IDB@@', 'idb')):
+    for tok, key in (('@@CACHE@@', 'cache'), ('@@SW_VERSION@@', 'swVersion'), ('@@APP_VERSION@@', 'appVersion'), ('@@STORE@@', 'store'), ('@@IDB@@', 'idb')):
         if tok in s:
             if key not in cfg:
                 raise BuildError(f'franchise.json: falta "{key}" (usado por {tok})')

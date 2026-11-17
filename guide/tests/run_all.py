@@ -24,7 +24,8 @@ VOLATILE = [(re.compile(r'data:image/[a-z]+;base64,[A-Za-z0-9+/=]+'), 'data:imag
             (re.compile(r'blob:http://localhost:\d+/[0-9a-f-]+'), 'blob:…'),
             (re.compile(r'localhost:\d+'), 'HOST'),
             (re.compile(r'net::ERR_[A-Z_]+'), 'net::ERR_…'),
-            (re.compile(r'\bchars=\d+'), 'chars=…'),           # i18n.py: total de caracteres varia com a formatação do sistema
+            (re.compile(r'\bchars=\d+'), 'chars=…'),
+            (re.compile(r"'([a-z][a-z\-]*)-v\d+'"), r"'\1-vN'"),   # nome do cache muda a cada versão (swVersion)           # i18n.py: total de caracteres varia com a formatação do sistema
             (re.compile(r'\d+\.\d+s elapsed'), '')]
 
 

@@ -1,9 +1,10 @@
 // Cache offline do guia. Página: rede primeiro (pega atualizações), cache se estiver sem internet.
-const V = 'porto-real-v18';
+const V = 'porto-real-v19';
 // dentro do app Android os arquivos já vêm no pacote: ali o service worker só guarda o mapa
 const NATIVE = new URL(self.location.href).searchParams.has('native');
 const TILES = 'porto-real-tiles-v1';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png', './lib/maplibre-gl.js', './lib/maplibre-gl.css',
+  './lib/fonts/fonts.css', './lib/fonts/inter-latin-ext-400-normal.woff2', './lib/fonts/inter-latin-400-normal.woff2', './lib/fonts/inter-latin-ext-500-normal.woff2', './lib/fonts/inter-latin-500-normal.woff2', './lib/fonts/inter-latin-ext-600-normal.woff2', './lib/fonts/inter-latin-600-normal.woff2', './lib/fonts/inter-latin-ext-700-normal.woff2', './lib/fonts/inter-latin-700-normal.woff2', './lib/fonts/cinzel-latin-ext-600-normal.woff2', './lib/fonts/cinzel-latin-600-normal.woff2', './lib/fonts/cinzel-latin-ext-700-normal.woff2', './lib/fonts/cinzel-latin-700-normal.woff2', './lib/fonts/cinzel-latin-ext-900-normal.woff2', './lib/fonts/cinzel-latin-900-normal.woff2',
   // frames da série que vêm com o app (uso pessoal)
   './frames/bp-arcades-hoje.jpg', './frames/bp-arcades.jpg', './frames/bp-jesuit-hoje.jpg', './frames/bp-jesuit.jpg', './frames/bp-pier-hoje.jpg', './frames/bp-pier.jpg', './frames/bp-pond-hoje.jpg', './frames/bp-pond.jpg', './frames/bp-stairs-hoje.jpg', './frames/bp-stairs.jpg', './frames/g-riot-hoje.jpg', './frames/g-riot.jpg', './frames/h-lovr1.jpg', './frames/h-minceta.jpg', './frames/h-pilebay.jpg', './frames/h-shame.jpg', './frames/h-westharbour.jpg', './frames/p-arena-1.jpg', './frames/p-arena-2.jpg', './frames/p-bokar-1.jpg', './frames/p-bokar-2.jpg', './frames/p-olenna-1.jpg', './frames/p-olenna-2.jpg', './frames/p-purple-1.jpg', './frames/p-redkeep-1.jpg', './frames/p-redkeep-2.jpg', './frames/p-redkeep-3.jpg', './frames/p-torneio-1.jpg', './frames/p-torneio-2.jpg', './frames/w-belvedere.jpg', './frames/w-bokar.jpg', './frames/w-domsteps.jpg', './frames/w-kingslanding.jpg', './frames/w-lokrum.jpg', './frames/w-lovr1.jpg', './frames/w-lovr2.jpg', './frames/w-market.jpg', './frames/w-minceta.jpg', './frames/w-pile.jpg', './frames/w-pilebay.jpg', './frames/w-purple.jpg', './frames/w-reitor.jpg', './frames/w-shame.jpg', './frames/w-trsteno.jpg', './frames/w-walls.jpg', './frames/w-westharbour.jpg', './frames/w-westpier.jpg'];
 self.addEventListener('install', e => {
@@ -16,16 +17,6 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  // fontes do Google: cache primeiro
-  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
-    e.respondWith(caches.open(V).then(async c => {
-      const hit = await c.match(req);
-      if (hit) return hit;
-      try { const res = await fetch(req); if (res.ok || res.type === 'opaque') c.put(req, res.clone()); return res; }
-      catch (err) { return hit || Response.error(); }
-    }));
-    return;
-  }
   // mapa real (OpenFreeMap): estilo/TileJSON rede primeiro; tiles, fontes e ícones cache primeiro — assim o que já foi visto abre sem internet
   if (url.hostname === 'tiles.openfreemap.org') {
     const fresh = url.pathname.startsWith('/styles/') || /^\/planet\/?$/.test(url.pathname);

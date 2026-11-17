@@ -64,6 +64,6 @@ async def main():
             if miss: print(lg,"faltando:",miss)
         await pg.goto("http://localhost:8765/?lang=fr"); await pg.wait_for_timeout(1400); await pg.evaluate("try{endTour()}catch(e){}"); await pg.evaluate("openPhoto('p-roofs')"); await pg.wait_for_timeout(500)
         print("fr:",await pg.evaluate(info,"p-roofs")); await pg.evaluate("$('#st-p-roofs').scrollIntoView()"); await pg.screenshot(path=OUT+"H_fr.png")
-        print("versão:",await pg.evaluate("document.body.innerHTML.includes('· v13')"))
+        print("versão:",await pg.evaluate("/· v\\d+<\\/p>/.test(document.body.innerHTML)"))  # rótulo de versão presente (o número vem do franchise.json)
         print("frames com erro:",bad); print("ERRS",errs); await b.close()
 asyncio.run(main())

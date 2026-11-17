@@ -8,3 +8,12 @@ const LFR={'walls':[['w-walls',1280,690]],'reitor':[['w-reitor',1143,682]],'lokr
 const HOJE={'w-pilebay':['h-pilebay',704,343,'bp'],'w-westharbour':['h-westharbour',704,344,'bp'],'w-minceta':['h-minceta',704,465,'bp'],'w-lovr1':['h-lovr1',540,404,'gt'],'w-shame':['h-shame',540,404,'gt'],
  'bp-pier':['bp-pier-hoje',704,342,'bp'],'bp-jesuit':['bp-jesuit-hoje',704,344,'bp'],'bp-arcades':['bp-arcades-hoje',704,346,'bp'],'bp-pond':['bp-pond-hoje',704,337,'bp'],'bp-stairs':['bp-stairs-hoje',704,342,'bp'],'g-riot':['g-riot-hoje',540,404,'gt']};
 const HSRC={bp:'Bored Panda · schmollywood1',gt:"Greta's Travels"};
+// quem fez cada imagem — aparece em Mais › Sobre › Créditos das imagens (r: scenes | today | clips)
+const CREDITS=[
+ {n:'HBO / Warner Bros. Discovery — Game of Thrones',u:'https://www.hbo.com/game-of-thrones',r:['scenes']},
+ {n:'Bored Panda · schmollywood1',u:'https://www.boredpanda.com/game-of-thrones-filming-locations-before-after/',r:['scenes','today']},
+ {n:"Greta's Travels",u:'https://gretastravels.com/game-of-thrones-filming-set-in-dubrovnik/',r:['scenes','today']},
+ {n:'We Seek Travel',u:'https://weseektravel.com/',r:['scenes']},
+ {n:'Sceen-it',u:'https://www.sceen-it.com/',r:['scenes']},
+ {n:'YouTube (clipes de cada cena, nos canais indicados no app)',u:'https://www.youtube.com/',r:['clips']}
+];

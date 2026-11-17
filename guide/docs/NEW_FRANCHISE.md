@@ -60,7 +60,8 @@ Siga a ordem: cada passo já dá para ver no navegador.
    recusa chave faltando e avisa enquanto sobrar `TODO`.
 7. **`01-head.html`**, **`05-brand.html`** (logo do topo), **`06-theme.css`** (cores, opcional).
 8. **`assets/`** — `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` (com margem de 20%),
-   `apple-touch-icon.png` (180), `og.png` (1200×630), `manifest.webmanifest`.
+   `apple-touch-icon.png` (180), `og.png` (1200×630), `manifest.webmanifest` e `privacy.html`
+   (troque o nome do guia e o e-mail de contato; se a franquia usar outro serviço externo, liste na tabela).
 9. **`20-content-i18n.js`** — traduções do conteúdo (`TRB.en`, `TRB.es`…). O que faltar cai no português.
 10. **`31-map-art.js`** — mapa desenhado de reserva. O modelo tem só mar e um retângulo de terra.
     Desenhe a costa/rio e os rótulos se der tempo (exemplo completo na de GoT).
@@ -99,7 +100,8 @@ Registre no CHANGELOG.md.
 - [ ] Todos os textos de marca reescritos, nenhum `TODO` (`build.py` não avisa nada).
 - [ ] 6 idiomas sem sobra de português (`i18n.py` adaptado, ou revisão manual).
 - [ ] Preços e horários com o ano e a fonte; links oficiais.
-- [ ] Cenas: créditos em `HSRC`/textos de crédito; repositório **privado** enquanto tiver frames.
+- [ ] Cenas: todas as fontes em `CREDITS` e `HSRC`; `frCredit` diz de quem são os frames.
+- [ ] `privacy.html` com o nome do guia e um e-mail de contato de verdade.
 - [ ] Smoke passando no Chrome e no WebKit; testado no celular de verdade, na rua.
 - [ ] `og.png` e ícones próprios (sem logo oficial da franquia).
 - [ ] "Sobre" diz que é guia de fã, não oficial, sem ligação com o estúdio.

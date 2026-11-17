@@ -3,11 +3,11 @@
 Como achar, capturar, tratar, nomear e registrar as imagens das cenas que vêm dentro do app.
 Vale para qualquer franquia. Tudo aqui foi usado de verdade na de Game of Thrones (Dubrovnik).
 
-> **Direitos.** Frames de séries/filmes e fotos de blogs têm dono. Eles só entram em app de
-> **uso pessoal, num repositório privado**. Antes de distribuir um guia, apague a pasta
-> `assets/frames/` da franquia e esvazie `FR`/`LFR`/`HOJE` no `50-frames.js`. O app continua
-> funcionando: cada missão mostra os botões para a pessoa adicionar os próprios prints, que
-> ficam só no aparelho dela.
+> **Direitos e créditos.** Frames de séries/filmes e fotos de blogs têm dono. Publicar com eles é
+> decisão do dono do guia (na de GoT: publicar com crédito). Toda fonte usada entra em `CREDITS`
+> (`50-frames.js`), que aparece em Mais › Sobre com link, e em `HSRC` para as fotos de hoje.
+> Se um dono pedir para tirar, apague os arquivos dele, remova as entradas e publique: o app
+> continua funcionando, e cada missão tem os botões para a pessoa adicionar os próprios prints.
 
 ## O que é cada imagem
 
@@ -108,6 +108,7 @@ const FR={'p-missao':[['arquivo',largura,altura], ...]};   // 1ª = a que abre p
 const LFR={'lugar':[['arquivo',largura,altura]]};           // extras na ficha do lugar
 const HOJE={'arquivo-da-cena':['arquivo-hoje',largura,altura,'fonte']};
 const HSRC={fonte:'Nome do site · autor'};                  // crédito mostrado com a foto de hoje
+const CREDITS=[{n:'Nome',u:'https://…',r:['scenes','today','clips']}]; // lista em Sobre
 ```
 
 Ordem dentro de `FR`: primeiro a cena **que tem foto de hoje e é do ângulo da missão**,

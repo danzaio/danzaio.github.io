@@ -19,7 +19,7 @@ fr trip: ✈️ Préparer le voyage |  | À faire en Wi-Fi avant de partir : la 
 it trip: ✈️ Prepararsi al viaggio |  | Fallo con il Wi-Fi prima di partire: la mappa, i percorsi a piedi e tutta la guida restano sul telefono e funzionano sen | faltando: []
 sw controla: [True, True]
 download: [True, '✈️ Preparar para a viagem |  | Faça isto no Wi-Fi antes de sair: o mapa, as rotas a pé e o guia inteiro ficam no aparelho e funcionam sem in'] pedidos: {'tile': 0, 'glyph': 3, 'sprite': 4, 'style': 2}
-caches: {'porto-real-v18': 56, 'porto-real-tiles-v1': 61}
+caches: {'porto-real-vN': 71, 'porto-real-tiles-vN': 61}
 offline: ['Porto Real de Verdad', True, 20]
 ios : ✈️ Get ready for the trip |  | Do this on Wi-Fi before you leave: the map, the walking routes and the whole guide stay on your phone and work without internet. |  | 1 | Add to your home screen | In Safari, tap Share (the square with an arrow), then “Add to Hom
 insta : ✈️ Get ready for the trip |  | Do this on Wi-Fi before you leave: the map, the walking routes and the whole guide stay on your phone and work without internet. |  | 1 | Add to your home screen | You're in another app's built-in browser, which keeps nothing. Op

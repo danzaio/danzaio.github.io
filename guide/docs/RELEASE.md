@@ -24,9 +24,20 @@ A pasta publicada (ex.: `got-dubrovnik/`) é estática: qualquer hospedagem serv
 | Cloudflare Pages + Access | grátis (até 50 pessoas) | só quem você liberar por e-mail | precisa de conta Cloudflare; deploy por workflow |
 | Artefato privado do Claude | — | só o dono | mapa, GPS, câmera e service worker ficam bloqueados: serve só para ver cenas |
 
-**Situação atual (nov/2026):** o repositório `danzaio.github.io` está privado (por causa dos frames)
-e o Pages saiu do ar. A versão completa está no APK. A galeria de cenas está publicada como
-artefato privado do Claude.
+**Situação atual (17/nov/2026):** o repositório `danzaio.github.io` está privado e o Pages saiu do ar.
+A versão completa está no APK. Falta escolher a hospedagem pública (ver "o que falta para a v1 pública").
+
+## O que falta para a v1 pública
+
+| item | depende de |
+| --- | --- |
+| hospedagem web com domínio | escolha do serviço/domínio |
+| e-mail de contato (privacidade, avisar erro sem conta no GitHub) | e-mail do dono |
+| APK/AAB de loja assinado + ficha na Play Store + formulário de segurança de dados | conta Google Play (US$25) e chave de assinatura nos secrets do repo |
+| roteador de rotas próprio ou pago (o de demonstração do OSM não é para app publicado) | escolha do serviço |
+| limite de uso na chave do ARCore | console do Google Cloud |
+| teste de rua (Android + iPhone) e beta com 5–10 pessoas | — |
+| revisão dos textos por nativos (en, es, de, fr, it) | — |
 
 ## Android
 

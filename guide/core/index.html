@@ -7,11 +7,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- fontes sem bloquear: com a folha normal, uma rede lenta segurava a tela e o script inteiro do app -->
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all';if(document.fonts)document.fonts.ready.then(function(){if(window.fitBrand)fitBrand()})">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="lib/fonts/fonts.css">
+<script>if(document.fonts)document.fonts.ready.then(function(){if(window.fitBrand)fitBrand()})</script>
 <!-- mapa real: baixar a biblioteca junto com a página e abrir a conexão com os tiles cedo -->
 <link rel="preload" href="lib/maplibre-gl.js" as="script">
 <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
@@ -344,6 +341,7 @@ body.rm-on #z3D,body.rm-on #zNorth.show{display:grid!important}
 #plMap{position:absolute;inset:0;border-radius:12px;overflow:hidden;display:none}
 #plMap.on{display:block}
 #plSvg.over{background:transparent!important;pointer-events:none}
+.cred summary{cursor:pointer}.cred ul{margin:6px 0 0;padding-left:18px}.cred li{margin:3px 0}
 /*@frag 06-theme.css*/
 </style>
 </head>
@@ -930,6 +928,18 @@ Object.assign(UI.es,{"frScene": "Escena", "frToday": "Hoy", "frTodayTag": "hoy, 
 Object.assign(UI.de,{"frScene": "Szene", "frToday": "Heute", "frTodayTag": "heute, gleicher Blickwinkel", "frTodayBy": "Der Ort heute, aus dem Blickwinkel der Szene · Foto: {0}", "frHasToday": "Zu dieser Szene gibt es ein Foto von heute aus demselben Blickwinkel: Tippe auf „Heute“ zum Vergleichen."});
 Object.assign(UI.fr,{"frScene": "Scène", "frToday": "Aujourd'hui", "frTodayTag": "aujourd'hui, même angle", "frTodayBy": "Le lieu aujourd'hui, sous l'angle de la scène · photo : {0}", "frHasToday": "Cette scène a une photo d'aujourd'hui sous le même angle : touchez « Aujourd'hui » pour comparer."});
 Object.assign(UI.it,{"frScene": "Scena", "frToday": "Oggi", "frTodayTag": "oggi, stessa angolazione", "frTodayBy": "Il luogo oggi, dall'angolazione della scena · foto: {0}", "frHasToday": "Questa scena ha una foto di oggi dalla stessa angolazione: tocca “Oggi” per confrontare."});
+Object.assign(UI.pt,{"credTitle": "Créditos das imagens", "credScenes": "cenas", "credToday": "fotos de hoje", "credClips": "clipes"});
+Object.assign(UI.en,{"credTitle": "Image credits", "credScenes": "scenes", "credToday": "photos of today", "credClips": "clips"});
+Object.assign(UI.es,{"credTitle": "Créditos de las imágenes", "credScenes": "escenas", "credToday": "fotos de hoy", "credClips": "clips"});
+Object.assign(UI.de,{"credTitle": "Bildnachweise", "credScenes": "Szenen", "credToday": "Fotos von heute", "credClips": "Clips"});
+Object.assign(UI.fr,{"credTitle": "Crédits des images", "credScenes": "scènes", "credToday": "photos d'aujourd'hui", "credClips": "extraits"});
+Object.assign(UI.it,{"credTitle": "Crediti delle immagini", "credScenes": "scene", "credToday": "foto di oggi", "credClips": "clip"});
+Object.assign(UI.pt,{"privacy":"Política de privacidade"});
+Object.assign(UI.en,{"privacy":"Privacy policy"});
+Object.assign(UI.es,{"privacy":"Política de privacidad"});
+Object.assign(UI.de,{"privacy":"Datenschutz"});
+Object.assign(UI.fr,{"privacy":"Politique de confidentialité"});
+Object.assign(UI.it,{"privacy":"Informativa sulla privacy"});
 /*@frag 25-ui-brand.js*/
 /*@frag 20-content-i18n.js*/
 /* ============ estado ============ */
@@ -1978,7 +1988,7 @@ function renderMais(){const el=$('#v-mais');const m=zMonth();const low=[11,12,1,
  <div class="card" id="quizCard"></div>
  <div class="card"><h2>${t('settings')}</h2><div class="row" style="margin-top:8px"><button class="btn sm gold" id="tourBtn">🎓 ${t('replayTour')}</button><button class="btn sm" id="langBtn">🌐 ${t('language')}: ${LANGS[LANG]}</button><button class="btn sm" id="themeBtn2">🌓 ${t('theme')}: ${t('theme_'+S.theme)}</button>${FRAMED?'':`<button class="btn sm" id="mapBtn">🗺️ ${t('mapMode')}: ${store.get('mapMode','real')==='drawn'?t('mapDrawn'):t('mapReal')}</button>`}<button class="btn sm" id="simBtn">🧪 ${t('simTitle')}: ${S.sim?t('onW'):t('offW')}</button><button class="btn sm" id="spBtn">${S.spoil?'🙈':'👀'} ${t('noSpoilers')}: ${S.spoil?t('onW'):t('offW')}</button><button class="btn sm" id="rsBtn">${t('resetConq')}</button></div></div>
  <div class="card" id="ajuda"><h2>${t('helpTitle')}</h2><ul class="clean small">${FRAMED?`<li>${t('helpFramed',`<a href="${HOSTED_URL}?lang=${LANG}" target="_blank" rel="noopener">${HOSTED_URL}</a>`)}</li>`:''}${t('helpHTML')}</ul></div>
- <div class="card"><h2>${t('aboutTitle')}</h2><p class="small" style="margin-top:0">${t('aboutP')}</p><p class="small muted">${t('sourcesP')} · v13</p><p class="small muted">🎞 ${t('frCredit')}</p><p class="small" style="margin-bottom:0">${t('reportAbout')} <a href="${reportURL(null)}" target="_blank" rel="noopener">${t('reportBtn')} ↗</a></p></div>
+ <div class="card"><h2>${t('aboutTitle')}</h2><p class="small" style="margin-top:0">${t('aboutP')}</p><p class="small muted">${t('sourcesP')} · v@@APP_VERSION@@</p><p class="small muted">🎞 ${t('frCredit')}</p>${CREDITS.length?`<details class="small muted cred"><summary>🖼 ${t('credTitle')}</summary><ul>${CREDITS.map(c=>`<li><a href="${esc(c.u)}" target="_blank" rel="noopener">${esc(c.n)}</a> — ${c.r.map(r=>t('cred'+r[0].toUpperCase()+r.slice(1))).join(', ')}</li>`).join('')}</ul></details>`:''}<p class="small" style="margin-bottom:0">${t('reportAbout')} <a href="${reportURL(null)}" target="_blank" rel="noopener">${t('reportBtn')} ↗</a></p><p class="small" style="margin:8px 0 0"><a href="privacy.html#${LANG==='pt'?'pt':'en'}" target="_blank" rel="noopener">🔒 ${t('privacy')}</a></p></div>
  </div>`;
  $('#shareBtn').onclick=shareApp;{const mb=$('#mapBtn');if(mb)mb.onclick=()=>{setMapMode(store.get('mapMode','real')==='drawn'?'real':'drawn');renderMais();toast('🗺️ '+t('mapMode')+': '+(store.get('mapMode','real')==='drawn'?t('mapDrawn'):t('mapReal')))}}$('#langBtn').onclick=openLangModal;$('#langBtn2').onclick=openLangModal;
  $('#tourBtn').onclick=()=>{go('mapa');setTimeout(()=>startTour(0),120)};

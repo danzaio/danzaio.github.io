@@ -15,13 +15,13 @@ guide/
   core/
     index.html          app inteiro, com marcadores onde entra o conteúdo da franquia
     sw.js               service worker (cache offline), com tokens da franquia
-    lib/                MapLibre GL (mapa real), copiado para a saída
+    lib/                MapLibre GL (mapa real) e fonts/ (Inter e Cinzel embutidas), copiado para a saída
     brand-keys.json     chaves de texto que toda franquia precisa preencher
   franchises/
     got-dubrovnik/      franquia de Game of Thrones em Dubrovnik (a referência)
       franchise.json    id, pasta de saída, versão, nome do cache, idiomas, app nativo
       fragments/        pedaços de código/conteúdo que entram nos marcadores do core
-      assets/           ícones, manifest, og.png, frames/ — copiados para a raiz da saída
+      assets/           ícones, manifest, og.png, privacy.html, frames/ — copiados para a raiz da saída
     _template/          ponto de partida para uma franquia nova
   tools/
     build.py            monta franquia → pasta publicada (e --check para o CI)
@@ -45,7 +45,7 @@ franchises/<id>/ ──────┘
 - `<!--@frag NOME-->` e `/*@frag NOME*/` (sozinhos numa linha) viram o conteúdo de
   `fragments/NOME`. Marcador sem fragmento, ou fragmento sem marcador, é **erro** de build.
 - `/*@auto sw-frames*/` vira a lista das imagens de `assets/frames/` para o cache offline.
-- `@@CACHE@@` e `@@SW_VERSION@@` vêm do `franchise.json`.
+- `@@CACHE@@`, `@@SW_VERSION@@`, `@@APP_VERSION@@`, `@@STORE@@` e `@@IDB@@` vêm do `franchise.json`.
 - O build confere que `25-ui-brand.js` tem todas as chaves de `core/brand-keys.json` em todos os idiomas.
 - `build.py <id> --check` monta numa pasta temporária e compara com a saída: o CI falha se
   alguém editou a saída à mão ou esqueceu de rodar o build.
@@ -69,7 +69,7 @@ A separação foi feita de forma mecânica e conferida: o primeiro build gerou o
 | `30-map-anchor.js` | `LAT0, LON0, MX, MY` — origem e escala do mapa desenhado | sim |
 | `31-map-art.js` | `COAST`, `WALL`, `lokrum()`, `LABELS` — desenho do mapa ilustrado (reserva sem internet) | sim (pode ser mínimo) |
 | `40-outlines.js` | `OUT` — contorno de cada missão para a guia da câmera | sim (pode ser `{}`) |
-| `50-frames.js` | `FR`, `LFR`, `HOJE`, `HSRC` — cenas que vêm no app (ver FRAMES.md) | sim (pode ser vazio) |
+| `50-frames.js` | `FR`, `LFR`, `HOJE`, `HSRC`, `CREDITS` — cenas que vêm no app e quem fez cada imagem (ver FRAMES.md) | sim (pode ser vazio) |
 | `60-takes.js` | `KLD`, `TAKE` — take escolhido de cada missão e link da página da cena | sim (pode ser vazio) |
 | `61-clips.js` | `YT`, `TNOTE` — clipes no segundo do take, avisos por missão | sim (pode ser vazio) |
 | `70-air.js` | `RT`, `AIR` — lugares que pedem transporte (sem rota a pé) | sim |
@@ -131,7 +131,6 @@ const FX={
 | tiles.openfreemap.org | mapa real (vetorial) | cai no mapa desenhado (`31-map-art.js`) |
 | routing.openstreetmap.de | rotas a pé pelas ruas | linha reta |
 | youtube-nocookie.com | clipe do take tocando no app | botão abre o YouTube |
-| fonts.googleapis.com | fontes | fontes do sistema |
 | sites de locação (KLD) | link "ver o take" | — |
 
 O service worker guarda a página, o MapLibre, os ícones e todos os frames (`porto-real-vNN`)

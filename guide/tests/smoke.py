@@ -45,8 +45,13 @@ async def main():
             if not await pg.evaluate("CAM.on"): errs.append("câmera não abriu")
             await pg.evaluate("closeCam()") if await pg.evaluate("typeof closeCam==='function'") else await pg.click("#camX")
         await pg.evaluate("go('mais')"); await pg.wait_for_timeout(300)
+        sobre = await pg.evaluate("""(async()=>{const a=document.querySelector('a[href^="privacy.html"]');const r=a?await fetch('privacy.html'):null;
+          return {privacidade:!!a&&r.ok, creditos:document.querySelectorAll('.cred li').length, versao:/· v\\d+<\\/p>/.test(document.body.innerHTML)}})()""")
+        if not sobre["privacidade"]: errs.append("sem política de privacidade")
+        if not sobre["versao"]: errs.append("sem versão no Sobre")
         print("engine:", ENGINE)
         print("conteúdo:", info)
+        print("sobre:", sobre)
         print("erros:", errs if errs else "nenhum")
         await b.close()
         sys.exit(1 if errs else 0)

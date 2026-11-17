@@ -23,10 +23,17 @@ Versões do core e das franquias. A versão de cada franquia é o `appVersion` d
   também confere o build.
 - Ferramentas de cenas em `guide/tools/frames/`; documentação em `guide/docs/`.
 
+### 2026-11-17 — prontidão para publicar
+- Fontes Inter e Cinzel no `core/lib/fonts` (SIL OFL); o service worker guarda junto.
+- `CREDITS` no `50-frames.js` → lista em Sobre; `privacy.html` nos assets de cada franquia, com link no Sobre.
+- Token `@@APP_VERSION@@`; o smoke confere privacidade, créditos e versão.
+- Testes: nome do cache e versão normalizados nos gabaritos (não quebram a cada versão).
+
 ## got-dubrovnik — Porto Real (Game of Thrones em Dubrovnik)
 
 | versão | data | o que entrou |
 | --- | --- | --- |
+| v14 | 2026-11-17 | fontes embutidas (funcionam sem internet, sem Google Fonts); créditos das imagens em Sobre, com link para cada fonte; política de privacidade (pt/en) para a Play Store; versão no Sobre vem do `franchise.json` |
 | v13 | 2026-11-16 | antes e depois: 11 cenas com foto de hoje do mesmo ângulo (Cena \| Hoje no cartão, visor, ficha e câmera); cenas novas da Escadaria Jesuíta, motim no Pile, píer, arcos do Lovrijenac, Trsteno, arena e pérgula |
 | v12 | 2026-11-16 | frames da série vêm no app (sites de locação + YouTube), 12 das 15 missões |
 | v11 | 2026-11-16 | o take toca dentro do app (player do YouTube parado no segundo) |
